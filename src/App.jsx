@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, Plus, X, Heart, Share2, Calendar, TrendingUp, Sparkles, Home, Shirt, Palette, Settings, Search } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
+import logo from './assets/images/logo.png';
+
+
 // Luxury Color System
 const colors = {
   background: '#FAFAF8',
@@ -650,15 +653,8 @@ export default function Closetry() {
     </div>
   );
 
-  // Bottom Navigation
-  const BottomNav = () => (
-    <div
-      className="fixed bottom-0 left-0 right-0 border-t flex justify-around items-center h-16"
-      style={{
-        backgroundColor: colors.background,
-        borderColor: colors.border,
-      }}
-    >
+  const TopNav = ({ currentPage, setCurrentPage, colors }) => (
+    <div className="flex gap-6 items-center">
       {[
         { id: 'home', icon: Home, label: 'Home' },
         { id: 'wardrobe', icon: Shirt, label: 'Wardrobe' },
@@ -669,12 +665,10 @@ export default function Closetry() {
         <button
           key={id}
           onClick={() => setCurrentPage(id)}
-          className="flex flex-col items-center justify-center w-full h-full transition-all duration-200"
-          style={{
-            color: currentPage === id ? colors.accent : colors.muted,
-          }}
+          className="transition-all duration-200"
+          style={{ color: currentPage === id ? colors.accent : colors.muted }}
         >
-          <Icon size={24} />
+          <Icon size={20} />
         </button>
       ))}
     </div>
@@ -682,33 +676,28 @@ export default function Closetry() {
 
   return (
     <div style={{ backgroundColor: colors.background }}>
-      {/* Header */}
       <div
         className="sticky top-0 z-40 border-b px-6 md:px-12 py-4"
-        style={{
-          backgroundColor: colors.background,
-          borderColor: colors.border,
-        }}
+        style={{ backgroundColor: colors.background, borderColor: colors.border }}
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1
-            className="text-2xl font-light tracking-widest"
-            style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              color: colors.heading,
-            }}
-          >
-            CLOSETRY
-          </h1>
-          <div className="hidden md:flex gap-4">
-            <p className="text-sm" style={{ color: colors.muted }}>
-              {wardrobe.length} pieces
-            </p>
+          <div className="flex items-center">
+            <img src={logo}
+            alt="Closetry Logo"
+            className="h-20 w-auto" />
+          </div>
+
+          <div className="flex items-center gap-8">
+            <TopNav currentPage={currentPage} setCurrentPage={setCurrentPage} colors={colors} />
+            
+            <div className="hidden md:flex pl-8 border-l" style={{ borderColor: colors.border }}>
+              <p className="text-sm" style={{ color: colors.muted }}>
+                {wardrobe.length} pieces
+              </p>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="pb-24">
         {currentPage === 'home' && <HomePage />}
         {currentPage === 'wardrobe' && <WardrobePage />}
@@ -716,9 +705,6 @@ export default function Closetry() {
         {currentPage === 'planner' && <PlannerPage />}
         {currentPage === 'analytics' && <AnalyticsPage />}
       </div>
-
-      {/* Bottom Navigation */}
-      <BottomNav />
     </div>
   );
 }
