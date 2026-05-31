@@ -11,7 +11,7 @@ export const colors = {
 };
 
 // Wardrobe Categories
-export const categories = ['All', 'Tops', 'Bottoms', 'Outerwear', 'Shoes', 'Accessories'];
+export const categories = ['All', 'Tops', 'Bottoms', 'Outerwear', 'Shoes', 'Bags', 'Accessories'];
 
 export const initialWardrobeData = [
   { 
@@ -71,9 +71,99 @@ export const initialWardrobeData = [
   { 
     id: 7, 
     name: 'White Bag', 
-    category: 'Accessories', 
+    category: 'Bags', 
     color: '#6B4423', 
     image: '/images/white-bag.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 8, 
+    name: 'Broken White with Vest', 
+    category: 'Tops', 
+    color: '#6B4423', 
+    image: '/images/broken-white-with-vest.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 9, 
+    name: 'Brown FLower Cut Out Belt', 
+    category: 'Accessories', 
+    color: '#6B4423', 
+    image: '/images/brown-flower-cut-out-belt.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 10, 
+    name: 'Brown Long Skirt', 
+    category: 'Bottoms', 
+    color: '#6B4423', 
+    image: '/images/brown-long-skirt.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 11, 
+    name: 'Brown Boots', 
+    category: 'Shoes', 
+    color: '#6B4423', 
+    image: '/images/brown-boots.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 12, 
+    name: 'Brown Plaid Mini Skirt', 
+    category: 'Bottoms', 
+    color: '#6B4423', 
+    image: '/images/brown-plaid-mini-skirt.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 13, 
+    name: 'Coquette Lace Trim Mary Jane Flats', 
+    category: 'Shoes', 
+    color: '#6B4423', 
+    image: '/images/coquette-lace-trim-mary-jane-flats.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 14, 
+    name: 'ESQ Brown Bag', 
+    category: 'Bags', 
+    color: '#6B4423', 
+    image: '/images/ESQ-brown-bag.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 15, 
+    name: 'Love Gold Necklace', 
+    category: 'Accessories', 
+    color: '#6B4423', 
+    image: '/images/love-necklace-gold.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 16, 
+    name: 'Navy Star Pattern Knit Sweater', 
+    category: 'Outerwear', 
+    color: '#6B4423', 
+    image: '/images/navy-star-pattern-knit-sweater.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+    { 
+    id: 17, 
+    name: 'Plaid Pink Top', 
+    category: 'Tops', 
+    color: '#6B4423', 
+    image: '/images/plaid-pink-top.png', 
     lastWorn: '1 day ago', 
     style: 'formal' 
   },

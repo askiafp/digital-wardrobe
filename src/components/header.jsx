@@ -29,7 +29,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
           <img 
             src={logo} 
             alt="Closetry Logo" 
-            className="h-18 w-auto object-contain transition-transform duration-500 hover:scale-105" 
+            className="h-16 max-h-16 w-auto object-contain transition-transform duration-500 hover:scale-105" 
           />
 
           {/* Desktop Navigation */}

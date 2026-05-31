@@ -37,7 +37,7 @@ export default function LoginPage({ onLogin }) {
     >
       <div className="w-full max-w-sm space-y-10">
         
-        {/* Header - Logo Lebih Besar */}
+        {/* Header */}
         <div className="text-center space-y-6">
           <div className="flex justify-center w-full">
             <img 
@@ -51,10 +51,8 @@ export default function LoginPage({ onLogin }) {
           </p>
         </div>
 
-        {/* Form Container dengan sedikit bayangan */}
-        <form onSubmit={handleSubmit} className="space-y-5 bg-white p-2 rounded-2xl" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
+        <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
           
-          {/* Field Input dengan tampilan lebih bersih */}
           {[
             { id: 'name', label: 'Full Name', type: 'text', val: name, set: setName, show: isSignUp },
             { id: 'email', label: 'Email Address', type: 'email', val: email, set: setEmail, show: true },

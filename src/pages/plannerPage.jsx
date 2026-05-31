@@ -4,7 +4,6 @@ import { days, colors } from '../constants';
 
 export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
   
-  // DEBUG: Log incoming data structure
   React.useEffect(() => {
     console.log("=== PLANNER PAGE LOADED ===");
     console.log("📥 weeklyPlan received:", weeklyPlan);
@@ -14,13 +13,11 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
       const allKeys = Object.keys(weeklyPlan);
       console.log("📥 All keys in weeklyPlan:", allKeys);
       
-      // Check each key
       allKeys.forEach(key => {
         console.log(`  Key "${key}": `, weeklyPlan[key]);
       });
     }
 
-    // Check each day of the week
     console.log("\n🗓️ Checking each day:");
     days.forEach(day => {
       const dayKey = day.toLowerCase();
@@ -33,7 +30,6 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
     e.target.style.display = 'none';
   };
 
-  // Function to remove outfit from a specific day
   const clearDayPlan = (day) => {
     const dayKey = day.toLowerCase();
     console.log("🗑️ Clearing plan for:", dayKey);
@@ -66,10 +62,8 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
         {/* Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {days.map(day => {
-            // Convert day name to lowercase for matching
             const dayKey = day.toLowerCase();
             
-            // Get outfit data from weeklyPlan
             const dayData = weeklyPlan ? weeklyPlan[dayKey] : null;
             const outfitItems = dayData?.items || [];
 
@@ -136,7 +130,6 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
                     ))}
                   </div>
                 ) : (
-                  /* Empty State */
                   <div className="my-8 text-center py-6 flex flex-col items-center justify-center space-y-2">
                     <CalendarDays size={24} className="text-gray-300" />
                     <p className="text-xs italic" style={{ color: colors.muted }}>

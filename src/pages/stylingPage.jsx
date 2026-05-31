@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, Calendar, ArrowRight, RotateCcw, Check, EyeOff } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, Calendar, ArrowRight, RotateCcw, Check, EyeOff, X } from 'lucide-react';
 import { colors } from '../constants';
+
+// Import komponen Shadcn UI
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const STEPS = [
   { id: 'Tops', label: 'Tops' },
   { id: 'Bottoms', label: 'Bottoms' },
   { id: 'Outerwear', label: 'Outerwear' },
   { id: 'Accessories', label: 'Accessories' },
+  { id: 'Bags', label: 'Bags'},
   { id: 'Shoes', label: 'Shoes' },
   { id: 'Preview', label: 'Review' }
 ];
@@ -23,12 +33,13 @@ export default function StylingPage({
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [skippedCategories, setSkippedCategories] = useState({});
   const [carouselIndices, setCarouselIndices] = useState({
-    Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Shoes: 0
+    Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Bags:0, Shoes: 0
   });
 
   const [selectedDay, setSelectedDay] = useState('Monday');
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'success', message: '' });
+  
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
   const currentStep = STEPS[currentStepIdx];
 
   const itemsByCategory = {
@@ -36,6 +47,7 @@ export default function StylingPage({
     Bottoms: wardrobe.filter(item => item.category === 'Bottoms'),
     Outerwear: wardrobe.filter(item => item.category === 'Outerwear'),
     Accessories: wardrobe.filter(item => item.category === 'Accessories'),
+    Bags: wardrobe.filter(item => item.category === 'Bags'),
     Shoes: wardrobe.filter(item => item.category === 'Shoes')
   };
 
@@ -89,61 +101,50 @@ export default function StylingPage({
 
   const saveAndScheduleOutfit = () => {
     console.log("🚀 SAVE FUNCTION TRIGGERED");
-    console.log("selectedOutfit:", selectedOutfit);
-    console.log("selectedDay:", selectedDay);
     
     if (!selectedOutfit || selectedOutfit.length === 0) {
-      alert("❌ Please select at least one clothing item!");
+      setModalConfig({
+        isOpen: true,
+        type: 'error',
+        message: 'Please select at least one clothing item!'
+      });
       return;
     }
 
-    // Create outfit object with all items
     const outfitId = Date.now();
     const newOutfitObj = { 
       id: outfitId, 
       items: [...selectedOutfit] 
     };
 
-    console.log("✅ newOutfitObj created:", newOutfitObj);
-    
     // 1. Save to savedOutfits array
     setSavedOutfits([...savedOutfits, newOutfitObj]);
-    console.log("✅ Saved to savedOutfits");
 
     // 2. Add to weekly planner
     if (typeof setWeeklyPlan === 'function') {
-      // Use lowercase for consistent key format
       const dayKey = selectedDay.toLowerCase();
-      console.log("🔑 dayKey:", dayKey);
       
       setWeeklyPlan(prevPlan => {
-        console.log("📊 prevPlan BEFORE:", prevPlan);
-        
         const nextPlan = { ...prevPlan };
         nextPlan[dayKey] = newOutfitObj;
-        
-        console.log("📊 nextPlan AFTER:", nextPlan);
-        console.log("🔍 Stored at ['" + dayKey + "']:", nextPlan[dayKey]);
-        
         return nextPlan;
       });
-      
-      console.log("✅ weeklyPlan updated");
     }
 
-    // Show success message
-    alert(`✅ Outfit successfully saved to ${selectedDay}!`);
+    setModalConfig({
+      isOpen: true,
+      type: 'success',
+      message: `Outfit successfully saved to ${selectedDay}!`
+    });
 
-    // 3. Navigate to planner with delay to ensure state updates
+    // 3. Navigate to planner with delay
     setTimeout(() => {
-      console.log("📍 Navigating to planner...");
+      setModalConfig(prev => ({ ...prev, isOpen: false }));
       if (typeof navigateTo === 'function') {
         navigateTo('planner');
       }
-      
-      // 4. Reset wizard after navigation
       resetWizard();
-    }, 200);
+    }, 1600);
   };
 
   const handlePrevStep = () => {
@@ -166,7 +167,7 @@ export default function StylingPage({
       }
     });
 
-    ['Outerwear', 'Accessories'].forEach(cat => {
+    ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
       if (items.length > 0 && Math.random() > 0.5) {
         const randomIndex = Math.floor(Math.random() * items.length);
@@ -187,11 +188,11 @@ export default function StylingPage({
     setSelectedOutfit([]);
     setCurrentStepIdx(0);
     setSkippedCategories({});
-    setCarouselIndices({ Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Shoes: 0 });
+    setCarouselIndices({ Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Bags:0, Shoes: 0 });
   };
 
   return (
-    <div className="min-h-screen py-6 md:py-12" style={{ backgroundColor: colors.background }}>
+    <div className="min-h-screen py-6 md:py-12 relative" style={{ backgroundColor: colors.background }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Title */}
@@ -352,17 +353,20 @@ export default function StylingPage({
             <div className="bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 border space-y-5 md:space-y-6 shadow-sm" style={{ borderColor: colors.border }}>
               <div>
                 <p className="text-xs tracking-[0.2em] uppercase text-gray-400 mb-2.5">Add to Planner</p>
-                <div className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border text-sm font-light bg-gray-50" style={{ borderColor: colors.border }}>
-                  <select 
-                    value={selectedDay}
-                    onChange={(e) => setSelectedDay(e.target.value)}
-                    className="bg-transparent w-full focus:outline-none cursor-pointer text-gray-700 text-sm"
-                  >
+                
+                {/* INTEGRASI DROPDOWN SHADCN UI */}
+                <Select value={selectedDay} onValueChange={(value) => setSelectedDay(value)}>
+                  <SelectTrigger className="w-full h-12 bg-gray-50 rounded-xl border font-light text-gray-700 text-sm focus:ring-1 focus:ring-amber-200" style={{ borderColor: colors.border }}>
+                    <SelectValue placeholder="Select a day" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border rounded-xl shadow-lg">
                     {daysOfWeek.map(day => (
-                      <option key={day} value={day}>{day}</option>
+                      <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light py-2.5">
+                        {day}
+                      </SelectItem>
                     ))}
-                  </select>
-                </div>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2.5 pt-1">
@@ -399,6 +403,38 @@ export default function StylingPage({
         )}
 
       </div>
+
+      {/* CUSTOM APP MODAL POP-UP (MENGGANTIKAN BROWSER ALERT) */}
+      {modalConfig.isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm mx-4 border border-gray-100 relative animate-slide-up">
+            
+            {/* Tombol Close manual khusus untuk modal Error/Peringatan */}
+            {modalConfig.type === 'error' && (
+              <button 
+                onClick={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-50"
+              >
+                <X size={16} />
+              </button>
+            )}
+
+            {/* Icon Dinamis berdasarkan type */}
+            <div className="text-4xl mb-4">
+              {modalConfig.type === 'success' ? '✨' : '⚠️'}
+            </div>
+
+            <h3 className={`text-lg font-medium mb-2 ${modalConfig.type === 'success' ? 'text-gray-900' : 'text-red-500'}`}>
+              {modalConfig.type === 'success' ? 'Outfit Scheduled!' : 'Action Required'}
+            </h3>
+            
+            <p className="text-gray-500 text-xs tracking-wide font-light leading-relaxed">
+              {modalConfig.message}
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

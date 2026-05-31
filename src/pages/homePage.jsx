@@ -64,12 +64,10 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
       </section>
 
       {/* CTA Section */}
-      {/* CTA Section */}
       <section className="px-6 md:px-12 py-16 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             
-            {/* Bagian Teks (Kiri) */}
             <div>
               <h2
                 className="text-4xl font-light mb-4"
@@ -89,7 +87,6 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
               </button>
             </div>
 
-            {/* Bagian Gambar (Kanan) */}
             <div className="h-64 md:h-80 w-full overflow-hidden rounded-2xl shadow-lg">
               <img 
                 src="/images/all-outfit.jpg" 
