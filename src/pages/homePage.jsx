@@ -24,7 +24,7 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 className="px-8 py-3 text-sm tracking-widest font-light rounded-2xl transition-all duration-150"
                 style={{ backgroundColor: colors.accent, color: 'white' }}
               >
-                START STYLING
+                START STYLING!
               </button>
             </div>
           </div>
