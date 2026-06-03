@@ -8,6 +8,7 @@ import AnalyticsPage from './pages/analyticsPage';
 import ProfilePage from './pages/profilePage';
 import Header from './components/header';
 import { colors, initialWardrobeData, analyticsData } from './constants';
+import Footer from './pages/footer'; 
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -57,7 +58,10 @@ export default function App() {
   }
 
   return (
-    <div style={{ backgroundColor: colors.background }}>
+    <div 
+      className="min-h-screen flex flex-col" 
+      style={{ backgroundColor: colors.background }}
+    >
       <Header 
         currentPage={currentPage}
         navigateTo={navigateTo}
@@ -66,7 +70,7 @@ export default function App() {
         onLogout={handleLogout}
       />
       
-      <div className="pb-24">
+      <div className="pb-24 flex-grow">
         {currentPage === 'home' && (
           <HomePage 
             wardrobe={wardrobe}
@@ -123,8 +127,8 @@ export default function App() {
             navigateTo={navigateTo}
           />
         )}
-
       </div>
+      <Footer />
     </div>
   );
 }
