@@ -125,6 +125,29 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 PLAN YOUR WEEK <ChevronRight size={16} />
               </button>
             </div>
+            
+            {/* Styling */}
+            <div
+              className="rounded-2xl p-8"
+              style={{ backgroundColor: colors.surface }}
+            >
+              <h3
+                className="text-2xl font-light mb-4"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Styling
+              </h3>
+              <p style={{ color: colors.body, marginBottom: '20px' }}>
+                Discover outfit combinations and get personalized style recommendations.
+              </p>
+              <button
+                onClick={() => navigateTo('styling')}
+                className="text-sm tracking-widest font-light flex items-center gap-2 transition-colors duration-150"
+                style={{ color: colors.accent }}
+              >
+                EXPLORE STYLING <ChevronRight size={16} />
+              </button>
+            </div>
 
             {/* Analytics */}
             <div
@@ -146,6 +169,29 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 style={{ color: colors.accent }}
               >
                 VIEW INSIGHTS <ChevronRight size={16} />
+              </button>
+            </div>
+
+            {/* Wardrobe */}
+            <div
+              className="rounded-2xl p-8"
+              style={{ backgroundColor: colors.surface }}
+            >
+              <h3
+                className="text-2xl font-light mb-4"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Wardrobe
+              </h3>
+              <p style={{ color: colors.body, marginBottom: '20px' }}>
+                Manage and organize all your clothing items in one place.
+              </p>
+              <button
+                onClick={() => navigateTo('wardrobe')}
+                className="text-sm tracking-widest font-light flex items-center gap-2 transition-colors duration-150"
+                style={{ color: colors.accent }}
+              >
+                VIEW WARDROBE <ChevronRight size={16} />
               </button>
             </div>
           </div>
