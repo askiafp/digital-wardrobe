@@ -57,6 +57,21 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
           <p className="text-xs md:text-sm" style={{ color: colors.muted }}>
             Organize your outfits day by day and step into your week with clarity.
           </p>
+          <p className="text-xs mt-3 italic" style={{ color: colors.accent }}>
+            "Getting dressed is a form of self-expression. Plan it with intention."
+          </p>
+        </div>
+        {/* Summary Bar */}
+        <div
+          className="mb-8 p-4 rounded-2xl flex items-center justify-between"
+          style={{ backgroundColor: colors.surface }}
+        >
+          <p className="text-sm font-light" style={{ color: colors.heading }}>
+            Weekly Planning Progress
+          </p>
+          <p className="text-sm" style={{ color: colors.accent }}>
+            {days.filter(day => weeklyPlan && weeklyPlan[day.toLowerCase()]?.items?.length > 0).length} of 7 days planned
+          </p>
         </div>
 
         {/* Responsive Grid */}
@@ -84,7 +99,7 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
                       {day}
                     </h3>
                     <p className="text-[10px]" style={{ color: colors.muted }}>
-                      {outfitItems.length > 0 ? 'Scheduled Look' : 'No Plan'}
+                      {outfitItems.length > 0 ? `${outfitItems.length} item${outfitItems.length > 1 ? 's' : ''} planned` : 'No outfit yet'}
                     </p>
                   </div>
                   
