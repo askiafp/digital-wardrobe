@@ -114,6 +114,46 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
                     </button>
                   )}
                 </div>
+                {/* Mood Picker */}
+                <div className="flex gap-1 mt-3 flex-wrap">
+                  {['Casual', 'Formal', 'Sporty', 'Comfy'].map(mood => (
+                    <button
+                      key={mood}
+                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
+                      style={{
+                        backgroundColor: dayData?.mood === mood ? colors.accent : 'transparent',
+                        color: dayData?.mood === mood ? 'white' : colors.muted,
+                        borderColor: dayData?.mood === mood ? colors.accent : colors.border,
+                      }}
+                      onClick={() => setWeeklyPlan(prev => ({
+                        ...prev,
+                        [dayKey]: { ...prev[dayKey], mood }
+                      }))}
+                    >
+                      {mood}
+                    </button>
+                  ))}
+                </div>
+                {/* Weather Tag */}
+                <div className="flex gap-1 mt-2 flex-wrap">
+                  {['Sunny', 'Rainy', 'Cold', 'Cloudy'].map(weather => (
+                    <button
+                      key={weather}
+                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
+                      style={{
+                        backgroundColor: dayData?.weather === weather ? colors.accent : 'transparent',
+                        color: dayData?.weather === weather ? 'white' : colors.muted,
+                        borderColor: dayData?.weather === weather ? colors.accent : colors.border,
+                      }}
+                      onClick={() => setWeeklyPlan(prev => ({
+                        ...prev,
+                        [dayKey]: { ...prev[dayKey], weather }
+                      }))}
+                    >
+                      {weather}
+                    </button>
+                  ))}
+                </div>
 
                 {/* Outfit Items List */}
                 {outfitItems.length > 0 ? (
