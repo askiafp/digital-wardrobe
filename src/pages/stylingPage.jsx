@@ -84,18 +84,11 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   const selected = UNDERTONES.find(t => t.id === selectedTone);
   return (
     <div className="fixed inset-0 flex items-end sm:items-center justify-center z-[9999] bg-black/50 backdrop-blur-sm p-0 sm:p-4">
-      {/* Sheet on mobile (slides up), centered card on sm+ */}
       <div className="bg-white w-full sm:w-auto sm:max-w-lg rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-gray-100 flex flex-col max-h-[92vh] sm:max-h-[85vh]">
-        
-        {/* Drag handle — mobile only */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-gray-200" />
         </div>
-
-        {/* Scrollable body */}
         <div className="overflow-y-auto flex-1 px-5 sm:px-8 pt-4 sm:pt-6 pb-2">
-
-          {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-light" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
@@ -103,72 +96,45 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
               </h2>
               <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 mt-0.5">Personalizes color recommendations</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0"
-              style={{ minWidth: 36, minHeight: 36 }}
-            >
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0" style={{ minWidth: 36, minHeight: 36 }}>
               <X size={16} className="text-gray-500" />
             </button>
           </div>
-
-          {/* How-to tip */}
           <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4">
             <p className="text-[10px] sm:text-[11px] text-gray-500 font-light leading-relaxed">
-              <span className="font-medium text-gray-600">Tips:</span> Lihat vena di pergelangan tangan —{' '}
-              hijau/kuning = <span className="text-amber-600 font-medium">Warm</span>,{' '}
-              biru/ungu = <span className="text-blue-500 font-medium">Cool</span>,{' '}
-              campuran = <span className="text-stone-500 font-medium">Neutral</span>
+              <span className="font-medium text-gray-600">Tips:</span> Check the veins on your wrist —{' '}
+              green/yellow = <span className="text-amber-600 font-medium">Warm</span>,{' '}
+              blue/purple = <span className="text-blue-500 font-medium">Cool</span>,{' '}
+              mix of both = <span className="text-stone-500 font-medium">Neutral</span>
             </p>
           </div>
-
-          {/* Cards — stacked on mobile, same stacked on sm (modal is already narrow) */}
           <div className="flex flex-col gap-2.5 mb-4">
             {UNDERTONES.map(tone => (
-              <button
-                key={tone.id}
-                onClick={() => onSelect(tone.id)}
+              <button key={tone.id} onClick={() => onSelect(tone.id)}
                 className={`flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border-2 transition-all text-left w-full ${
-                  selectedTone === tone.id
-                    ? 'border-amber-400 bg-amber-50/40 shadow-sm'
-                    : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 active:bg-gray-100'
-                }`}
-                style={{ minHeight: 64 }}
-              >
-                {/* Swatches */}
+                  selectedTone === tone.id ? 'border-amber-400 bg-amber-50/40 shadow-sm' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 active:bg-gray-100'
+                }`} style={{ minHeight: 64 }}>
                 <div className="flex -space-x-2 flex-shrink-0">
                   {tone.swatches.map((hex, i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: hex, zIndex: tone.swatches.length - i }}
-                    />
+                    <div key={i} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: hex, zIndex: tone.swatches.length - i }} />
                   ))}
                 </div>
-                {/* Label */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800">{tone.label}</p>
                   <p className="text-[10px] text-gray-400 font-light leading-tight">{tone.description}</p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {tone.exampleColors.map(c => (
-                      <span key={c} className="text-[8px] uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md">
-                        {c}
-                      </span>
+                      <span key={c} className="text-[8px] uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md">{c}</span>
                     ))}
                   </div>
                 </div>
-                {/* Check */}
                 {selectedTone === tone.id
-                  ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}>
-                      <Check size={10} className="text-white" />
-                    </div>
+                  ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}><Check size={10} className="text-white" /></div>
                   : <div className="w-5 h-5 rounded-full border-2 border-gray-200 flex-shrink-0" />
                 }
               </button>
             ))}
           </div>
-
-          {/* Tips */}
           {selected && (
             <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-3.5 mb-4">
               <div className="flex gap-2">
@@ -178,15 +144,10 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
             </div>
           )}
         </div>
-
-        {/* Sticky CTA */}
         <div className="px-5 sm:px-8 pb-6 sm:pb-8 pt-3 flex-shrink-0 border-t border-gray-50">
-          <button
-            onClick={onClose}
-            disabled={!selectedTone}
+          <button onClick={onClose} disabled={!selectedTone}
             className="w-full py-3.5 text-xs tracking-[0.2em] font-medium text-white rounded-xl transition-all duration-300 shadow-md hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
-            style={{ backgroundColor: colors.accent, minHeight: 48 }}
-          >
+            style={{ backgroundColor: colors.accent, minHeight: 48 }}>
             {selectedTone ? 'APPLY PREFERENCES' : 'SELECT YOUR UNDERTONE'}
           </button>
         </div>
@@ -202,6 +163,153 @@ function MatchBadge({ item, undertone }) {
     <span className="absolute top-1.5 right-1.5 bg-amber-400 text-white text-[7px] sm:text-[8px] font-semibold px-1.5 py-0.5 rounded-full leading-tight shadow-sm">
       ✦ MATCH
     </span>
+  );
+}
+
+// ─── Curated Look Collage ───────────────────────────────────────────────────
+// Displays the selected outfit in a polyvore-style collage layout:
+// main clothing items stacked vertically on the left, accessories on the right.
+function CuratedLookPanel({ selectedOutfit, undertone, selectedUndertoneData }) {
+  // Separate clothing from accessories/bags
+  const clothingCategories = ['Tops', 'Bottoms', 'Outerwear'];
+  const accessoryCategories = ['Accessories', 'Bags', 'Shoes'];
+
+  const clothingItems = selectedOutfit.filter(i => clothingCategories.includes(i.category));
+  const accessoryItems = selectedOutfit.filter(i => accessoryCategories.includes(i.category));
+  const hasItems = selectedOutfit.length > 0;
+
+  return (
+    <div
+      className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm overflow-hidden flex flex-col"
+      style={{ borderColor: colors.border }}
+    >
+      {/* Header */}
+      <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex items-center justify-between flex-shrink-0">
+        <div>
+          <p className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-gray-400 font-light">Your Outfit</p>
+          <p className="text-sm sm:text-base font-light mt-0.5" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
+            Curated Look
+          </p>
+        </div>
+        {undertone && hasItems && (
+          <div className="flex items-center gap-1.5">
+            <div className="flex -space-x-1">
+              {selectedUndertoneData?.swatches.slice(0, 2).map((c, i) => (
+                <div key={i} className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: c }} />
+              ))}
+            </div>
+            <span className="text-[8px] text-amber-600 tracking-wide font-light">{selectedUndertoneData?.label}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Collage canvas */}
+      <div className="flex-1 px-3 sm:px-4 pb-4 sm:pb-5">
+        {!hasItems ? (
+          /* Empty state */
+          <div
+            className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 flex flex-col items-center justify-center gap-2 py-10"
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <Sparkles size={16} className="text-gray-300" />
+            </div>
+            <p className="text-[10px] text-gray-400 font-light text-center leading-relaxed px-4">
+              Select pieces to preview<br />your curated look
+            </p>
+          </div>
+        ) : (
+          /* Polyvore-style collage */
+          <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-3 flex gap-2.5" style={{ minHeight: 280 }}>
+
+            {/* Left column — main clothing, stacked vertically */}
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              {clothingItems.length > 0 ? clothingItems.map(item => {
+                const isMatch = undertone && isGoodMatch(item, undertone);
+                return (
+                  <div
+                    key={item.id}
+                    className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 transition-all ${isMatch ? 'border-amber-200' : 'border-gray-100'}`}
+                    style={{ minHeight: 80 }}
+                  >
+                    {isMatch && (
+                      <span className="absolute top-1 right-1 text-amber-400 text-[7px] font-bold leading-none">✦</span>
+                    )}
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="object-contain mb-1"
+                      style={{ width: '70%', height: 64, maxHeight: 64 }}
+                    />
+                    <p className="text-[8px] text-center text-gray-500 font-light truncate w-full px-1 leading-tight">
+                      {item.name}
+                    </p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <div className="w-2 h-2 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: item.color }} />
+                      <span className="text-[7px] text-gray-300 uppercase tracking-wide truncate" style={{ maxWidth: 50 }}>
+                        {item.category}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }) : (
+                <div className="flex-1 bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center">
+                  <p className="text-[9px] text-gray-300 font-light">No clothing</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right column — accessories stacked vertically, smaller */}
+            <div className="flex flex-col gap-2" style={{ width: 72 }}>
+              {accessoryItems.length > 0 ? accessoryItems.map(item => {
+                const isMatch = undertone && isGoodMatch(item, undertone);
+                return (
+                  <div
+                    key={item.id}
+                    className={`relative bg-white rounded-xl border flex flex-col items-center p-2 transition-all ${isMatch ? 'border-amber-200' : 'border-gray-100'}`}
+                    style={{ minHeight: 70 }}
+                  >
+                    {isMatch && (
+                      <span className="absolute top-0.5 right-0.5 text-amber-400 text-[6px] font-bold leading-none">✦</span>
+                    )}
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="object-contain mb-1"
+                      style={{ width: '80%', height: 44, maxHeight: 44 }}
+                    />
+                    <p className="text-[7px] text-center text-gray-500 font-light truncate w-full px-0.5 leading-tight">
+                      {item.name}
+                    </p>
+                    <div className="w-2 h-2 rounded-full border border-gray-200 mt-0.5 flex-shrink-0" style={{ backgroundColor: item.color }} />
+                  </div>
+                );
+              }) : (
+                <div
+                  className="flex-1 bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center"
+                  style={{ minHeight: 80 }}
+                >
+                  <p className="text-[7px] text-gray-300 font-light text-center leading-tight px-1">No acc.</p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* Match summary footer */}
+      {undertone && hasItems && (
+        <div className="px-4 pb-4 flex-shrink-0">
+          <div className="bg-amber-50/60 border border-amber-100 rounded-xl px-3 py-2 flex items-center gap-2">
+            <Sparkles size={11} className="text-amber-500 flex-shrink-0" />
+            <p className="text-[9px] text-amber-800 font-light leading-snug">
+              {selectedOutfit.filter(i => isGoodMatch(i, undertone)).length}/{selectedOutfit.length} match your{' '}
+              <span className="font-medium">{selectedUndertoneData?.label}</span> palette
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -385,6 +493,9 @@ export default function StylingPage({
   const currentItem = currentItems?.[carouselIndices[currentStep.id]];
   const currentItemIsMatch = currentItem && undertone && isGoodMatch(currentItem, undertone);
 
+  // Whether to show the curated panel alongside wizard (not on Preview step)
+  const showCuratedPanel = currentStep.id !== 'Preview';
+
   return (
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -435,16 +546,13 @@ export default function StylingPage({
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs font-medium text-amber-900">
-                    <span className="font-semibold">{selectedUndertoneData?.label}</span> undertone aktif
+                    <span className="font-semibold">{selectedUndertoneData?.label}</span> undertone active
                   </p>
-                  <p className="text-[9px] text-amber-600 font-light hidden sm:block">Rekomendasi warna sudah dipersonalisasi</p>
+                  <p className="text-[9px] text-amber-600 font-light hidden sm:block">Dw, these color recs are literally made for u</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowUndertoneModal(true)}
-                className="text-[10px] tracking-wider text-amber-600 hover:text-amber-800 font-medium transition-colors px-2 py-1"
-              >
-                UBAH
+              <button onClick={() => setShowUndertoneModal(true)} className="text-[10px] tracking-wider text-amber-600 hover:text-amber-800 font-medium transition-colors px-2 py-1">
+                CHANGE
               </button>
             </div>
           )}
@@ -452,7 +560,6 @@ export default function StylingPage({
 
         {/* ── Progress Bar ──────────────────────────────────────────── */}
         <div className="relative mb-8 md:mb-10 max-w-2xl mx-auto">
-          {/* connecting line */}
           <div className="absolute top-4 sm:top-[18px] left-0 right-0 h-px bg-gray-200 z-0" />
           <div className="flex items-start justify-between relative z-10">
             {STEPS.map((step, idx) => (
@@ -467,12 +574,7 @@ export default function StylingPage({
                 >
                   {idx < currentStepIdx ? <Check size={13} /> : idx + 1}
                 </div>
-                {/* Show shortLabel on mobile, full label on sm+ */}
-                <span className={`text-center mt-1.5 font-light leading-tight transition-colors ${
-                  idx === currentStepIdx ? 'text-gray-800 font-medium' : 'text-gray-400'
-                }`}
-                  style={{ fontSize: 8 }}
-                >
+                <span className={`text-center mt-1.5 font-light leading-tight transition-colors ${idx === currentStepIdx ? 'text-gray-800 font-medium' : 'text-gray-400'}`} style={{ fontSize: 8 }}>
                   <span className="sm:hidden">{step.shortLabel}</span>
                   <span className="hidden sm:inline text-[9px] md:text-[10px] tracking-wide uppercase">{step.label}</span>
                 </span>
@@ -487,8 +589,8 @@ export default function StylingPage({
             <div className="flex justify-center text-amber-500"><Sparkles size={22} /></div>
             <p className="text-xs sm:text-sm font-light text-amber-900 leading-relaxed">
               {undertone
-                ? `Bingung mix-match baju hari ini? AI akan pilihkan outfit dengan palet warna cocok untuk undertone ${selectedUndertoneData?.label} kamu!`
-                : 'Bingung mau pasang baju apa hari ini?'
+                ? `Struggling to mix & match today? Lowkey don't worry, AI gotchu with an outfit color palette that perfectly fits your ${selectedUndertoneData?.label} undertone!`
+                : "Idk what to wear today?"
               }
             </p>
             <button
@@ -502,143 +604,143 @@ export default function StylingPage({
           </div>
         )}
 
-        {/* ── Carousel Wizard / Preview ─────────────────────────────── */}
+        {/* ── Wizard + Curated Look side by side / Preview ─────────── */}
         {currentStep.id !== 'Preview' ? (
 
-          /* ── WIZARD CARD ── */
-          <div
-            className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm max-w-xl mx-auto overflow-hidden"
-            style={{ borderColor: colors.border }}
-          >
-            {/* Card header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 gap-3">
-              <span className="text-[9px] sm:text-[10px] tracking-[0.18em] uppercase px-2.5 py-1 bg-gray-100 rounded-full text-gray-500 flex-shrink-0">
-                {currentStepIdx + 1}/{STEPS.length - 1} · {currentStep.label}
-              </span>
-              <button
-                onClick={handleSelectNone}
-                className={`text-xs px-3 py-2 rounded-xl border border-dashed flex items-center gap-1.5 transition-all flex-shrink-0 ${
-                  skippedCategories[currentStep.id]
-                    ? 'bg-red-50 text-red-500 border-red-200 font-medium'
-                    : 'bg-white text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                }`}
-                style={{ minHeight: 36 }}
-              >
-                <EyeOff size={11} />
-                <span className="hidden xs:inline">{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
-                <span className="xs:hidden">{skippedCategories[currentStep.id] ? 'NONE' : 'SKIP'}</span>
-              </button>
-            </div>
+          /* WIZARD STEP — side-by-side layout on lg+ */
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center max-w-4xl mx-auto">
 
-            {/* Match indicator */}
-            {undertone && currentItem && (
-              <div className={`flex items-center justify-center gap-1.5 text-[10px] font-light pb-2 ${
-                currentItemIsMatch ? 'text-amber-600' : 'text-gray-400'
-              }`}>
-                <div className="w-2.5 h-2.5 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: currentItem.color }} />
-                {currentItemIsMatch
-                  ? <span>✦ Cocok untuk undertone {selectedUndertoneData?.label}</span>
-                  : <span>Geser untuk cari warna lebih cocok ↔</span>
-                }
-              </div>
-            )}
-
-            {/* Carousel row */}
-            <div className="flex items-center justify-center gap-2 sm:gap-4 px-3 sm:px-6 pb-2">
-              <button
-                onClick={() => handleScrollItem(-1)}
-                disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
-                className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
-                style={{ minWidth: 44, minHeight: 44 }}
-              >
-                <ChevronLeft size={20} style={{ color: colors.heading }} />
-              </button>
-
-              {/* Item card — responsive square via aspect-ratio */}
-              <div
-                className={`relative flex-1 rounded-2xl flex flex-col items-center justify-center p-4 border border-dashed transition-all ${
-                  skippedCategories[currentStep.id]
-                    ? 'bg-red-50/30 border-red-200'
-                    : currentItemIsMatch
-                      ? 'bg-amber-50/40 border-amber-200'
-                      : 'bg-gray-50 border-gray-200'
-                }`}
-                style={{ aspectRatio: '1 / 1', maxWidth: 240, maxHeight: 240 }}
-              >
-                {skippedCategories[currentStep.id] ? (
-                  <div className="text-red-400 text-center space-y-1">
-                    <p className="text-xs font-medium">NONE</p>
-                    <p className="text-[10px] italic">Omitted</p>
-                  </div>
-                ) : currentItem ? (
-                  <>
-                    {undertone && <MatchBadge item={currentItem} undertone={undertone} />}
-                    <img
-                      src={currentItem.image}
-                      alt={currentItem.name}
-                      className="object-contain mb-2"
-                      style={{ width: '60%', height: '60%' }}
-                    />
-                    <p className="text-[11px] sm:text-xs font-light text-center text-gray-700 w-full truncate px-1">
-                      {currentItem.name}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="w-2.5 h-2.5 rounded-full border border-gray-300" style={{ backgroundColor: currentItem.color }} />
-                      <span className="text-[9px] text-gray-400">{currentItem.color.toUpperCase()}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-gray-400 text-center space-y-1">
-                    <p className="text-xs">No items</p>
-                    <p className="text-[10px] italic">(Skippable)</p>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => handleScrollItem(1)}
-                disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
-                className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
-                style={{ minWidth: 44, minHeight: 44 }}
-              >
-                <ChevronRight size={20} style={{ color: colors.heading }} />
-              </button>
-            </div>
-
-            {/* Recommendation strip */}
-            {undertone && !skippedCategories[currentStep.id] && (
-              <div className="px-4 sm:px-6 pb-2">
-                <RecommendationPanel category={currentStep.id} />
-              </div>
-            )}
-
-            {/* Action buttons */}
+            {/* ── WIZARD CARD ── */}
             <div
-              className="flex gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t mt-2"
+              className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm w-full lg:max-w-sm overflow-hidden flex-shrink-0"
               style={{ borderColor: colors.border }}
             >
-              <button
-                onClick={handlePrevStep}
-                disabled={currentStepIdx === 0}
-                className="flex-1 py-3 text-xs tracking-wider border rounded-xl flex items-center justify-center gap-1 hover:bg-gray-50 disabled:opacity-30 transition-all"
-                style={{ color: colors.heading, borderColor: colors.border, minHeight: 44 }}
-              >
-                <ChevronLeft size={14} /> BACK
-              </button>
-              <button
-                onClick={handleNextStep}
-                className="flex-[2] py-3 text-xs tracking-wider text-white rounded-xl flex items-center justify-center gap-1 transition-all duration-300 shadow-[0_3px_0_rgba(0,0,0,0.12)] hover:translate-y-[2px] hover:shadow-none active:scale-[0.98]"
-                style={{ backgroundColor: colors.accent, minHeight: 44 }}
-              >
-                NEXT <ArrowRight size={14} />
-              </button>
+              {/* Card header */}
+              <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 gap-3">
+                <span className="text-[9px] sm:text-[10px] tracking-[0.18em] uppercase px-2.5 py-1 bg-gray-100 rounded-full text-gray-500 flex-shrink-0">
+                  {currentStepIdx + 1}/{STEPS.length - 1} · {currentStep.label}
+                </span>
+                <button
+                  onClick={handleSelectNone}
+                  className={`text-xs px-3 py-2 rounded-xl border border-dashed flex items-center gap-1.5 transition-all flex-shrink-0 ${
+                    skippedCategories[currentStep.id]
+                      ? 'bg-red-50 text-red-500 border-red-200 font-medium'
+                      : 'bg-white text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                  }`}
+                  style={{ minHeight: 36 }}
+                >
+                  <EyeOff size={11} />
+                  <span className="hidden xs:inline">{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
+                  <span className="xs:hidden">{skippedCategories[currentStep.id] ? 'NONE' : 'SKIP'}</span>
+                </button>
+              </div>
+
+              {/* Match indicator */}
+              {undertone && currentItem && (
+                <div className={`flex items-center justify-center gap-1.5 text-[10px] font-light pb-2 ${currentItemIsMatch ? 'text-amber-600' : 'text-gray-400'}`}>
+                  <div className="w-2.5 h-2.5 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: currentItem.color }} />
+                  {currentItemIsMatch
+                    ? <span>Fits your {selectedUndertoneData?.label} undertone perfectly</span>
+                    : <span>Swipe to find a better match</span>
+                  }
+                </div>
+              )}
+
+              {/* Carousel row */}
+              <div className="flex items-center justify-center gap-2 sm:gap-4 px-3 sm:px-6 pb-2">
+                <button
+                  onClick={() => handleScrollItem(-1)}
+                  disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
+                  className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
+                  style={{ minWidth: 44, minHeight: 44 }}
+                >
+                  <ChevronLeft size={20} style={{ color: colors.heading }} />
+                </button>
+
+                <div
+                  className={`relative flex-1 rounded-2xl flex flex-col items-center justify-center p-4 border border-dashed transition-all ${
+                    skippedCategories[currentStep.id]
+                      ? 'bg-red-50/30 border-red-200'
+                      : currentItemIsMatch
+                        ? 'bg-amber-50/40 border-amber-200'
+                        : 'bg-gray-50 border-gray-200'
+                  }`}
+                  style={{ aspectRatio: '1 / 1', maxWidth: 240, maxHeight: 240 }}
+                >
+                  {skippedCategories[currentStep.id] ? (
+                    <div className="text-red-400 text-center space-y-1">
+                      <p className="text-xs font-medium">NONE</p>
+                      <p className="text-[10px] italic">Omitted</p>
+                    </div>
+                  ) : currentItem ? (
+                    <>
+                      {undertone && <MatchBadge item={currentItem} undertone={undertone} />}
+                      <img src={currentItem.image} alt={currentItem.name} className="object-contain mb-2" style={{ width: '60%', height: '60%' }} />
+                      <p className="text-[11px] sm:text-xs font-light text-center text-gray-700 w-full truncate px-1">{currentItem.name}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="w-2.5 h-2.5 rounded-full border border-gray-300" style={{ backgroundColor: currentItem.color }} />
+                        <span className="text-[9px] text-gray-400">{currentItem.color.toUpperCase()}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-400 text-center space-y-1">
+                      <p className="text-xs">No items</p>
+                      <p className="text-[10px] italic">(Skippable)</p>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => handleScrollItem(1)}
+                  disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
+                  className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
+                  style={{ minWidth: 44, minHeight: 44 }}
+                >
+                  <ChevronRight size={20} style={{ color: colors.heading }} />
+                </button>
+              </div>
+
+              {/* Recommendation strip */}
+              {undertone && !skippedCategories[currentStep.id] && (
+                <div className="px-4 sm:px-6 pb-2">
+                  <RecommendationPanel category={currentStep.id} />
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t mt-2" style={{ borderColor: colors.border }}>
+                <button
+                  onClick={handlePrevStep}
+                  disabled={currentStepIdx === 0}
+                  className="flex-1 py-3 text-xs tracking-wider border rounded-xl flex items-center justify-center gap-1 hover:bg-gray-50 disabled:opacity-30 transition-all"
+                  style={{ color: colors.heading, borderColor: colors.border, minHeight: 44 }}
+                >
+                  <ChevronLeft size={14} /> BACK
+                </button>
+                <button
+                  onClick={handleNextStep}
+                  className="flex-1 py-3 text-xs tracking-wider text-white rounded-xl flex items-center justify-center gap-1 transition-all duration-300 shadow-[0_3px_0_rgba(0,0,0,0.12)] hover:translate-y-[2px] hover:shadow-none active:scale-[0.98]"
+                  style={{ backgroundColor: colors.accent, minHeight: 44 }}
+                >
+                  NEXT <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
+
+            {/* ── CURATED LOOK PANEL (same card style, alongside wizard) ── */}
+            <div className="w-full lg:w-56 xl:w-64 flex-shrink-0">
+              <CuratedLookPanel
+                selectedOutfit={selectedOutfit}
+                undertone={undertone}
+                selectedUndertoneData={selectedUndertoneData}
+              />
+            </div>
+
           </div>
 
         ) : (
 
           /* ── PREVIEW STEP ── */
-          /* Stack on mobile/tablet, side-by-side on lg */
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-5 lg:gap-8 items-start">
 
             {/* Left — Lookbook grid */}
@@ -660,16 +762,12 @@ export default function StylingPage({
                 )}
               </div>
 
-              {/* Outfit grid — 2 cols on xs, 3 on sm, 4 on md+ */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl min-h-[160px]">
                 {selectedOutfit.length > 0 ? (
                   selectedOutfit.map(item => {
                     const isMatch = undertone && isGoodMatch(item, undertone);
                     return (
-                      <div
-                        key={item.id}
-                        className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 sm:p-3 shadow-sm transition-transform hover:scale-105 ${isMatch ? 'border-amber-200' : ''}`}
-                      >
+                      <div key={item.id} className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 sm:p-3 shadow-sm transition-transform hover:scale-105 ${isMatch ? 'border-amber-200' : ''}`}>
                         {isMatch && <span className="absolute top-1 right-1 text-amber-400 text-[8px] font-bold">✦</span>}
                         <img src={item.image} alt={item.name} className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain mb-1.5" />
                         <span className="text-[7px] sm:text-[8px] uppercase px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded-md mb-1 font-light">{item.category}</span>
@@ -687,18 +785,14 @@ export default function StylingPage({
                 <div className="flex items-center gap-2 bg-amber-50/60 rounded-xl px-4 py-2.5">
                   <Sparkles size={13} className="text-amber-500 flex-shrink-0" />
                   <p className="text-[10px] text-amber-800 font-light">
-                    {selectedOutfit.filter(i => isGoodMatch(i, undertone)).length} dari {selectedOutfit.length} item cocok untuk {selectedUndertoneData?.label} undertone kamu
+                    {selectedOutfit.filter(i => isGoodMatch(i, undertone)).length}/{selectedOutfit.length} items are a certified match for your {selectedUndertoneData?.label} undertone
                   </p>
                 </div>
               )}
             </div>
 
             {/* Right — Schedule panel */}
-            <div
-              className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm"
-              style={{ borderColor: colors.border }}
-            >
-              {/* Undertone shortcut */}
+            <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm" style={{ borderColor: colors.border }}>
               <div className="mb-5">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-2">Skin Undertone</p>
                 <button
@@ -715,16 +809,13 @@ export default function StylingPage({
                     }
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-700">
-                      {undertone ? `${selectedUndertoneData?.label} Undertone` : 'Belum diset'}
-                    </p>
-                    <p className="text-[9px] text-gray-400">{undertone ? 'Tap untuk ubah' : 'Tap untuk personalisasi'}</p>
+                    <p className="text-xs font-medium text-gray-700">{undertone ? `${selectedUndertoneData?.label} Undertone` : 'Not set yet'}</p>
+                    <p className="text-[9px] text-gray-400">{undertone ? 'Tap to change' : 'Tap to personalize'}</p>
                   </div>
                   <Palette size={14} className="text-gray-400 flex-shrink-0" />
                 </button>
               </div>
 
-              {/* Day selector */}
               <div className="mb-5">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-2">Add to Planner</p>
                 <Select value={selectedDay} onValueChange={setSelectedDay}>
@@ -736,15 +827,12 @@ export default function StylingPage({
                   </SelectTrigger>
                   <SelectContent className="bg-white border rounded-xl shadow-lg">
                     {daysOfWeek.map(day => (
-                      <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light py-2.5">
-                        {day}
-                      </SelectItem>
+                      <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light py-2.5">{day}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* CTAs */}
               <div className="space-y-2.5">
                 <button
                   onClick={saveAndScheduleOutfit}
