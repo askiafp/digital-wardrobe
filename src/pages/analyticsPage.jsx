@@ -26,12 +26,15 @@ export default function AnalyticsPage({ wardrobe, savedOutfits }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Usage Chart */}
             <div
-              className="rounded-2xl p-8"
+              className="rounded-2xl p-8 mb-8"
               style={{ backgroundColor: colors.surface }}
             >
               <h3 className="font-light text-sm tracking-widest uppercase mb-6" style={{ color: colors.heading }}>
                 Weekly Usage
               </h3>
+              <p className="text-xs mb-4" style={{ color: colors.muted }}>
+                How many items you wore each day this week
+              </p>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={analyticsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
@@ -57,6 +60,9 @@ export default function AnalyticsPage({ wardrobe, savedOutfits }) {
               <h3 className="font-light text-sm tracking-widest uppercase mb-6" style={{ color: colors.heading }}>
                 By Category
               </h3>
+              <p className="text-xs mb-4" style={{ color: colors.muted }}>
+                Distribution of your wardrobe by clothing type
+              </p>
               <div className="space-y-4">
                 {categories.slice(1).map(cat => {
                   const count = wardrobe.filter(i => i.category === cat).length;
@@ -155,6 +161,28 @@ export default function AnalyticsPage({ wardrobe, savedOutfits }) {
               </div>
             </div>
           </div>
+          {/* Most Worn Category */}
+            <div
+              className="rounded-2xl p-8"
+              style={{ backgroundColor: colors.surface }}
+            >
+              <h3 className="font-light text-sm tracking-widest uppercase mb-2" style={{ color: colors.heading }}>
+                Most Worn Category
+              </h3>
+              <p className="text-xs mb-6" style={{ color: colors.muted }}>
+                The category you reach for the most
+              </p>
+              <p className="text-4xl font-light" style={{ color: colors.accent }}>
+                {categories.slice(1).reduce((best, cat) => {
+                  const count = wardrobe.filter(i => i.category === cat).length;
+                  const bestCount = wardrobe.filter(i => i.category === best).length;
+                  return count > bestCount ? cat : best;
+                }, categories[1] || 'None')}
+              </p>
+              <p className="text-xs mt-2" style={{ color: colors.muted }}>
+                is your go-to category
+              </p>
+            </div>
         </div>
       </div>
     </div>
