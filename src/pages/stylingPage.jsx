@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info } from 'lucide-react';
 import { colors } from '../constants';
 
@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// ─── Undertone definitions ──────────────────────────────────────────────────
 const UNDERTONES = [
   {
     id: 'warm',
@@ -44,7 +43,6 @@ const UNDERTONES = [
   }
 ];
 
-// ─── Color helpers ──────────────────────────────────────────────────────────
 function hexDistance(hex1, hex2) {
   const toRgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
   const [r1,g1,b1] = toRgb(hex1);
@@ -79,75 +77,140 @@ function isGoodMatch(item, undertone) {
   return true;
 }
 
-// ─── Undertone Modal ────────────────────────────────────────────────────────
 function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   const selected = UNDERTONES.find(t => t.id === selectedTone);
   return (
     <div className="fixed inset-0 flex items-end sm:items-center justify-center z-[9999] bg-black/50 backdrop-blur-sm p-0 sm:p-4">
-      <div className="bg-white w-full sm:w-auto sm:max-w-lg rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-gray-100 flex flex-col max-h-[92vh] sm:max-h-[85vh]">
+      <div
+        className="bg-white w-full rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-gray-100 flex flex-col"
+        style={{ maxWidth: 'min(100%, 520px)', maxHeight: '92dvh' }}
+      >
+        {/* drag handle mobile */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-gray-200" />
         </div>
-        <div className="overflow-y-auto flex-1 px-5 sm:px-8 pt-4 sm:pt-6 pb-2">
+
+        {/* scrollable body */}
+        <div className="overflow-y-auto flex-1 px-5 pt-4 pb-2" style={{ scrollbarWidth: 'none' }}>
+
+          {/* header */}
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h2 className="text-xl sm:text-2xl font-light" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
+              <h2
+                className="font-light"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading, fontSize: 'clamp(18px, 4vw, 24px)' }}
+              >
                 Skin Undertone
               </h2>
-              <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 mt-0.5">Personalizes color recommendations</p>
+              <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 mt-0.5">
+                Personalizes color recommendations
+              </p>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0" style={{ minWidth: 36, minHeight: 36 }}>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0"
+              style={{ minWidth: 36, minHeight: 36 }}
+            >
               <X size={16} className="text-gray-500" />
             </button>
           </div>
+
+          {/* tips */}
           <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4">
-            <p className="text-[10px] sm:text-[11px] text-gray-500 font-light leading-relaxed">
+            <p className="text-[10px] text-gray-500 font-light leading-relaxed" style={{ fontSize: 'clamp(10px, 1.5vw, 11px)' }}>
               <span className="font-medium text-gray-600">Tips:</span> Check the veins on your wrist —{' '}
               green/yellow = <span className="text-amber-600 font-medium">Warm</span>,{' '}
               blue/purple = <span className="text-blue-500 font-medium">Cool</span>,{' '}
               mix of both = <span className="text-stone-500 font-medium">Neutral</span>
             </p>
           </div>
+
+          {/* undertone options */}
           <div className="flex flex-col gap-2.5 mb-4">
             {UNDERTONES.map(tone => (
-              <button key={tone.id} onClick={() => onSelect(tone.id)}
-                className={`flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border-2 transition-all text-left w-full ${
-                  selectedTone === tone.id ? 'border-amber-400 bg-amber-50/40 shadow-sm' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 active:bg-gray-100'
-                }`} style={{ minHeight: 64 }}>
+              <button
+                key={tone.id}
+                onClick={() => onSelect(tone.id)}
+                className={`flex items-center gap-3 rounded-2xl border-2 transition-all text-left w-full ${
+                  selectedTone === tone.id
+                    ? 'border-amber-400 bg-amber-50/40 shadow-sm'
+                    : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 active:bg-gray-100'
+                }`}
+                style={{ padding: 'clamp(10px, 2vw, 16px) clamp(12px, 2.5vw, 16px)', minHeight: 'clamp(56px, 10vw, 72px)' }}
+              >
+                {/* swatches */}
                 <div className="flex -space-x-2 flex-shrink-0">
                   {tone.swatches.map((hex, i) => (
-                    <div key={i} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: hex, zIndex: tone.swatches.length - i }} />
+                    <div
+                      key={i}
+                      className="rounded-full border-2 border-white shadow-sm"
+                      style={{
+                        backgroundColor: hex,
+                        zIndex: tone.swatches.length - i,
+                        width: 'clamp(28px, 5vw, 36px)',
+                        height: 'clamp(28px, 5vw, 36px)',
+                      }}
+                    />
                   ))}
                 </div>
+
+                {/* label + desc */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800">{tone.label}</p>
-                  <p className="text-[10px] text-gray-400 font-light leading-tight">{tone.description}</p>
+                  <p className="font-medium text-gray-800" style={{ fontSize: 'clamp(12px, 1.8vw, 14px)' }}>
+                    {tone.label}
+                  </p>
+                  <p className="text-gray-400 font-light leading-tight" style={{ fontSize: 'clamp(9px, 1.2vw, 10px)' }}>
+                    {tone.description}
+                  </p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {tone.exampleColors.map(c => (
-                      <span key={c} className="text-[8px] uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md">{c}</span>
+                      <span key={c} className="uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md" style={{ fontSize: 'clamp(7px, 1vw, 8px)' }}>
+                        {c}
+                      </span>
                     ))}
                   </div>
                 </div>
+
+                {/* checkmark */}
                 {selectedTone === tone.id
-                  ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}><Check size={10} className="text-white" /></div>
+                  ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}>
+                      <Check size={10} className="text-white" />
+                    </div>
                   : <div className="w-5 h-5 rounded-full border-2 border-gray-200 flex-shrink-0" />
                 }
               </button>
             ))}
           </div>
+
+          {/* selected tips */}
           {selected && (
             <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-3.5 mb-4">
               <div className="flex gap-2">
                 <Info size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-[11px] text-amber-900 font-light leading-relaxed">{selected.tips}</p>
+                <p className="text-amber-900 font-light leading-relaxed" style={{ fontSize: 'clamp(10px, 1.5vw, 11px)' }}>
+                  {selected.tips}
+                </p>
               </div>
             </div>
           )}
         </div>
-        <div className="px-5 sm:px-8 pb-6 sm:pb-8 pt-3 flex-shrink-0 border-t border-gray-50">
-          <button onClick={onClose} disabled={!selectedTone}
-            className="w-full py-3.5 text-xs tracking-[0.2em] font-medium text-white rounded-xl transition-all duration-300 shadow-md hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
-            style={{ backgroundColor: colors.accent, minHeight: 48 }}>
+
+        {/* footer CTA */}
+        <div
+          className="flex-shrink-0 border-t border-gray-50"
+          style={{ padding: 'clamp(12px, 2vw, 20px) clamp(16px, 3vw, 32px) clamp(16px, 4vw, 32px)' }}
+        >
+          <button
+            onClick={onClose}
+            disabled={!selectedTone}
+            className="w-full tracking-[0.2em] font-medium text-white rounded-xl transition-all duration-300 shadow-md hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
+            style={{
+              backgroundColor: colors.accent,
+              fontSize: 'clamp(10px, 1.2vw, 12px)',
+              padding: 'clamp(12px, 2vw, 14px)',
+              minHeight: 'clamp(44px, 6vw, 52px)',
+            }}
+          >
             {selectedTone ? 'APPLY PREFERENCES' : 'SELECT YOUR UNDERTONE'}
           </button>
         </div>
@@ -156,7 +219,6 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   );
 }
 
-// ─── Match Badge ────────────────────────────────────────────────────────────
 function MatchBadge({ item, undertone }) {
   if (!undertone || !isGoodMatch(item, undertone)) return null;
   return (
@@ -166,145 +228,72 @@ function MatchBadge({ item, undertone }) {
   );
 }
 
-// ─── Curated Look Collage ───────────────────────────────────────────────────
-// Displays the selected outfit in a polyvore-style collage layout:
-// main clothing items stacked vertically on the left, accessories on the right.
 function CuratedLookPanel({ selectedOutfit, undertone, selectedUndertoneData }) {
-  // Separate clothing from accessories/bags
-  const clothingCategories = ['Tops', 'Bottoms', 'Outerwear'];
-  const accessoryCategories = ['Accessories', 'Bags', 'Shoes'];
+  const order = ['Tops', 'Outerwear', 'Bottoms', 'Accessories', 'Shoes', 'Bags'];
+  
+  const sortedOutfit = [...selectedOutfit].sort((a, b) => 
+    order.indexOf(a.category) - order.indexOf(b.category)
+  );
 
-  const clothingItems = selectedOutfit.filter(i => clothingCategories.includes(i.category));
-  const accessoryItems = selectedOutfit.filter(i => accessoryCategories.includes(i.category));
   const hasItems = selectedOutfit.length > 0;
 
   return (
     <div
-      className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm overflow-hidden flex flex-col"
+      className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full"
       style={{ borderColor: colors.border }}
     >
-      {/* Header */}
-      <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex items-center justify-between flex-shrink-0">
-        <div>
-          <p className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-gray-400 font-light">Your Outfit</p>
-          <p className="text-sm sm:text-base font-light mt-0.5" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
-            Curated Look
-          </p>
-        </div>
-        {undertone && hasItems && (
-          <div className="flex items-center gap-1.5">
-            <div className="flex -space-x-1">
-              {selectedUndertoneData?.swatches.slice(0, 2).map((c, i) => (
-                <div key={i} className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: c }} />
-              ))}
-            </div>
-            <span className="text-[8px] text-amber-600 tracking-wide font-light">{selectedUndertoneData?.label}</span>
-          </div>
-        )}
+      <div className="px-5 pt-5 pb-3 border-b border-gray-50">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-light">Your Outfit</p>
+        <p className="text-base font-light mt-0.5" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
+          Curated Look
+        </p>
       </div>
 
-      {/* Collage canvas */}
-      <div className="flex-1 px-3 sm:px-4 pb-4 sm:pb-5">
+      <div className="flex-1 p-3 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
         {!hasItems ? (
-          /* Empty state */
-          <div
-            className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 flex flex-col items-center justify-center gap-2 py-10"
-          >
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-              <Sparkles size={16} className="text-gray-300" />
-            </div>
-            <p className="text-[10px] text-gray-400 font-light text-center leading-relaxed px-4">
-              Select pieces to preview<br />your curated look
-            </p>
+          <div className="h-full flex flex-col items-center justify-center text-gray-300">
+            <Sparkles size={20} className="mb-2 opacity-50" />
+            <p className="text-[10px] font-light">No items selected</p>
           </div>
         ) : (
-          /* Polyvore-style collage */
-          <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-3 flex gap-2.5" style={{ minHeight: 280 }}>
-
-            {/* Left column — main clothing, stacked vertically */}
-            <div className="flex flex-col gap-2 flex-1 min-w-0">
-              {clothingItems.length > 0 ? clothingItems.map(item => {
-                const isMatch = undertone && isGoodMatch(item, undertone);
-                return (
-                  <div
-                    key={item.id}
-                    className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 transition-all ${isMatch ? 'border-amber-200' : 'border-gray-100'}`}
-                    style={{ minHeight: 80 }}
-                  >
-                    {isMatch && (
-                      <span className="absolute top-1 right-1 text-amber-400 text-[7px] font-bold leading-none">✦</span>
-                    )}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="object-contain mb-1"
-                      style={{ width: '70%', height: 64, maxHeight: 64 }}
-                    />
-                    <p className="text-[8px] text-center text-gray-500 font-light truncate w-full px-1 leading-tight">
-                      {item.name}
-                    </p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <div className="w-2 h-2 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className="text-[7px] text-gray-300 uppercase tracking-wide truncate" style={{ maxWidth: 50 }}>
-                        {item.category}
-                      </span>
-                    </div>
-                  </div>
-                );
-              }) : (
-                <div className="flex-1 bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center">
-                  <p className="text-[9px] text-gray-300 font-light">No clothing</p>
-                </div>
-              )}
-            </div>
-
-            {/* Right column — accessories stacked vertically, smaller */}
-            <div className="flex flex-col gap-2" style={{ width: 72 }}>
-              {accessoryItems.length > 0 ? accessoryItems.map(item => {
-                const isMatch = undertone && isGoodMatch(item, undertone);
-                return (
-                  <div
-                    key={item.id}
-                    className={`relative bg-white rounded-xl border flex flex-col items-center p-2 transition-all ${isMatch ? 'border-amber-200' : 'border-gray-100'}`}
-                    style={{ minHeight: 70 }}
-                  >
-                    {isMatch && (
-                      <span className="absolute top-0.5 right-0.5 text-amber-400 text-[6px] font-bold leading-none">✦</span>
-                    )}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="object-contain mb-1"
-                      style={{ width: '80%', height: 44, maxHeight: 44 }}
-                    />
-                    <p className="text-[7px] text-center text-gray-500 font-light truncate w-full px-0.5 leading-tight">
-                      {item.name}
-                    </p>
-                    <div className="w-2 h-2 rounded-full border border-gray-200 mt-0.5 flex-shrink-0" style={{ backgroundColor: item.color }} />
-                  </div>
-                );
-              }) : (
+          <div className="grid grid-cols-2 gap-3">
+            {sortedOutfit.map(item => {
+              const isMatch = undertone && isGoodMatch(item, undertone);
+              return (
                 <div
-                  className="flex-1 bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center"
-                  style={{ minHeight: 80 }}
+                  key={item.id}
+                  className="relative flex items-center justify-center transition-all hover:scale-105"
+                  style={{
+                    aspectRatio: '1 / 1',  
+                    padding: 8,
+                  }}
                 >
-                  <p className="text-[7px] text-gray-300 font-light text-center leading-tight px-1">No acc.</p>
+                  {isMatch && (
+                    <span className="absolute top-1 right-1 text-amber-400 text-[10px] font-bold z-10">✦</span>
+                  )}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.2))',
+                    }}
+                  />
                 </div>
-              )}
-            </div>
-
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Match summary footer */}
       {undertone && hasItems && (
-        <div className="px-4 pb-4 flex-shrink-0">
-          <div className="bg-amber-50/60 border border-amber-100 rounded-xl px-3 py-2 flex items-center gap-2">
+        <div className="p-4 pt-0">
+          <div className="bg-amber-50/60 rounded-xl px-3 py-2 flex items-center gap-2">
             <Sparkles size={11} className="text-amber-500 flex-shrink-0" />
             <p className="text-[9px] text-amber-800 font-light leading-snug">
-              {selectedOutfit.filter(i => isGoodMatch(i, undertone)).length}/{selectedOutfit.length} match your{' '}
-              <span className="font-medium">{selectedUndertoneData?.label}</span> palette
+              {selectedOutfit.filter(i => isGoodMatch(i, undertone)).length}/{selectedOutfit.length} matches your {selectedUndertoneData?.label} palette
             </p>
           </div>
         </div>
@@ -313,7 +302,6 @@ function CuratedLookPanel({ selectedOutfit, undertone, selectedUndertoneData }) 
   );
 }
 
-// ─── Steps ─────────────────────────────────────────────────────────────────
 const STEPS = [
   { id: 'Tops',        label: 'Tops',        shortLabel: 'Top'  },
   { id: 'Bottoms',     label: 'Bottoms',     shortLabel: 'Bot'  },
@@ -324,7 +312,6 @@ const STEPS = [
   { id: 'Preview',     label: 'Review',      shortLabel: 'Rev'  },
 ];
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
 export default function StylingPage({
   wardrobe,
   selectedOutfit,
@@ -451,7 +438,6 @@ export default function StylingPage({
     setCarouselIndices({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
   };
 
-  // ── Recommendation strip ─────────────────────────────────────────────────
   const RecommendationPanel = ({ category }) => {
     const items = itemsByCategory[category] || [];
     if (!undertone || items.length === 0) return null;
@@ -462,7 +448,7 @@ export default function StylingPage({
         <p className="text-[9px] uppercase tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1">
           <Sparkles size={10} /> Recommended for {selectedUndertoneData?.label} undertone
         </p>
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none' }}>
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling: 'touch' }}>
           {goodItems.map(item => {
             const sorted = getSortedItems(category);
             const sortedIdx = sorted.findIndex(i => i.id === item.id);
@@ -493,14 +479,10 @@ export default function StylingPage({
   const currentItem = currentItems?.[carouselIndices[currentStep.id]];
   const currentItemIsMatch = currentItem && undertone && isGoodMatch(currentItem, undertone);
 
-  // Whether to show the curated panel alongside wizard (not on Preview step)
-  const showCuratedPanel = currentStep.id !== 'Preview';
-
   return (
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
         <div className="mb-5 md:mb-8 text-center">
           <h1
             className="text-3xl sm:text-4xl lg:text-5xl font-light mb-1.5"
@@ -513,7 +495,6 @@ export default function StylingPage({
           </p>
         </div>
 
-        {/* ── Undertone Banner ───────────────────────────────────────── */}
         <div className="max-w-xl mx-auto mb-5">
           {!undertone ? (
             <button
@@ -558,10 +539,9 @@ export default function StylingPage({
           )}
         </div>
 
-        {/* ── Progress Bar ──────────────────────────────────────────── */}
-        <div className="relative mb-8 md:mb-10 max-w-2xl mx-auto">
-          <div className="absolute top-4 sm:top-[18px] left-0 right-0 h-px bg-gray-200 z-0" />
-          <div className="flex items-start justify-between relative z-10">
+        <div className="relative mb-8 md:mb-10 max-w-2xl mx-auto overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0" style={{ scrollbarWidth: 'none' }}>
+          <div className="absolute top-4 sm:top-[18px] left-0 right-0 h-px bg-gray-200 z-0 min-w-[340px]" />
+          <div className="flex items-start justify-between relative z-10 gap-2 sm:gap-0 min-w-[340px] px-1">
             {STEPS.map((step, idx) => (
               <div key={step.id} className="flex flex-col items-center" style={{ flex: '1 1 0', minWidth: 0 }}>
                 <div
@@ -583,7 +563,6 @@ export default function StylingPage({
           </div>
         </div>
 
-        {/* ── AI Banner ─────────────────────────────────────────────── */}
         {currentStepIdx === 0 && selectedOutfit.length === 0 && (
           <div className="mb-5 bg-amber-50/50 border border-amber-100 rounded-2xl p-4 sm:p-6 text-center space-y-3 max-w-xl mx-auto">
             <div className="flex justify-center text-amber-500"><Sparkles size={22} /></div>
@@ -604,111 +583,103 @@ export default function StylingPage({
           </div>
         )}
 
-        {/* ── Wizard + Curated Look side by side / Preview ─────────── */}
         {currentStep.id !== 'Preview' ? (
-
-          /* WIZARD STEP — side-by-side layout on lg+ */
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center max-w-4xl mx-auto">
-
-            {/* ── WIZARD CARD ── */}
+          <div className="flex flex-col md:flex-row gap-4 lg:gap-6 items-stretch justify-center max-w-4xl mx-auto w-full">
             <div
-              className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm w-full lg:max-w-sm overflow-hidden flex-shrink-0"
+              className="bg-white rounded-2xl sm:rounded-3xl border shadow-sm w-full md:flex-1 overflow-hidden flex flex-col justify-between"
               style={{ borderColor: colors.border }}
             >
-              {/* Card header */}
-              <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 gap-3">
-                <span className="text-[9px] sm:text-[10px] tracking-[0.18em] uppercase px-2.5 py-1 bg-gray-100 rounded-full text-gray-500 flex-shrink-0">
-                  {currentStepIdx + 1}/{STEPS.length - 1} · {currentStep.label}
-                </span>
-                <button
-                  onClick={handleSelectNone}
-                  className={`text-xs px-3 py-2 rounded-xl border border-dashed flex items-center gap-1.5 transition-all flex-shrink-0 ${
-                    skippedCategories[currentStep.id]
-                      ? 'bg-red-50 text-red-500 border-red-200 font-medium'
-                      : 'bg-white text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                  }`}
-                  style={{ minHeight: 36 }}
-                >
-                  <EyeOff size={11} />
-                  <span className="hidden xs:inline">{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
-                  <span className="xs:hidden">{skippedCategories[currentStep.id] ? 'NONE' : 'SKIP'}</span>
-                </button>
-              </div>
-
-              {/* Match indicator */}
-              {undertone && currentItem && (
-                <div className={`flex items-center justify-center gap-1.5 text-[10px] font-light pb-2 ${currentItemIsMatch ? 'text-amber-600' : 'text-gray-400'}`}>
-                  <div className="w-2.5 h-2.5 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: currentItem.color }} />
-                  {currentItemIsMatch
-                    ? <span>Fits your {selectedUndertoneData?.label} undertone perfectly</span>
-                    : <span>Swipe to find a better match</span>
-                  }
+              <div>
+                <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 gap-3">
+                  <span className="text-[9px] sm:text-[10px] tracking-[0.18em] uppercase px-2.5 py-1 bg-gray-100 rounded-full text-gray-500 flex-shrink-0">
+                    {currentStepIdx + 1}/{STEPS.length - 1} · {currentStep.label}
+                  </span>
+                  <button
+                    onClick={handleSelectNone}
+                    className={`text-xs px-3 py-2 rounded-xl border border-dashed flex items-center gap-1.5 transition-all flex-shrink-0 ${
+                      skippedCategories[currentStep.id]
+                        ? 'bg-red-50 text-red-500 border-red-200 font-medium'
+                        : 'bg-white text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                    }`}
+                    style={{ minHeight: 36 }}
+                  >
+                    <EyeOff size={11} />
+                    <span className="hidden xs:inline">{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
+                    <span className="xs:hidden">{skippedCategories[currentStep.id] ? 'NONE' : 'SKIP'}</span>
+                  </button>
                 </div>
-              )}
 
-              {/* Carousel row */}
-              <div className="flex items-center justify-center gap-2 sm:gap-4 px-3 sm:px-6 pb-2">
-                <button
-                  onClick={() => handleScrollItem(-1)}
-                  disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
-                  className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
-                  style={{ minWidth: 44, minHeight: 44 }}
-                >
-                  <ChevronLeft size={20} style={{ color: colors.heading }} />
-                </button>
+                {undertone && currentItem && (
+                  <div className={`flex items-center justify-center gap-1.5 text-[10px] font-light pb-2 ${currentItemIsMatch ? 'text-amber-600' : 'text-gray-400'}`}>
+                    <div className="w-2.5 h-2.5 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: currentItem.color }} />
+                    {currentItemIsMatch
+                      ? <span>Fits your {selectedUndertoneData?.label} undertone perfectly</span>
+                      : <span>Swipe to find a better match</span>
+                    }
+                  </div>
+                )}
 
-                <div
-                  className={`relative flex-1 rounded-2xl flex flex-col items-center justify-center p-4 border border-dashed transition-all ${
-                    skippedCategories[currentStep.id]
-                      ? 'bg-red-50/30 border-red-200'
-                      : currentItemIsMatch
-                        ? 'bg-amber-50/40 border-amber-200'
-                        : 'bg-gray-50 border-gray-200'
-                  }`}
-                  style={{ aspectRatio: '1 / 1', maxWidth: 240, maxHeight: 240 }}
-                >
-                  {skippedCategories[currentStep.id] ? (
-                    <div className="text-red-400 text-center space-y-1">
-                      <p className="text-xs font-medium">NONE</p>
-                      <p className="text-[10px] italic">Omitted</p>
-                    </div>
-                  ) : currentItem ? (
-                    <>
-                      {undertone && <MatchBadge item={currentItem} undertone={undertone} />}
-                      <img src={currentItem.image} alt={currentItem.name} className="object-contain mb-2" style={{ width: '60%', height: '60%' }} />
-                      <p className="text-[11px] sm:text-xs font-light text-center text-gray-700 w-full truncate px-1">{currentItem.name}</p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <div className="w-2.5 h-2.5 rounded-full border border-gray-300" style={{ backgroundColor: currentItem.color }} />
-                        <span className="text-[9px] text-gray-400">{currentItem.color.toUpperCase()}</span>
+                <div className="flex items-center justify-center gap-2 sm:gap-6 px-3 sm:px-6 pb-4 w-full max-w-sm mx-auto">
+                  <button
+                    onClick={() => handleScrollItem(-1)}
+                    disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
+                    className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
+                    style={{ minWidth: 44, minHeight: 44 }}
+                  >
+                    <ChevronLeft size={20} style={{ color: colors.heading }} />
+                  </button>
+
+                  <div
+                    className={`relative flex-1 rounded-2xl flex flex-col items-center justify-center p-4 border border-dashed transition-all w-full ${
+                      skippedCategories[currentStep.id]
+                        ? 'bg-red-50/30 border-red-200'
+                        : currentItemIsMatch
+                          ? 'bg-amber-50/40 border-amber-200'
+                          : 'bg-gray-50 border-gray-200'
+                    }`}
+                    style={{ aspectRatio: '1 / 1' }}
+                  >
+                    {skippedCategories[currentStep.id] ? (
+                      <div className="text-red-400 text-center space-y-1">
+                        <p className="text-xs font-medium">NONE</p>
+                        <p className="text-[10px] italic">Omitted</p>
                       </div>
-                    </>
-                  ) : (
-                    <div className="text-gray-400 text-center space-y-1">
-                      <p className="text-xs">No items</p>
-                      <p className="text-[10px] italic">(Skippable)</p>
-                    </div>
-                  )}
+                    ) : currentItem ? (
+                      <>
+                        {undertone && <MatchBadge item={currentItem} undertone={undertone} />}
+                        <img src={currentItem.image} alt={currentItem.name} className="object-contain mb-2 w-[55%] h-[55%] sm:w-[60%] sm:h-[60%]" />
+                        <p className="text-[11px] sm:text-xs font-light text-center text-gray-700 w-full truncate px-1">{currentItem.name}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <div className="w-2.5 h-2.5 rounded-full border border-gray-300" style={{ backgroundColor: currentItem.color }} />
+                          <span className="text-[9px] text-gray-400">{currentItem.color.toUpperCase()}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-gray-400 text-center space-y-1">
+                        <p className="text-xs">No items</p>
+                        <p className="text-[10px] italic">(Skippable)</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => handleScrollItem(1)}
+                    disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
+                    className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
+                    style={{ minWidth: 44, minHeight: 44 }}
+                  >
+                    <ChevronRight size={20} style={{ color: colors.heading }} />
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => handleScrollItem(1)}
-                  disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1}
-                  className="p-2.5 sm:p-3 rounded-full border bg-white shadow-sm hover:bg-gray-50 active:scale-90 disabled:opacity-10 transition-all flex-shrink-0"
-                  style={{ minWidth: 44, minHeight: 44 }}
-                >
-                  <ChevronRight size={20} style={{ color: colors.heading }} />
-                </button>
+                {undertone && !skippedCategories[currentStep.id] && (
+                  <div className="px-4 sm:px-6 pb-4">
+                    <RecommendationPanel category={currentStep.id} />
+                  </div>
+                )}
               </div>
 
-              {/* Recommendation strip */}
-              {undertone && !skippedCategories[currentStep.id] && (
-                <div className="px-4 sm:px-6 pb-2">
-                  <RecommendationPanel category={currentStep.id} />
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t mt-2" style={{ borderColor: colors.border }}>
+              <div className="flex gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t mt-auto" style={{ borderColor: colors.border }}>
                 <button
                   onClick={handlePrevStep}
                   disabled={currentStepIdx === 0}
@@ -727,23 +698,16 @@ export default function StylingPage({
               </div>
             </div>
 
-            {/* ── CURATED LOOK PANEL (same card style, alongside wizard) ── */}
-            <div className="w-full lg:w-56 xl:w-64 flex-shrink-0">
+            <div className="w-full md:w-64 lg:w-72 flex-shrink-0">
               <CuratedLookPanel
                 selectedOutfit={selectedOutfit}
                 undertone={undertone}
                 selectedUndertoneData={selectedUndertoneData}
               />
             </div>
-
           </div>
-
         ) : (
-
-          /* ── PREVIEW STEP ── */
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-5 lg:gap-8 items-start">
-
-            {/* Left — Lookbook grid */}
             <div
               className="w-full lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border space-y-4 shadow-sm"
               style={{ borderColor: colors.border }}
@@ -762,22 +726,22 @@ export default function StylingPage({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl min-h-[160px]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl min-h-[160px]">
                 {selectedOutfit.length > 0 ? (
                   selectedOutfit.map(item => {
                     const isMatch = undertone && isGoodMatch(item, undertone);
                     return (
-                      <div key={item.id} className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 sm:p-3 shadow-sm transition-transform hover:scale-105 ${isMatch ? 'border-amber-200' : ''}`}>
+                      <div key={item.id} className={`relative bg-white rounded-xl border flex flex-col items-center p-2.5 sm:p-3 shadow-sm transition-transform hover:scale-[1.02] ${isMatch ? 'border-amber-200' : 'border-gray-100'}`}>
                         {isMatch && <span className="absolute top-1 right-1 text-amber-400 text-[8px] font-bold">✦</span>}
                         <img src={item.image} alt={item.name} className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain mb-1.5" />
                         <span className="text-[7px] sm:text-[8px] uppercase px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded-md mb-1 font-light">{item.category}</span>
-                        <p className="text-[9px] sm:text-[10px] text-center font-light truncate w-full text-gray-700 px-0.5">{item.name}</p>
+                        <p className="text-[9px] sm:text-[10px] text-gray-700 text-center font-light truncate w-full px-0.5">{item.name}</p>
                         <div className="w-2.5 h-2.5 rounded-full border border-gray-200 mt-1 flex-shrink-0" style={{ backgroundColor: item.color }} />
                       </div>
                     );
                   })
                 ) : (
-                  <p className="col-span-full text-xs text-gray-400 text-center py-10">No pieces selected.</p>
+                  <p className="col-span-full text-xs text-gray-400 text-center py-10 my-auto">No pieces selected.</p>
                 )}
               </div>
 
@@ -791,7 +755,6 @@ export default function StylingPage({
               )}
             </div>
 
-            {/* Right — Schedule panel */}
             <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm" style={{ borderColor: colors.border }}>
               <div className="mb-5">
                 <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-2">Skin Undertone</p>
@@ -803,7 +766,7 @@ export default function StylingPage({
                   <div className="flex -space-x-1.5 flex-shrink-0">
                     {undertone
                       ? selectedUndertoneData?.swatches.map((c,i) => (
-                          <div key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor:c, zIndex:3-i }} />
+                          <div key={i} className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor:c, zIndex:3-i }} />
                         ))
                       : <div className="w-6 h-6 rounded-full bg-gray-200" />
                     }
@@ -858,13 +821,10 @@ export default function StylingPage({
                 </button>
               </div>
             </div>
-
           </div>
         )}
-
       </div>
 
-      {/* ── Undertone Modal ─────────────────────────────────────────── */}
       {showUndertoneModal && (
         <UndertoneSelectorModal
           selectedTone={undertone}
@@ -873,7 +833,6 @@ export default function StylingPage({
         />
       )}
 
-      {/* ── Success / Error Modal ───────────────────────────────────── */}
       {modalConfig.isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl text-center w-full max-w-xs sm:max-w-sm border border-gray-100 relative p-6 sm:p-8">
@@ -896,7 +855,6 @@ export default function StylingPage({
           </div>
         </div>
       )}
-
     </div>
   );
 }
