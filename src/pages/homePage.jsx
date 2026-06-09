@@ -277,26 +277,6 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
 
         </div>
       </section>
-
-      {/* Footer */}
-      <section className="px-6 md:px-12 py-12 border-t" style={{ borderColor: colors.border }}>
-        <div className="max-w-5xl mx-auto text-center space-y-4">
-          <h3
-            className="text-xl font-light"
-            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-          >
-            A Digital Wardrobe for the Intentional
-          </h3>
-          <p style={{ color: colors.muted }}>
-            Closetry helps you reconnect with the clothes you already own.
-          </p>
-          
-          {/* Copyright Section */}
-          <div className="pt-8 text-[10px] tracking-[0.2em] uppercase" style={{ color: colors.muted }}>
-            <p>© {new Date().getFullYear()} Closetry. All rights reserved.</p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
