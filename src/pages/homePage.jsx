@@ -24,7 +24,7 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 className="px-8 py-3 text-sm tracking-widest font-light rounded-2xl transition-all duration-150"
                 style={{ backgroundColor: colors.accent, color: 'white' }}
               >
-                START STYLING
+                START STYLING!
               </button>
             </div>
           </div>
@@ -125,6 +125,29 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 PLAN YOUR WEEK <ChevronRight size={16} />
               </button>
             </div>
+            
+            {/* Styling */}
+            <div
+              className="rounded-2xl p-8"
+              style={{ backgroundColor: colors.surface }}
+            >
+              <h3
+                className="text-2xl font-light mb-4"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Styling
+              </h3>
+              <p style={{ color: colors.body, marginBottom: '20px' }}>
+                Discover outfit combinations and get personalized style recommendations.
+              </p>
+              <button
+                onClick={() => navigateTo('styling')}
+                className="text-sm tracking-widest font-light flex items-center gap-2 transition-colors duration-150"
+                style={{ color: colors.accent }}
+              >
+                EXPLORE STYLING <ChevronRight size={16} />
+              </button>
+            </div>
 
             {/* Analytics */}
             <div
@@ -148,7 +171,110 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
                 VIEW INSIGHTS <ChevronRight size={16} />
               </button>
             </div>
+
+            {/* Wardrobe */}
+            <div
+              className="rounded-2xl p-8"
+              style={{ backgroundColor: colors.surface }}
+            >
+              <h3
+                className="text-2xl font-light mb-4"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Wardrobe
+              </h3>
+              <p style={{ color: colors.body, marginBottom: '20px' }}>
+                Manage and organize all your clothing items in one place.
+              </p>
+              <button
+                onClick={() => navigateTo('wardrobe')}
+                className="text-sm tracking-widest font-light flex items-center gap-2 transition-colors duration-150"
+                style={{ color: colors.accent }}
+              >
+                VIEW WARDROBE <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Cara Pakai Section */}
+      <section className="py-20 px-8" style={{ backgroundColor: colors.surface }}>
+        {/* Header */}
+        <div className="text-center mb-16">
+          <p
+            className="text-sm tracking-widest mb-4"
+            style={{ color: colors.accent }}
+          >
+            CARA PAKAI
+          </p>
+          <h2
+            className="text-4xl font-light"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+          >
+            Tiga langkah mudah
+            <br />
+          <span className="italic">untuk tampil lebih baik</span>
+          </h2>
+        </div>
+
+      {/* Steps */}
+      <div className="flex items-center justify-center gap-4 max-w-5xl mx-auto">
+
+        {/* Step 01 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            01
+          </p>
+          <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+            Upload Pakaianmu
+          </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+            Foto dan upload pakaian yang kamu punya. Kelompokkan ke kategori yang sesuai.
+          </p>
+        </div>
+
+          {/* Arrow */}
+          <span style={{ color: colors.accent, opacity: 0.5, fontSize: '20px' }}>→</span>
+
+        {/* Step 02 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            02
+          </p>
+            <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+              Mix & Match Outfit
+            </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+            Drag-and-drop pakaian ke canvas. Temukan kombinasi outfit terbaikmu secara visual.
+          </p>
+        </div>
+
+          {/* Arrow */}
+          <span style={{ color: colors.accent, opacity: 0.5, fontSize: '20px' }}>→</span>
+
+        {/* Step 03 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            03
+          </p>
+            <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+              Rencanakan & Simpan
+            </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+              Simpan outfit ke weekly planner. Tidak perlu bingung setiap pagi mau pakai apa.
+          </p>
+        </div>
+
         </div>
       </section>
     </div>
