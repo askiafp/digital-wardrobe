@@ -198,6 +198,86 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
         </div>
       </section>
 
+      {/* Cara Pakai Section */}
+      <section className="py-20 px-8" style={{ backgroundColor: colors.surface }}>
+        {/* Header */}
+        <div className="text-center mb-16">
+          <p
+            className="text-sm tracking-widest mb-4"
+            style={{ color: colors.accent }}
+          >
+            CARA PAKAI
+          </p>
+          <h2
+            className="text-4xl font-light"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+          >
+            Tiga langkah mudah
+            <br />
+          <span className="italic">untuk tampil lebih baik</span>
+          </h2>
+        </div>
+
+      {/* Steps */}
+      <div className="flex items-center justify-center gap-4 max-w-5xl mx-auto">
+
+        {/* Step 01 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            01
+          </p>
+          <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+            Upload Pakaianmu
+          </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+            Foto dan upload pakaian yang kamu punya. Kelompokkan ke kategori yang sesuai.
+          </p>
+        </div>
+
+          {/* Arrow */}
+          <span style={{ color: colors.accent, opacity: 0.5, fontSize: '20px' }}>→</span>
+
+        {/* Step 02 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            02
+          </p>
+            <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+              Mix & Match Outfit
+            </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+            Drag-and-drop pakaian ke canvas. Temukan kombinasi outfit terbaikmu secara visual.
+          </p>
+        </div>
+
+          {/* Arrow */}
+          <span style={{ color: colors.accent, opacity: 0.5, fontSize: '20px' }}>→</span>
+
+        {/* Step 03 */}
+        <div className="rounded-2xl p-8 flex-1" style={{ backgroundColor: colors.background }}>
+          <p
+            className="text-4xl font-light mb-6"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent, opacity: 0.4 }}
+          >
+            03
+          </p>
+            <h3 className="text-base font-semibold mb-3" style={{ color: colors.heading }}>
+              Rencanakan & Simpan
+            </h3>
+          <p className="text-sm leading-relaxed" style={{ color: colors.body }}>
+              Simpan outfit ke weekly planner. Tidak perlu bingung setiap pagi mau pakai apa.
+          </p>
+        </div>
+
+        </div>
+      </section>
+
       {/* Footer */}
       <section className="px-6 md:px-12 py-12 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto text-center space-y-4">
