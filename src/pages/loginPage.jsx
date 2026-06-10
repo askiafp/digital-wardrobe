@@ -3,31 +3,38 @@ import { colors } from '../constants';
 import logo from '../../public/images/logo.png';
 
 export default function LoginPage({ onLogin }) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName]         = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       alert('Please fill in all fields');
       return;
     }
-
     if (isSignUp && !name) {
       alert('Please enter your name');
       return;
     }
 
-    const userData = {
-      id: Date.now(),
-      name: isSignUp ? name : email.split('@')[0],
-      email: email,
-    };
+    onLogin({
+      id:      email,                                      
+      name:    isSignUp ? name : email.split('@')[0],
+      email:   email,
+      isGuest: false,
+    });
+  };
 
-    onLogin(userData);
+  const handleGuest = () => {
+    onLogin({
+      id:      'guest',
+      name:    'Guest',
+      email:   null,
+      isGuest: true,
+    });
   };
 
   return (
@@ -36,14 +43,14 @@ export default function LoginPage({ onLogin }) {
       style={{ backgroundColor: colors.background }}
     >
       <div className="w-full max-w-sm space-y-10">
-        
+
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="flex justify-center w-full">
-            <img 
-              src={logo} 
-              alt="Closetry Logo" 
-              className="h-24 w-auto object-contain transition-transform duration-500 hover:scale-105" 
+            <img
+              src={logo}
+              alt="Closetry Logo"
+              className="h-24 w-auto object-contain transition-transform duration-500 hover:scale-105"
             />
           </div>
           <p className="text-sm tracking-[0.2em] uppercase" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
@@ -52,11 +59,10 @@ export default function LoginPage({ onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
-          
           {[
-            { id: 'name', label: 'Full Name', type: 'text', val: name, set: setName, show: isSignUp },
-            { id: 'email', label: 'Email Address', type: 'email', val: email, set: setEmail, show: true },
-            { id: 'password', label: 'Password', type: 'password', val: password, set: setPassword, show: true },
+            { id: 'name',     label: 'Full Name',      type: 'text',     val: name,     set: setName,     show: isSignUp },
+            { id: 'email',    label: 'Email Address',  type: 'email',    val: email,    set: setEmail,    show: true },
+            { id: 'password', label: 'Password',       type: 'password', val: password, set: setPassword, show: true },
           ].map((field) => field.show && (
             <div key={field.id}>
               <label className="block text-[10px] tracking-[0.2em] uppercase mb-2 ml-1" style={{ color: colors.muted }}>
@@ -69,14 +75,13 @@ export default function LoginPage({ onLogin }) {
                 className="w-full px-5 py-4 rounded-xl border text-sm font-light transition-all focus:ring-2 focus:ring-opacity-20"
                 style={{
                   backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  color: colors.heading,
+                  borderColor:     colors.border,
+                  color:           colors.heading,
                 }}
               />
             </div>
           ))}
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-4 text-xs tracking-[0.2em] font-medium rounded-xl transition-all duration-300 
@@ -98,10 +103,10 @@ export default function LoginPage({ onLogin }) {
           >
             {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
           </button>
-          
+
           <div className="pt-6">
             <button
-              onClick={() => onLogin({ id: 1, name: 'User', email: 'demo@closetry.com' })}
+              onClick={handleGuest}
               className="text-[10px] tracking-[0.2em] font-light border-b border-transparent hover:border-current transition-all"
               style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}
             >
