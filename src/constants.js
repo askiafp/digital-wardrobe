@@ -7,7 +7,7 @@ export const colors = {
   heading: '#1A1714',
   body: '#5A5450',
   muted: '#9E9890',
-  accent: '#C9A09A',
+  accent: '#800020',
 };
 
 // Wardrobe Categories
