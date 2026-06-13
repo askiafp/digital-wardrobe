@@ -157,7 +157,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
                     Receive outfit suggestions and weekly style tips
                   </p>
                 </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
+                <input type="checkbox" defaultChecked className="w-5 h-5" style={{ backgroundColor: colors.background }} />
               </div>
               <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: colors.background }}>
                 <div>
@@ -193,7 +193,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
                 Version 1.0.0
               </p>
               <p style={{ color: colors.muted }}>
-                © 2024 Closetry. All rights reserved.
+                © 2026 Closetry. All rights reserved.
               </p>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
               onClick={onLogout}
               className="w-full py-3 text-sm font-light tracking-widest rounded-lg transition-all duration-150"
               style={{
-                backgroundColor: '#E8B4B8',
+                backgroundColor: '#800020',
                 color: 'white',
               }}
             >

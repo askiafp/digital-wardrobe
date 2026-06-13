@@ -35,10 +35,15 @@ export default function App() {
       return { wardrobe: [], outfits: [], weeklyPlan: {} };
     }
     const saved = loadUserData(user.email);
+    
+    const finalWardrobe = (saved.wardrobe && saved.wardrobe.length > 0) 
+      ? saved.wardrobe 
+      : initialWardrobeData;
+
     return {
-      wardrobe:   saved.wardrobe   ?? initialWardrobeData,
-      outfits:    saved.outfits,
-      weeklyPlan: saved.weeklyPlan,
+      wardrobe:   finalWardrobe,
+      outfits:    saved.outfits || [],
+      weeklyPlan: saved.weeklyPlan || {},
     };
   };
 
@@ -52,7 +57,22 @@ export default function App() {
   const [wardrobe, setWardrobe] = useState(() => {
     const saved = localStorage.getItem('currentUser');
     const user  = saved ? JSON.parse(saved) : null;
-    return initUserData(user).wardrobe;
+    
+    if (!user || user.isGuest) return [];
+    
+    const savedData = loadUserData(user.email);
+    const localItems = savedData?.wardrobe || [];
+    
+    const combined = [...localItems];
+    
+    initialWardrobeData.forEach(constItem => {
+      const isAlreadyExist = combined.some(localItem => localItem.id === constItem.id);
+      if (!isAlreadyExist) {
+        combined.push(constItem);
+      }
+    });
+    
+    return combined;
   });
 
   const [savedOutfits, setSavedOutfits] = useState(() => {
@@ -69,25 +89,53 @@ export default function App() {
 
   // ─── Auto-save ────────────────────────────────────────────────────────────
   React.useEffect(() => {
-    if (!isGuest && currentUser?.email) saveWardrobe(currentUser.email, wardrobe);
+    if (!isGuest && currentUser?.email) {
+      try {
+        saveWardrobe(currentUser.email, wardrobe);
+      } catch (e) {
+        console.error("Failed to auto-save wardrobe due to quota:", e);
+      }
+    }
   }, [wardrobe]);
 
   React.useEffect(() => {
-    if (!isGuest && currentUser?.email) saveOutfits(currentUser.email, savedOutfits);
+    if (!isGuest && currentUser?.email) {
+      try {
+        saveOutfits(currentUser.email, savedOutfits);
+      } catch (e) {
+        console.error("Failed to auto-save outfits due to quota:", e);
+      }
+    }
   }, [savedOutfits]);
 
   React.useEffect(() => {
-    if (!isGuest && currentUser?.email) saveWeeklyPlan(currentUser.email, weeklyPlan);
+    if (!isGuest && currentUser?.email) {
+      try {
+        saveWeeklyPlan(currentUser.email, weeklyPlan);
+      } catch (e) {
+        console.error("Failed to auto-save weekly plan due to quota:", e);
+      }
+    }
   }, [weeklyPlan]);
 
   // ─── Auth handlers ────────────────────────────────────────────────────────
   const handleLogin = (userData) => {
     localStorage.setItem('currentUser', JSON.stringify(userData));
     setCurrentUser(userData);
+    
     const data = initUserData(userData);
-    setWardrobe(data.wardrobe);
-    setSavedOutfits(data.outfits);
-    setWeeklyPlan(data.weeklyPlan);
+    const localItems = data.wardrobe || [];
+    
+    const combined = [...localItems];
+    initialWardrobeData.forEach(constItem => {
+      if (!combined.some(item => item.id === constItem.id)) {
+        combined.push(constItem);
+      }
+    });
+
+    setWardrobe(combined);
+    setSavedOutfits(data.outfits || []);
+    setWeeklyPlan(data.weeklyPlan || {});
     setSelectedOutfit([]);
     setCurrentPage('home');
   };
@@ -102,13 +150,48 @@ export default function App() {
     setCurrentPage('home');
   };
 
-  // ─── Wardrobe handlers ────────────────────────────────────────────────────
+  // ─── Wardrobe handlers & Image Compressor ──────────────────────────────────
   const handleImagePick = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setNewItemData((prev) => ({ ...prev, image: ev.target.result, preview: ev.target.result }));
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Dinaikkan ke 1080 agar pas dipasang full di card portrait tidak pecah
+        const MAX_WIDTH = 1080;
+        const MAX_HEIGHT = 1350; // Disesuaikan dengan aspek rasio 4:5
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Menggunakan 'image/webp' agar file super ringan tapi ketajaman gambar tetap HD
+        const compressedBase64 = canvas.toDataURL('image/webp', 0.6);
+        setNewItemData((prev) => ({ 
+          ...prev, 
+          image: compressedBase64, 
+          preview: compressedBase64 
+        }));
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -123,7 +206,7 @@ export default function App() {
       id:       Date.now(),
       name:     newItemData.name,
       category: newItemData.category,
-      color:    '#EDE9E3',
+      color:    '#1A1A1A', 
       image:    newItemData.image,
       lastWorn: 'Just now',
       style:    'minimalist',
@@ -144,7 +227,6 @@ export default function App() {
     setSelectedOutfit((prev) => prev.filter((item) => item.id !== deleteModal.itemId));
     setDeleteModal({ isOpen: false, itemId: null });
   };
-
 
   // ─── Gate ────────────────────────────────────────────────────────────────
   if (!isAuthenticated) {
@@ -239,13 +321,9 @@ export default function App() {
               <X size={18} />
             </button>
 
-            {/* drag handle on mobile */}
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden" />
 
-            <h2
-              className="text-2xl font-light mb-1"
-              style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-            >
+            <h2 className="text-2xl font-light mb-1" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
               Add New Piece
             </h2>
             <p className="text-xs text-gray-400 mb-6 uppercase tracking-wider">
@@ -253,7 +331,6 @@ export default function App() {
             </p>
 
             <form onSubmit={handleSaveNewItem} className="space-y-4">
-              {/* Item Name */}
               <div>
                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
                   Item Name
@@ -269,7 +346,6 @@ export default function App() {
                 />
               </div>
 
-              {/* Category Select */}
               <div>
                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
                   Category
@@ -284,7 +360,7 @@ export default function App() {
                   >
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border shadow-lg z-[10000]">
+                  <SelectContent className="rounded-xl border shadow-lg z-[10000] bg-white">
                     {categories.filter((cat) => cat !== 'All').map((cat) => (
                       <SelectItem
                         key={cat}
@@ -298,7 +374,6 @@ export default function App() {
                 </Select>
               </div>
 
-              {/* Photo upload */}
               <div>
                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
                   Photo
@@ -350,19 +425,17 @@ export default function App() {
           </div>
         </div>
       )}
+
       {deleteModal.isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-[10000] bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm border border-gray-100 p-6 shadow-2xl text-center">
-            
             <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 text-red-500">
               <Trash2 size={24} />
             </div>
-
             <h2 className="text-xl text-black font-light mb-2">Delete Item?</h2>
             <p className="text-xs text-gray-400 mb-6 tracking-wide leading-relaxed">
               Are you sure you want to remove this piece from your wardrobe?
             </p>
-
             <div className="flex gap-3">
               <button 
                 onClick={() => setDeleteModal({ isOpen: false, itemId: null })}

@@ -7,7 +7,7 @@ export const colors = {
   heading: '#1A1714',
   body: '#5A5450',
   muted: '#9E9890',
-  accent: '#C9A09A',
+  accent: '#800020',
 };
 
 // Wardrobe Categories
@@ -164,6 +164,105 @@ export const initialWardrobeData = [
     category: 'Tops', 
     color: '#E8A0B0', // Soft pink for plaid pink top
     image: '/images/plaid-pink-top.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 18, 
+    name: 'Victorian Gothic Collared', 
+    category: 'Tops', 
+    color: '#1A1A1A', // Deep gothic black for collared top
+    image: '/images/victorian-gothic-collared-top.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 19, 
+    name: 'Tooth Powder Mini Bag', 
+    category: 'Bags', 
+    color: '#E8A0B0', // Soft pink for tooth powder mini bag
+    image: '/images/tooth.powder-mini-bag.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 20, 
+    name: 'Tabi Black Shoes', 
+    category: 'Shoes', 
+    color: '#111111', // Matte black for tabi shoes
+    image: '/images/tabi-black-shoes.png', 
+    lastWorn: '3 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 21, 
+    name: 'Short Afghan Jacket', 
+    category: 'Outerwear', 
+    color: '#5C4033', // Earthy dark brown for short afghan jacket
+    image: '/images/short-afghan-jacket.png', 
+    lastWorn: '5 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 22, 
+    name: 'Sai Corazon Fireman Clasps Jackets', 
+    category: 'Outerwear', 
+    color: '#1C1C1C', // Obsidian black for fireman clasps jacket
+    image: '/images/sai-corazon-fireman-clasps-jackets.png', 
+    lastWorn: '4 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 23, 
+    name: 'Rae Ruffle Shoulder Bag', 
+    category: 'Bags', 
+    color: '#252525', // Charcoal black for ruffle shoulder bag
+    image: '/images/rae-ruffle-shoulder-bag.png', 
+    lastWorn: '4 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 24, 
+    name: 'Puma Speedcat Black Mauve', 
+    category: 'Shoes', 
+    color: '#2B1A2F', // Deep black and mauve fusion for speedcat shoes
+    image: '/images/puma-speedcat-black-mauve.png', 
+    lastWorn: '4 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 25, 
+    name: 'Polkadot Top Taobao', 
+    category: 'Tops', 
+    color: '#181818', // Base black with white spots for polkadot top
+    image: '/images/polkadot-top-taobao.png', 
+    lastWorn: '2 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 26, 
+    name: 'Polkadot Skinny Scarf', 
+    category: 'Accessories', 
+    color: '#FAFAFA', // Clean crisp white for skinny scarf
+    image: '/images/polka-dot-skinny-scarf.png', 
+    lastWorn: '2 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 27, 
+    name: 'Hei Hei Corduroy Loungers Olive', 
+    category: 'Bottoms', 
+    color: '#3B3C36', // Olive green tinted brown for corduroy loungers
+    image: '/images/heihei-corduroy-loungers-olive.png', 
+    lastWorn: '1 day ago', 
+    style: 'formal' 
+  },
+  { 
+    id: 28, 
+    name: 'Elevenses Harbormaster Trousers', 
+    category: 'Bottoms', 
+    color: '#0F0F0F', // Midnight black for harbormaster trousers
+    image: '/images/elevenses-harbormaster-trousers.png', 
     lastWorn: '1 day ago', 
     style: 'formal' 
   },
