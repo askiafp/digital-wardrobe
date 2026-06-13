@@ -629,7 +629,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     return (
       <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-3">
         <p className="text-[9px] uppercase tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1">
-          <Sparkles size={10} /> Recommended for {selectedUndertoneData?.label} undertone
+          Recommended for {selectedUndertoneData?.label} undertone
         </p>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling: 'touch' }}>
           {goodItems.map(item => {
@@ -866,23 +866,23 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                           </div>
                         ))}                        
                         {selectedOutfit.filter(i => i.category === 'Bottoms').map(item => (
-                          <div key={item.id} className="absolute top-54 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-130">
+                          <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
                           </div>
                         ))}
                         {selectedOutfit.filter(i => i.category === 'Shoes').map(item => (
-                          <div key={item.id} className="absolute bottom-6 right-15 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
+                          <div key={item.id} className="absolute bottom-6 right-10 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
                           </div>
                         ))}
 
                         {selectedOutfit.filter(i => i.category === 'Outerwear').map(item => (
-                          <div key={item.id} className="absolute top-10 right-2 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
+                          <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
                           </div>
                         ))}
                         {selectedOutfit.filter(i => i.category === 'Accessories').map(item => (
-                          <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-100">
+                          <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-80">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)]" />
                           </div>
                         ))}

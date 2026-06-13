@@ -159,8 +159,9 @@ export default function App() {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const MAX_WIDTH = 400;
-        const MAX_HEIGHT = 400;
+        // Dinaikkan ke 1080 agar pas dipasang full di card portrait tidak pecah
+        const MAX_WIDTH = 1080;
+        const MAX_HEIGHT = 1350; // Disesuaikan dengan aspek rasio 4:5
         let width = img.width;
         let height = img.height;
 
@@ -182,7 +183,8 @@ export default function App() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        // Menggunakan 'image/webp' agar file super ringan tapi ketajaman gambar tetap HD
+        const compressedBase64 = canvas.toDataURL('image/webp', 0.6);
         setNewItemData((prev) => ({ 
           ...prev, 
           image: compressedBase64, 

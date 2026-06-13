@@ -57,7 +57,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
             border: scrolled ? `1px solid rgba(255,255,255,0.55)` : `0px solid transparent`,
             borderBottom: scrolled ? `1px solid rgba(255,255,255,0.55)` : `1px solid ${colors.border}`,
             boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' : 'none',
-            padding: scrolled ? '10px 24px' : '16px 24px',
+            padding: scrolled ? '10px 24px' : '6px 24px',
           }}
         >
           <div className="flex justify-between items-center">
