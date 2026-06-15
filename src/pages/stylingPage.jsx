@@ -131,15 +131,18 @@ function WeatherIcon({ icon, size = 20, color }) {
 
 function getWeatherBackgroundImage(conditionIcon, tempC) {
   if (conditionIcon === 'rain') {
-    return 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000&q=80&fit=crop';
+    return '/images/rain.jpg';
   }
+  
   if (tempC >= 30) {
-    return 'https://images.unsplash.com/photo-1495567720989-cebdbdd97913?w=1000&q=80&fit=crop';
+    return '/images/hot.jpg';
   }
+  
   if (tempC >= 25) {
-    return 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1000&q=80&fit=crop';
+    return '/images/warm.jpg';
   }
-  return 'https://images.unsplash.com/photo-1505228395891-9a51e7e86e81?w=1000&q=80&fit=crop';
+  
+  return '/images/default.jpg';
 }
 
 // ─── Responsive Weather Card Component ───────────────────────────────────────

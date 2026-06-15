@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { colors } from '../constants';
+import { useTranslation } from 'react-i18next';
+import { Camera, Shirt, Calendar, Sparkles, User, Mail, Settings, ShieldAlert, LogOut } from 'lucide-react';
 
-export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
+export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = [], days = [], weeklyPlan = {}, onLogout }) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: currentUser?.name || '',
     email: currentUser?.email || '',
@@ -10,10 +14,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSave = (e) => {
@@ -26,203 +27,222 @@ export default function ProfilePage({ currentUser, setCurrentUser, onLogout }) {
     setIsEditing(false);
   };
 
-  return (
-    <div style={{ backgroundColor: colors.background }}>
-      <div className="px-6 md:px-12 py-12">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-12">
-            <h1
-              className="text-5xl font-light mb-2"
-              style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-            >
-              Your Profile
-            </h1>
-            <p style={{ color: colors.muted }}>
-              Manage your account settings
-            </p>
-          </div>
+  const plannedDaysCount = days.filter(day => weeklyPlan && weeklyPlan[day.toLowerCase()]?.items?.length > 0).length;
 
-          {/* Profile Card */}
-          <div
-            className="rounded-2xl p-8 mb-8"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <div className="space-y-6">
-              {/* Profile Header */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs tracking-widest uppercase mb-2" style={{ color: colors.muted }}>
-                    Account Information
+  const eleganceScore = wardrobe?.length > 0 && plannedDaysCount > 0 
+    ? ((plannedDaysCount / 7) * 10).toFixed(1) 
+    : '0.0';
+
+  return (
+    <div style={{ backgroundColor: colors.background }} className="min-h-screen pb-24 sm:pb-32 font-sans antialiased text-gray-800">      
+      {/* Banner */}
+      <div 
+        className="h-40 sm:h-56 md:h-80 w-full bg-cover bg-center relative"
+        style={{ 
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.2)), url('/images/wardrobe.jpg')`,
+          backgroundColor: '#F3F3EF' 
+        }}
+      >
+        <div className="absolute inset-0 backdrop-blur-[0.5px]" />
+      </div>
+
+      {/* Main Content Container */}
+      <div className="px-4 sm:px-6 md:px-12 -mt-16 sm:-mt-20 md:-mt-24 relative z-10">
+        <div className="max-w-2xl mx-auto w-full space-y-6 sm:space-y-8">
+          
+          {/* Profile Header Card */}
+          <div className="bg-white/85 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-white/60 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+              {/* Avatar & Info */}
+              <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                {/* Avatar */}
+                <div 
+                  className="w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-full border-4 shadow-sm flex items-center justify-center relative group overflow-hidden flex-shrink-0 transition-transform duration-500 hover:scale-105 bg-white"
+                  style={{ borderColor: colors.background }}
+                >
+                  <span className="text-2xl sm:text-2xl md:text-3xl font-light text-neutral-400 font-serif tracking-tighter">
+                    {formData.name ? formData.name.charAt(0).toUpperCase() : 'C'}
+                  </span>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer duration-300">
+                    <Camera size={14} className="text-white" />
+                  </div>
+                </div>
+                
+                <div className="space-y-1 min-w-0">
+                  <p className="text-[7px] sm:text-[8px] md:text-[9px] tracking-[0.1em] sm:tracking-[0.3em] uppercase font-semibold text-neutral-400 whitespace-nowrap">
+                    Curation Vault Owner
                   </p>
-                  <h2
-                    className="text-3xl font-light"
+                  <h1
+                    className="text-xl sm:text-2xl md:text-3xl font-light tracking-tight break-words"
                     style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
                   >
-                    {formData.name}
-                  </h2>
-                  <p style={{ color: colors.body, marginTop: '8px' }}>
-                    {formData.email}
+                    {formData.name || 'Anonymous Curator'}
+                  </h1>
+                  <p className="text-xs sm:text-xs md:text-sm font-light text-neutral-400 tracking-wide truncate">
+                    {formData.email || 'No email registered'}
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="px-4 py-2 rounded-lg text-sm font-light tracking-wider transition-all duration-150"
-                  style={{
-                    backgroundColor: isEditing ? colors.border : colors.accent,
-                    color: isEditing ? colors.heading : 'white',
-                  }}
-                >
-                  {isEditing ? 'CANCEL' : 'EDIT'}
-                </button>
               </div>
 
-              {/* Edit Form */}
-              {isEditing && (
-                <form onSubmit={handleSave} className="space-y-6 border-t pt-6" style={{ borderColor: colors.border }}>
-                  <div>
-                    <label
-                      className="block text-xs tracking-widest uppercase mb-3"
-                      style={{ color: colors.muted }}
-                    >
-                      Full Name
-                    </label>
+              {/* Edit Button */}
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] tracking-[0.2em] font-medium transition-all duration-300 uppercase border shadow-sm active:scale-95 whitespace-nowrap flex-shrink-0"
+                style={{
+                  backgroundColor: isEditing ? 'white' : colors.accent,
+                  color: isEditing ? colors.heading : 'white',
+                  borderColor: isEditing ? colors.border : 'transparent'
+                }}
+              >
+                {isEditing ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {[
+              { 
+                icon: <Shirt size={14} />, 
+                count: wardrobe?.length || 0, 
+                label: 'Pieces Cataloged', 
+                isAccent: true 
+              },
+              { 
+                icon: <Calendar size={14} />, 
+                count: `${plannedDaysCount} / 7`, 
+                label: 'Active Curations', 
+                isAccent: false 
+              },
+              { 
+                icon: <Sparkles size={14} />, 
+                count: eleganceScore, 
+                label: 'Elegance Quotient', 
+                isAccent: false 
+              },
+            ].map((stat, i) => (
+              <div 
+                key={i} 
+                className="p-4 sm:p-5 rounded-xl sm:rounded-2xl text-center border bg-white shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all duration-300 hover:translate-y-[-2px] hover:shadow-md" 
+                style={{ borderColor: colors.border }}
+              >
+                <div className="flex justify-center mb-2 text-neutral-300">{stat.icon}</div>
+                <div 
+                  className={stat.isAccent ? "text-3xl sm:text-4xl font-light" : "text-xl sm:text-2xl font-light"} 
+                  style={{ 
+                    color: stat.isAccent ? colors.accent : colors.heading, 
+                    fontFamily: 'Cormorant Garamond, serif' 
+                  }}
+                >
+                  {stat.count}
+                </div>
+                <div className="text-[7px] sm:text-[8px] tracking-[0.2em] uppercase text-neutral-400 mt-1.5 font-semibold">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Edit Form */}
+          {isEditing && (
+            <div 
+              className="rounded-2xl p-4 sm:p-6 md:p-8 border animate-in fade-in slide-in-from-top-4 duration-300 shadow-md bg-white" 
+              style={{ borderColor: colors.border }}
+            >
+              <form onSubmit={handleSave} className="space-y-5">
+                {/* Form Header */}
+                <div className="flex items-center gap-2 pb-3 sm:pb-4 border-b" style={{ borderColor: colors.border }}>
+                  <Settings size={13} className="text-neutral-400 flex-shrink-0" />
+                  <h3 className="text-[8px] sm:text-[9px] tracking-[0.2em] uppercase font-bold text-neutral-400">Credentials Setup</h3>
+                </div>
+                
+                {/* Name Input */}
+                <div className="space-y-2">
+                  <label className="text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-semibold text-neutral-400 block ml-0.5">Full Name</label>
+                  <div className="relative flex items-center">
+                    <User size={14} className="absolute left-4 text-neutral-400 flex-shrink-0" />
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm font-light"
-                      style={{
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
-                        color: colors.heading,
-                      }}
+                      placeholder="Enter your full name"
+                      className="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-sm font-light bg-neutral-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
+                      style={{ borderColor: colors.border, color: colors.heading }}
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label
-                      className="block text-xs tracking-widest uppercase mb-3"
-                      style={{ color: colors.muted }}
-                    >
-                      Email Address
-                    </label>
+                {/* Email Input */}
+                <div className="space-y-2">
+                  <label className="text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-semibold text-neutral-400 block ml-0.5">Email Address</label>
+                  <div className="relative flex items-center">
+                    <Mail size={14} className="absolute left-4 text-neutral-400 flex-shrink-0" />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm font-light"
-                      style={{
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
-                        color: colors.heading,
-                      }}
+                      placeholder="your.email@example.com"
+                      className="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-sm font-light bg-neutral-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
+                      style={{ borderColor: colors.border, color: colors.heading }}
                     />
                   </div>
+                </div>
 
-                  <button
-                    type="submit"
-                    className="w-full py-3 text-sm font-light tracking-widest rounded-lg transition-all duration-150"
-                    style={{
-                      backgroundColor: colors.accent,
-                      color: 'white',
-                    }}
-                  >
-                    SAVE CHANGES
-                  </button>
-                </form>
-              )}
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full py-2.5 sm:py-3 sm:py-3.5 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] rounded-lg sm:rounded-xl transition-all shadow-sm hover:brightness-105 active:scale-[0.99] mt-3"
+                  style={{ backgroundColor: colors.accent, color: 'white' }}
+                >
+                  COMMIT CHANGES
+                </button>
+              </form>
             </div>
-          </div>
+          )}
 
-          {/* Settings Section */}
-          <div
-            className="rounded-2xl p-8 mb-8"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <h3
-              className="text-xl font-light mb-6"
-              style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-            >
-              Preferences
+          {/* Preferences Section */}
+          <div className="rounded-2xl p-4 sm:p-6 md:p-7 border bg-white shadow-[0_4px_20px_rgba(0,0,0,0.01)]" style={{ borderColor: colors.border }}>
+            <h3 className="text-base sm:text-lg font-medium mb-4 tracking-tight" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
+              Curation Workspace Preferences
             </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: colors.background }}>
-                <div>
-                  <p className="font-light text-sm" style={{ color: colors.heading }}>
-                    Email Notifications
-                  </p>
-                  <p className="text-xs" style={{ color: colors.muted }}>
-                    Receive outfit suggestions and weekly style tips
-                  </p>
+            <div className="space-y-3">
+              {/* Preference 1 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-neutral-100 bg-neutral-50/30">
+                <div className="space-y-0.5 min-w-0">
+                  <p className="font-normal text-xs sm:text-sm" style={{ color: colors.heading }}>Weekly Analytics Digest</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 font-light">Receive algorithmic wardrobe efficiency reporting</p>
                 </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" style={{ backgroundColor: colors.background }} />
+                <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-neutral-800 cursor-pointer focus:ring-0 flex-shrink-0" />
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: colors.background }}>
-                <div>
-                  <p className="font-light text-sm" style={{ color: colors.heading }}>
-                    Dark Mode
-                  </p>
-                  <p className="text-xs" style={{ color: colors.muted }}>
-                    Coming soon
-                  </p>
+
+              {/* Preference 2 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-neutral-100 bg-neutral-50/30">
+                <div className="space-y-0.5 min-w-0">
+                  <p className="font-normal text-xs sm:text-sm text-neutral-400">System Low-Light Mode</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 font-light">Dark interface matrix optimization</p>
                 </div>
-                <input type="checkbox" disabled className="w-5 h-5 opacity-50" />
+                <span className="text-[8px] tracking-wider uppercase font-bold text-neutral-300 bg-neutral-100 px-2 py-0.5 rounded-md flex-shrink-0">Soon</span>
               </div>
             </div>
           </div>
 
-          {/* About Section */}
-          <div
-            className="rounded-2xl p-8 mb-8"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <h3
-              className="text-xl font-light mb-6"
-              style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-            >
-              About Closetry
-            </h3>
-            <p style={{ color: colors.body, marginBottom: '16px', lineHeight: 1.8 }}>
-              Closetry is a luxury digital wardrobe designed to help you reconnect with the clothes you already own.
-              Organize, plan, and style with intention.
-            </p>
-            <div className="space-y-2 text-sm">
-              <p style={{ color: colors.muted }}>
-                Version 1.0.0
-              </p>
-              <p style={{ color: colors.muted }}>
-                © 2026 Closetry. All rights reserved.
-              </p>
+          {/* Danger Zone - Logout */}
+          <div className="rounded-2xl p-4 sm:p-6 md:p-7 border bg-red-50/10 border-red-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4 text-red-800">
+              <ShieldAlert size={14} className="flex-shrink-0" />
+              <h3 className="text-base sm:text-lg text-black font-medium tracking-tight" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                De-authenticate Workspace
+              </h3>
             </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div
-            className="rounded-2xl p-8 border-2"
-            style={{ backgroundColor: colors.background, borderColor: colors.border }}
-          >
-            <h3
-              className="text-xl font-light mb-4"
-              style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-            >
-              Danger Zone
-            </h3>
-            <p style={{ color: colors.body, marginBottom: '16px' }}>
-              Once you log out, you'll need to sign in again to access your wardrobe.
-            </p>
             <button
               onClick={onLogout}
-              className="w-full py-3 text-sm font-light tracking-widest rounded-lg transition-all duration-150"
-              style={{
-                backgroundColor: '#800020',
-                color: 'white',
-              }}
+              className="w-full py-2.5 sm:py-3 sm:py-3.5 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] rounded-lg sm:rounded-xl transition-all duration-300 hover:brightness-110 active:scale-[0.99] shadow-sm flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#800020', color: 'white' }}
             >
-              SIGN OUT
+              <LogOut size={12} /> TERMINATE DISCOVERY SESSION
             </button>
           </div>
+
         </div>
       </div>
     </div>
