@@ -281,6 +281,9 @@ export default function App() {
             }}
             onLogout={handleLogout}
             isGuest={isGuest}
+            wardrobe={wardrobe}
+            days={['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+            weeklyPlan={weeklyPlan} 
           />
         )}
         {currentPage === 'styling' && (
