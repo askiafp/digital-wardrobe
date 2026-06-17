@@ -4,10 +4,8 @@ import { colors } from '../constants';
 
 const heroImages = [
   '/images/hero-homepage.jpg',
-  '/images/all-outfit.jpg',
   '/images/all-outfit-2.jpg',
-  '/images/outfit mix match.jpg',
-  '/images/wardrobe.jpg',
+  '/images/outfit-mix-match.jpg',
 ];
 
 export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo }) {
@@ -18,12 +16,10 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   const [randomItems, setRandomItems] = useState([]);
   const heroRef = useRef(null);
 
-  // Ambil nama hari ini dalam Bahasa Inggris
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const todayName = daysOfWeek[new Date().getDay()];
-  const todayOutfit = weeklyPlan[todayName] || null;
+  const todayOutfit = weeklyPlan[todayName.toLowerCase()] || null;
 
-  // 💡 FIX UNCAUGHT REFERENCEERROR: Fungsi handleImageError sekarang sudah didefinisikan dengan benar
   const handleImageError = (e) => {
     e.target.style.display = 'none';
   };
@@ -61,7 +57,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mengambil 3 item acak dari wardrobe untuk Inspiration Corner saat pertama kali load
   useEffect(() => {
     if (wardrobe && wardrobe.length > 0) {
       const shuffled = [...wardrobe].sort(() => 0.5 - Math.random());
@@ -72,14 +67,13 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
 
-      {/* ── Hero dengan Fixed Landscape Aspect Ratio ── */}
       <section 
         ref={heroRef} 
         className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] min-h-[400px] sm:min-h-0 overflow-hidden flex items-center justify-center"
       >
-        {/* Current Background Image */}
+
         <div
-          className="absolute inset-0 bg-cover bg-center transition-all"
+          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top transition-all"
           style={{
             backgroundImage: `url(${heroImages[currentIndex]})`,
             transform: isTransitioning ? 'scale(1.02)' : 'scale(1)',
@@ -88,9 +82,8 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           }}
         />
 
-        {/* Next Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center -z-10"
+          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top -z-10"
           style={{
             backgroundImage: `url(${heroImages[nextIndex]})`,
             opacity: isTransitioning ? bgOpacity : 0,
@@ -98,7 +91,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           }}
         />
 
-        {/* Overlay */}
         <div
           className="absolute inset-0"
           style={{
@@ -108,7 +100,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           }}
         />
 
-        {/* Hero Content */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-12 max-w-4xl mx-auto h-full w-full">
           <h1
             className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-4 sm:mb-6 leading-tight select-none"
@@ -132,7 +123,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── Featured Stats ── */}
       <section className="px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -164,7 +154,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── Today's OOTD Dinamis ── */}
       <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-3xl p-6 md:p-8 border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col md:flex-row items-center justify-between gap-6">
@@ -192,7 +181,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── CTA Mix & Match ── */}
       <section className="px-6 md:px-12 py-16 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -225,7 +213,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── Features Section (Cleaned & Focused) ── */}
       <section className="px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -256,7 +243,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── How-To Section ── */}
       <section className="py-20 px-6 md:px-12" style={{ backgroundColor: colors.surface }}>
         <div className="text-center mb-16 space-y-2">
           <h2 
@@ -271,7 +257,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto relative">
-          {/* Step 1 */}
           <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between relative group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -284,7 +269,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             </div>
           </div>
 
-          {/* Step 2 */}
           <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between relative group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -297,7 +281,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             </div>
           </div>
 
-          {/* Step 3 */}
           <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between sm:col-span-2 md:col-span-1 hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
             <div className="space-y-4">
               <div className="flex items-center">
