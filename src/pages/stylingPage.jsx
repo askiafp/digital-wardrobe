@@ -670,7 +670,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ── Page header ── */}
         <div className="mb-6 md:mb-10 text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light mb-1.5" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
             Outfit Builder
@@ -680,7 +679,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
           </p>
         </div>
 
-        {/* ── TOP HEADER GRID: Symmetrical Rectangular Cards ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 max-w-4xl mx-auto w-full">
           
           <div className="w-full flex">
@@ -748,7 +746,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
 
         </div>
 
-        {/* ── MAIN WORKSPACE CONTENT ── */}
         <div className="flex flex-col gap-5 max-w-4xl mx-auto w-full">
           
           <div className="flex-1 min-w-0 w-full space-y-5">
@@ -932,7 +929,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
         </div>
       </div>
 
-      {/* ── Modals Containers ── */}
       {showUndertoneModal && (
         <UndertoneSelectorModal 
           selectedTone={undertone} 
