@@ -3,9 +3,9 @@ import { ChevronRight, Calendar, Sparkles } from 'lucide-react';
 import { colors } from '../constants';
 
 const heroImages = [
-  '/images/hero-homepage.jpg',
-  '/images/all-outfit-2.jpg',
-  '/images/outfit-mix-match.jpg',
+  '/images/hero-1.jpg',
+  '/images/hero-2.jpg',
+  '/images/hero-3.jpg',
 ];
 
 export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo }) {
