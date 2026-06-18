@@ -45,18 +45,7 @@ export default function LoginPage({ onLogin }) {
       <div className="w-full max-w-sm space-y-10">
 
         {/* Header */}
-        <div className="text-center space-y-6">
-          <div className="flex justify-center w-full">
-            <img
-              src={logo}
-              alt="Closetry Logo"
-              className="h-24 w-auto object-contain transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-          <p className="text-sm tracking-[0.2em] uppercase" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
-            Your digital luxury wardrobe
-          </p>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>
           {[
