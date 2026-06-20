@@ -20,6 +20,9 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   const todayName = daysOfWeek[new Date().getDay()];
   const todayOutfit = weeklyPlan[todayName.toLowerCase()] || null;
 
+  // Guest = no wardrobe items yet
+  const isGuest = !wardrobe || wardrobe.length === 0;
+
   const handleImageError = (e) => {
     e.target.style.display = 'none';
   };
@@ -67,11 +70,11 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
 
+      {/* Hero */}
       <section 
         ref={heroRef} 
         className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] min-h-[400px] sm:min-h-0 overflow-hidden flex items-center justify-center"
       >
-
         <div
           className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top transition-all"
           style={{
@@ -81,7 +84,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 1.2s ease-in-out, transform 7s linear',
           }}
         />
-
         <div
           className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top -z-10"
           style={{
@@ -90,7 +92,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 1.2s ease-in-out',
           }}
         />
-
         <div
           className="absolute inset-0"
           style={{
@@ -99,7 +100,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 0.5s ease',
           }}
         />
-
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-12 max-w-4xl mx-auto h-full w-full">
           <h1
             className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-4 sm:mb-6 leading-tight select-none"
@@ -123,64 +123,95 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      <section className="px-6 md:px-12 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {wardrobe?.length || 0}
+      {/* Stats — only shown when user has data */}
+      {!isGuest ? (
+        <section className="px-6 md:px-12 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {wardrobe.length}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Pieces in Your Closet
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Pieces in Your Closet
-              </p>
-            </div>
-            <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {savedOutfits?.length || 0}
+              <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {savedOutfits?.length || 0}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Outfits Saved
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Outfits Saved
-              </p>
-            </div>
-            <div className="text-center space-y-2 pb-0 last:border-0">
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {Object.keys(weeklyPlan || {}).length}
+              <div className="text-center space-y-2 pb-0 last:border-0">
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {Object.keys(weeklyPlan || {}).length}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Days Planned
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Days Planned
-              </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4 text-center md:text-left flex-col md:flex-row">
-              <div className="p-4 rounded-2xl bg-neutral-50" style={{ color: colors.accent }}>
-                <Calendar size={24} />
-              </div>
-              <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-neutral-400 block mb-0.5">
-                  Today's Schedule ({todayName})
-                </span>
-                <h3 className="text-lg font-medium text-neutral-800">
-                  {todayOutfit ? `Ready to wear: ${todayOutfit.name || 'Your Curated Look'}` : "No look scheduled for today yet."}
-                </h3>
-              </div>
+        </section>
+      ) : (
+        <section className="px-6 md:px-12 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-3xl border p-8 md:p-10 text-center space-y-4 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.01)]" style={{ borderColor: colors.border }}>
+              <Sparkles size={28} style={{ color: colors.accent }} className="mx-auto" />
+              <h2
+                className="text-2xl md:text-3xl font-light"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Welcome to Your Curation Vault
+              </h2>
+              <p className="text-sm font-light text-neutral-400 max-w-md mx-auto leading-relaxed">
+                Start by adding pieces to your wardrobe. Your stats, outfits, and weekly plan will appear here once you do.
+              </p>
+              <button
+                onClick={() => navigateTo('wardrobe')}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-md active:scale-[0.98]"
+                style={{ backgroundColor: colors.accent, color: 'white' }}
+              >
+                ADD YOUR FIRST PIECE <ChevronRight size={12} />
+              </button>
             </div>
-            <button 
-              onClick={() => navigateTo('planner')}
-              className="text-xs font-semibold tracking-wider uppercase border px-5 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-              style={{ borderColor: colors.border, color: colors.heading }}
-            >
-              {todayOutfit ? 'Open Planner' : 'Schedule Now'} <ChevronRight size={12} />
-            </button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
+      {/* Today's Schedule — only shown when user has data */}
+      {!isGuest && (
+        <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4 text-center md:text-left flex-col md:flex-row">
+                <div className="p-4 rounded-2xl bg-neutral-50" style={{ color: colors.accent }}>
+                  <Calendar size={24} />
+                </div>
+                <div>
+                  <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-neutral-400 block mb-0.5">
+                    Today's Schedule ({todayName})
+                  </span>
+                  <h3 className="text-lg font-medium text-neutral-800">
+                    {todayOutfit ? `Ready to wear: ${todayOutfit.name || 'Your Curated Look'}` : "No look scheduled for today yet."}
+                  </h3>
+                </div>
+              </div>
+              <button 
+                onClick={() => navigateTo('planner')}
+                className="text-xs font-semibold tracking-wider uppercase border px-5 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                style={{ borderColor: colors.border, color: colors.heading }}
+              >
+                {todayOutfit ? 'Open Planner' : 'Schedule Now'} <ChevronRight size={12} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Mix & Match */}
       <section className="px-6 md:px-12 py-16 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -213,6 +244,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
+      {/* Feature cards */}
       <section className="px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -243,6 +275,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
+      {/* How-To */}
       <section className="py-20 px-6 md:px-12" style={{ backgroundColor: colors.surface }}>
         <div className="text-center mb-16 space-y-2">
           <h2 
