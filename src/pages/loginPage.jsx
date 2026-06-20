@@ -50,7 +50,7 @@ export default function LoginPage({ onLogin }) {
             <img
               src={logo}
               alt="Closetry Logo"
-              className="h-24 w-auto object-contain transition-transform duration-500 hover:scale-105"
+              className="h-24 w-auto object-contain transition-transform duration-500"
             />
           </div>
           <p className="text-sm tracking-[0.2em] uppercase" style={{ color: colors.body, fontFamily: 'DM Sans, sans-serif' }}>

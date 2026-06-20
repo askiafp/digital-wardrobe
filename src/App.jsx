@@ -261,7 +261,7 @@ export default function App() {
       style={{ backgroundColor: colors.accent }}
     >
       <p className="text-[11px] tracking-[0.15em] uppercase font-medium text-white/90">
-        You're browsing as guest — some features are unavailable
+        You're browsing as a guest. Sign in to unlock all features.
       </p>
       <button
         onClick={handleLogout}

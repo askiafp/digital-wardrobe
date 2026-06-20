@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { colors } from '../constants';
 import { useTranslation } from 'react-i18next';
-import { Camera, Shirt, Calendar, Sparkles, User, Mail, Settings, ShieldAlert, LogOut, X } from 'lucide-react';
+import { Camera, Shirt, Calendar, Sparkles, User, Mail, Settings, ShieldAlert, LogOut, ArrowLeft, UserCheck } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,12 +13,23 @@ import {
 const getStorageKey = (user) =>
   `curation_vault_profile_${user?.id || user?.email || 'guest'}`;
 
+const getPhotoKey = (user) =>
+  `curation_vault_photo_${user?.id || user?.email || 'guest'}`;
+
 const loadProfile = (user) => {
   try {
     const saved = localStorage.getItem(getStorageKey(user));
     if (saved) return JSON.parse(saved);
   } catch (_) {}
   return null;
+};
+
+const loadPhoto = (user) => {
+  try {
+    return localStorage.getItem(getPhotoKey(user)) || null;
+  } catch (_) {
+    return null;
+  }
 };
 
 const defaultForm = (user, saved) => ({
@@ -29,16 +40,19 @@ const defaultForm = (user, saved) => ({
 
 export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = [], days = [], weeklyPlan = {}, onLogout }) {
   const { t } = useTranslation();
-  const [isEditing, setIsEditing] = useState(false); 
+  const [isEditingPage, setIsEditingPage] = useState(false); 
+  const [profilePhoto, setProfilePhoto] = useState(() => loadPhoto(currentUser));
   const [formData, setFormData] = useState(() => {
     const saved = loadProfile(currentUser);
     return defaultForm(currentUser, saved);
   });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const saved = loadProfile(currentUser);
     setFormData(defaultForm(currentUser, saved));
-    setIsEditing(false);
+    setProfilePhoto(loadPhoto(currentUser));
+    setIsEditingPage(false);
   }, [currentUser?.id, currentUser?.email]);
 
   const handleChange = (e) => {
@@ -56,7 +70,27 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
       }));
     } catch (_) {}
     setCurrentUser({ ...currentUser, name: formData.name, email: formData.email, gender: formData.gender });
-    setIsEditing(false);
+    setIsEditingPage(false); 
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran foto maksimal 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      setProfilePhoto(dataUrl);
+      try {
+        localStorage.setItem(getPhotoKey(currentUser), dataUrl);
+      } catch (_) {}
+    };
+    reader.readAsDataURL(file);
   };
 
   const plannedDaysCount = days.filter(day => weeklyPlan && weeklyPlan[day.toLowerCase()]?.items?.length > 0).length;
@@ -73,9 +107,151 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
     { value: 'other', label: 'Other' },
   ];
 
+  if (isEditingPage) {
+    return (
+      <div style={{ backgroundColor: colors.background }} className="min-h-screen pt-6 pb-24 px-4 font-sans antialiased text-gray-800 animate-in fade-in duration-300">
+        <div className="max-w-xl mx-auto w-full bg-white rounded-2xl p-6 md:p-8 border shadow-sm" style={{ borderColor: colors.border }}>
+          
+          <div className="flex items-center gap-4 pb-4 border-b mb-6" style={{ borderColor: colors.border }}>
+            <button 
+              onClick={() => setIsEditingPage(false)}
+              className="p-2 -ml-2 rounded-full hover:bg-neutral-100 transition-colors text-neutral-500"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <h2 className="text-lg font-medium tracking-tight text-neutral-800" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                Edit Profile Workspace
+              </h2>
+              <p className="text-xs text-neutral-400 font-light">Update your profile</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="flex flex-row items-center gap-5 bg-neutral-50/50 p-4 rounded-xl border border-dashed border-neutral-200">
+              <div
+                className="w-16 h-16 rounded-full border flex items-center justify-center overflow-hidden flex-shrink-0 bg-white aspect-square"
+                style={{ borderColor: colors.border }}
+              >
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover object-center aspect-square flex-shrink-0" />
+                ) : (
+                  <span className="text-2xl font-light text-neutral-400 font-serif">
+                    {formData.name ? formData.name.charAt(0).toUpperCase() : 'C'}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg border bg-white transition-all hover:bg-neutral-50 active:scale-95 shadow-sm"
+                    style={{ borderColor: colors.border, color: colors.heading }}
+                  >
+                    Upload Photo
+                  </button>
+                  {profilePhoto && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfilePhoto(null);
+                        try { localStorage.removeItem(getPhotoKey(currentUser)); } catch (_) {}
+                      }}
+                      className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors px-2 py-1.5"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-neutral-400 mt-1.5">Max 5MB · JPG, PNG, WebP</p>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-neutral-600 block ml-0.5">Full Name</label>
+              <div className="relative flex items-center">
+                <User size={16} className="absolute left-4 text-neutral-400 pointer-events-none" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your full name"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border text-sm font-light bg-neutral-50/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
+                  style={{ borderColor: colors.border, color: colors.heading }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-neutral-600 block ml-0.5">Email Address</label>
+              <div className="relative flex items-center">
+                <Mail size={16} className="absolute left-4 text-neutral-400 pointer-events-none" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your.email@example.com"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border text-sm font-light bg-neutral-50/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
+                  style={{ borderColor: colors.border, color: colors.heading }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-neutral-600 block ml-0.5">Gender</label>
+              <div className="relative flex items-center">
+                <UserCheck size={16} className="absolute left-4 text-neutral-400 pointer-events-none z-10" />
+                <Select
+                  value={formData.gender || undefined}
+                  onValueChange={(value) => handleChange({ target: { name: 'gender', value } })}
+                >
+                  <SelectTrigger
+                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border text-sm font-light bg-neutral-50/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all text-left"
+                    style={{ borderColor: colors.border, color: formData.gender ? colors.heading : '#a3a3a3' }}
+                  >
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {genderOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t" style={{ borderColor: colors.border }}>
+              <button
+                type="button"
+                onClick={() => setIsEditingPage(false)}
+                className="flex-1 py-2.5 text-sm font-medium border rounded-xl transition-all hover:bg-neutral-50 active:scale-[0.99]"
+                style={{ borderColor: colors.border, color: colors.heading }}
+              >
+                CANCEL
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2.5 text-sm font-medium rounded-xl transition-all shadow-sm hover:brightness-105 active:scale-[0.99] text-white"
+                style={{ backgroundColor: colors.accent }}
+              >
+                SAVE CHANGES
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ backgroundColor: colors.background }} className="min-h-screen pb-24 sm:pb-32 font-sans antialiased text-gray-800 relative">
-      {/* Banner */}
+    <div style={{ backgroundColor: colors.background }} className="min-h-screen pb-24 sm:pb-32 font-sans antialiased text-gray-800 relative animate-in fade-in duration-300">
       <div
         className="h-40 sm:h-56 md:h-80 w-full bg-cover bg-center relative"
         style={{
@@ -86,24 +262,29 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
         <div className="absolute inset-0 backdrop-blur-[0.5px]" />
       </div>
 
-      {/* Main Content */}
       <div className="px-4 sm:px-6 md:px-12 -mt-16 sm:-mt-20 md:-mt-24 relative z-10">
         <div className="max-w-2xl mx-auto w-full space-y-6 sm:space-y-8">
 
-          {/* Profile Header Card */}
           <div className="bg-white/85 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-white/60 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
               <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-                {/* Profile Pic */}
-                <div
-                  className="w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-full border-4 shadow-sm flex items-center justify-center relative group overflow-hidden flex-shrink-0 transition-transform duration-500 hover:scale-105 bg-white"
-                  style={{ borderColor: colors.background }}
-                >
-                  <span className="text-2xl sm:text-2xl md:text-3xl font-light text-neutral-400 font-serif tracking-tighter">
-                    {formData.name ? formData.name.charAt(0).toUpperCase() : 'C'}
-                  </span>
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer duration-300">
-                    <Camera size={14} className="text-white" />
+
+                <div className="relative flex-shrink-0 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24">
+                  <div
+                    className="w-full h-full rounded-full border-4 shadow-sm flex items-center justify-center overflow-hidden aspect-square bg-white"
+                    style={{ borderColor: colors.background }}
+                  >
+                    {profilePhoto ? (
+                      <img
+                        src={profilePhoto}
+                        alt="Profile"
+                        className="w-full h-full object-cover object-center aspect-square flex-shrink-0"
+                      />
+                    ) : (
+                      <span className="text-2xl sm:text-2xl md:text-3xl font-light text-neutral-400 font-serif tracking-tighter">
+                        {formData.name ? formData.name.charAt(0).toUpperCase() : 'C'}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -129,7 +310,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
               </div>
 
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={() => setIsEditingPage(true)} 
                 className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] tracking-[0.2em] font-medium transition-all duration-300 uppercase border shadow-sm active:scale-95 whitespace-nowrap flex-shrink-0"
                 style={{
                   backgroundColor: colors.accent,
@@ -142,7 +323,6 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
             </div>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[
               { icon: <Shirt size={14} />, count: wardrobe?.length || 0, label: 'Pieces Cataloged', isAccent: true },
@@ -166,103 +346,6 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
             ))}
           </div>
 
-          {isEditing && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div 
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-                onClick={() => setIsEditing(false)} 
-              />
-              
-              {/* Modal Box */}
-              <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border animate-in fade-in zoom-in-95 duration-200 z-10" style={{ borderColor: colors.border }}>
-                
-                {/* Close Button X */}
-                <button 
-                  onClick={() => setIsEditing(false)} 
-                  className="absolute right-4 top-4 p-1 rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-
-                <form onSubmit={handleSave} className="space-y-5">
-                  <div className="flex items-center gap-2 pb-3 border-b" style={{ borderColor: colors.border }}>
-                    <Settings size={13} className="text-neutral-400 flex-shrink-0" />
-                    <h3 className="text-[8px] sm:text-[9px] tracking-[0.2em] uppercase font-bold text-neutral-400">Credentials Setup</h3>
-                  </div>
-
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <label className="text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-semibold text-neutral-400 block ml-0.5">Full Name</label>
-                    <div className="relative flex items-center">
-                      <User size={14} className="absolute left-4 text-neutral-400 flex-shrink-0 pointer-events-none" />
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter your full name"
-                        className="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-sm font-light bg-neutral-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
-                        style={{ borderColor: colors.border, color: colors.heading }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <label className="text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-semibold text-neutral-400 block ml-0.5">Email Address</label>
-                    <div className="relative flex items-center">
-                      <Mail size={14} className="absolute left-4 text-neutral-400 flex-shrink-0 pointer-events-none" />
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="your.email@example.com"
-                        className="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-sm font-light bg-neutral-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all"
-                        style={{ borderColor: colors.border, color: colors.heading }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Gender */}
-                  <div className="space-y-2">
-                    <label className="text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-semibold text-neutral-400 block ml-0.5">Gender</label>
-                    <div className="relative flex items-center">
-                      <User size={14} className="absolute left-4 text-neutral-400 flex-shrink-0 pointer-events-none z-10" />
-                      <Select
-                        value={formData.gender || undefined}
-                        onValueChange={(value) => handleChange({ target: { name: 'gender', value } })}
-                      >
-                        <SelectTrigger
-                          className="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-sm font-light bg-neutral-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all text-left"
-                          style={{ borderColor: colors.border, color: formData.gender ? colors.heading : '#a3a3a3' }}
-                        >
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {genderOptions.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 sm:py-3 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] rounded-lg sm:rounded-xl transition-all shadow-sm hover:brightness-105 active:scale-[0.99] mt-3"
-                    style={{ backgroundColor: colors.accent, color: 'white' }}
-                  >
-                    COMMIT CHANGES
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Preferences */}
           <div className="rounded-2xl p-4 sm:p-6 md:p-7 border bg-white shadow-[0_4px_20px_rgba(0,0,0,0.01)]" style={{ borderColor: colors.border }}>
             <h3 className="text-base sm:text-lg font-medium mb-4 tracking-tight" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
               Curation Workspace Preferences
@@ -285,7 +368,6 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
             </div>
           </div>
 
-          {/* Danger Zone */}
           <div className="rounded-2xl p-4 sm:p-6 md:p-7 border bg-red-50/10 border-red-100 shadow-sm">
             <div className="flex items-center gap-2 mb-3 sm:mb-4 text-red-800">
               <ShieldAlert size={14} className="flex-shrink-0" />

@@ -126,31 +126,30 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
   return (
     <>
       <div
-        className="sticky top-0 z-40 transition-all duration-500 w-full"
-        style={{
-          padding: scrolled ? '10px 16px' : (window.innerWidth < 768 ? '0px 16px' : '0'),
-          backgroundColor: 'transparent',
-        }}
+        className={cn(
+          "sticky top-0 z-40 w-full transition-all duration-500 ease-in-out",
+          scrolled ? "p-2 sm:p-3 md:p-4" : "p-0"
+        )}
       >
         <div
-          className="max-w-7xl mx-auto transition-all duration-500"
-          style={{
-            backgroundColor: scrolled ? 'rgba(255,255,255,0.72)' : colors.background,
-            backdropFilter: scrolled ? 'blur(18px) saturate(1.4)' : 'none',
-            borderRadius: scrolled ? '9999px' : '0',
-            border: scrolled ? `1px solid rgba(255,255,255,0.55)` : `0px solid transparent`,
-            borderBottom: scrolled ? `1px solid rgba(255,255,255,0.55)` : `1px solid ${colors.border}`,
-            boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' : 'none',
-            padding: scrolled ? '10px 24px' : '6px 24px',
+          className={cn(
+            "max-w-7xl mx-auto w-full transition-all duration-500 ease-in-out",
+            scrolled 
+              ? "bg-white/75 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.02)] rounded-full px-6 py-2.5" 
+              : "bg-transparent border-b px-6 py-2.5"
+          )}
+          style={{ 
+            borderColor: scrolled ? 'rgba(255,255,255,0.4)' : colors.border,
+            backgroundColor: scrolled ? undefined : colors.background 
           }}
         >
           <div className="flex justify-between items-center">
             <img
               src={logo}
               alt="Closetry Logo"
-              className="w-auto object-contain transition-all duration-500 hover:scale-105 flex-shrink-0"
+              className="w-auto object-contain transition-all duration-500 ease-in-out hover:scale-105 flex-shrink-0"
               style={{ 
-                height: window.innerWidth < 640 ? (scrolled ? 36 : 48) : (scrolled ? 44 : 64)
+                height: window.innerWidth < 640 ? (scrolled ? 32 : 44) : (scrolled ? 40 : 56)
               }}
             />
 
@@ -160,7 +159,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className="text-sm font-light tracking-wider transition-colors duration-200"
+                    className="text-sm font-light tracking-wider transition-colors duration-300 ease-in-out"
                     style={{
                       color: currentPage === item.id ? colors.accent : colors.body,
                       fontFamily: 'DM Sans, sans-serif',
@@ -171,16 +170,15 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
                 ))}
               </nav>
 
-              <div className="flex items-center gap-6 pl-8 border-l" style={{ borderColor: colors.border }}>
+              <div className="flex items-center gap-6 pl-8 border-l transition-colors duration-500" style={{ borderColor: colors.border }}>
                 <LanguageSelect mobile={false} />
 
                 <button
                   onClick={() => handleNavClick('profile')}
-                  className="px-4 py-2 rounded-full text-sm font-light tracking-wider transition-all duration-150"
+                  className="px-4 py-2 rounded-full text-sm font-light tracking-wider transition-all duration-300 ease-in-out"
                   style={{
                     backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
                     color: currentPage === 'profile' ? 'white' : colors.heading,
-                    borderRadius: scrolled ? '9999px' : undefined,
                   }}
                 >
                   {displayName}
@@ -195,7 +193,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 style={{ color: colors.heading }}
-                className="p-1 active:scale-95 transition-transform"
+                className="p-1 active:scale-95 transition-transform duration-200"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -206,14 +204,14 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
         {isMobileMenuOpen && (
           <div 
-            className="absolute left-4 right-4 mt-2 p-4 rounded-2xl shadow-xl flex flex-col gap-2 border md:hidden animate-in fade-in slide-in-from-top-2 duration-200"
+            className="absolute left-4 right-4 mt-2 p-4 rounded-2xl shadow-xl flex flex-col gap-2 border md:hidden animate-in fade-in slide-in-from-top-2 duration-300"
             style={{ backgroundColor: '#FAFAF8', borderColor: colors.border }}
           >
             {navItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-150"
+                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
                 style={{
                   backgroundColor: currentPage === item.id ? colors.accent : colors.surfaceAlt,
                   color: currentPage === item.id ? 'white' : colors.heading,
@@ -227,7 +225,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
             <button
               onClick={() => handleNavClick('profile')}
-              className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-150"
+              className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
               style={{
                 backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
                 color: currentPage === 'profile' ? 'white' : colors.heading,
@@ -236,7 +234,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
               {displayName}
             </button>
 
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-xl border mt-1" style={{ borderColor: colors.border }}>
+            <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border mt-1 rounded-xl" style={{ borderColor: colors.border }}>
               <span className="text-xs font-light text-gray-400 uppercase tracking-wider">Language</span>
               <LanguageSelect mobile={true} />
             </div>
