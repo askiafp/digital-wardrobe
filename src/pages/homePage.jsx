@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sun, CloudRain, Cloud, Snowflake } from 'lucide-react';
 import { colors } from '../constants';
 
 const heroImages = [
@@ -10,12 +10,31 @@ const heroImages = [
   '/images/wardrobe.jpg',
 ];
 
+// Dummy data cuaca — nanti bisa diganti API asli
+const weatherDummy = {
+  condition: 'Sunny', // 'Sunny' | 'Rainy' | 'Cloudy' | 'Snowy'
+  temp: 22,
+  day: 'Sunday',
+  time: '9 am',
+};
+
+const weatherConfig = {
+  Sunny: { icon: Sun, label: 'Sunny', bg: '/images/weather-sunny.jpg' },
+  Rainy: { icon: CloudRain, label: 'Rainy', bg: '/images/weather-rainy.jpg' },
+  Cloudy: { icon: Cloud, label: 'Cloudy', bg: '/images/weather-cloudy.jpg' },
+  Snowy: { icon: Snowflake, label: 'Snowy', bg: '/images/weather-snowy.jpg' },
+};
+
 export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateTo }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isBlurring, setIsBlurring] = useState(false);
   const [bgOpacity, setBgOpacity] = useState(1);
   const heroRef = useRef(null);
+
+  const [weather] = useState(weatherDummy);
+  const weatherInfo = weatherConfig[weather.condition];
+  const WeatherIcon = weatherInfo.icon;
 
   // Auto slide every 4 seconds
   useEffect(() => {
@@ -287,6 +306,47 @@ export default function HomePage({ wardrobe, savedOutfits, weeklyPlan, navigateT
 
         </div>
       </section>
+
+      {/* ── Weather Widget (Fixed, nempel pojok kanan bawah) ── */}
+      <button
+        onClick={() => navigateTo('styling')}
+        className="fixed bottom-6 right-6 z-50 flex rounded-3xl overflow-hidden shadow-2xl transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+        style={{ width: '320px', height: '150px' }}
+      >
+        {/* Background image kiri */}
+        <div
+          className="w-1/2 h-full bg-cover bg-center"
+          style={{ backgroundImage: `url(${weatherInfo.bg})` }}
+        />
+
+        {/* Info kanan */}
+        <div
+          className="w-1/2 h-full flex flex-col justify-center px-4 text-left backdrop-blur-md"
+          style={{ backgroundColor: 'rgba(255,255,255,0.55)' }}
+        >
+          <h4 className="text-sm font-bold leading-tight" style={{ color: colors.heading }}>
+            Recommended
+          </h4>
+          <p className="text-xs mb-2" style={{ color: colors.body }}>
+            clothes for today
+          </p>
+          <p className="text-xs mb-2" style={{ color: colors.body }}>
+            {weather.day}, {weather.time}
+          </p>
+
+          <div className="flex items-center gap-2 bg-white/70 rounded-full px-3 py-1.5 w-fit">
+            <WeatherIcon size={18} style={{ color: colors.accent }} />
+            <div>
+              <p className="text-[10px] leading-none" style={{ color: colors.muted }}>
+                {weatherInfo.label}
+              </p>
+              <p className="text-sm font-bold leading-none" style={{ color: colors.heading }}>
+                {weather.temp}°C
+              </p>
+            </div>
+          </div>
+        </div>
+      </button>
 
     </div>
   );
