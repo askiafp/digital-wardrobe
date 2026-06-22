@@ -463,7 +463,8 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const [currentStepIdx, setCurrentStepIdx]       = useState(0);
   const [skippedCategories, setSkippedCategories] = useState({});
   const [carouselIndices, setCarouselIndices]      = useState({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
-  const [selectedDay, setSelectedDay]              = useState('Monday');
+  const [selectedDay, setSelectedDay] = useState(() => { const s = localStorage.getItem('plannerTargetDay'); return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Monday'; });
+  const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || 'Morning');
   const [modalConfig, setModalConfig]              = useState({ isOpen:false, type:'success', message:'' });
   
   const [undertone, setUndertone]                  = useState(() => {
@@ -607,7 +608,8 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     const newOutfitObj = { id: outfitId, items: [...selectedOutfit] };
     setSavedOutfits([...savedOutfits, newOutfitObj]);
     if (typeof setWeeklyPlan === 'function') {
-      setWeeklyPlan(prevPlan => ({ ...prevPlan, [selectedDay.toLowerCase()]: newOutfitObj }));
+      const dayKey = selectedDay.toLowerCase();
+      setWeeklyPlan(prevPlan => { const existing = prevPlan[dayKey] || {}; return { ...prevPlan, [dayKey]: { ...existing, slots: { ...(existing.slots || {}), [selectedSlot]: { items: [...selectedOutfit] } } } }; });
     }
     setModalConfig({ isOpen:true, type:'success', message:`Outfit successfully saved to ${selectedDay}!` });
     setTimeout(() => {
@@ -906,6 +908,14 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                         </SelectTrigger>
                         <SelectContent className="bg-white border rounded-xl shadow-lg">
                           {daysOfWeek.map(day => <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light">{day}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={selectedSlot} onValueChange={setSelectedSlot}>
+                        <SelectTrigger className="w-full bg-gray-50 rounded-xl border text-black" style={{ borderColor: colors.border, height: 44 }}>
+                          <SelectValue placeholder="Select time slot" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border rounded-xl shadow-lg">
+                          {['Morning','Afternoon','Evening','Night'].map(slot => <SelectItem key={slot} value={slot} className="cursor-pointer text-sm font-light">{slot}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>

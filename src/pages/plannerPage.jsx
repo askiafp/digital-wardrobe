@@ -1,57 +1,91 @@
-import React from 'react';
-import { Trash2, CalendarDays } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, CalendarDays, Plus, X } from 'lucide-react';
 import { days, colors } from '../constants';
 
-export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
-  
-  React.useEffect(() => {
-    console.log("=== PLANNER PAGE LOADED ===");
-    console.log("📥 weeklyPlan received:", weeklyPlan);
-    console.log("📥 Type of weeklyPlan:", typeof weeklyPlan);
-    
-    if (weeklyPlan && typeof weeklyPlan === 'object') {
-      const allKeys = Object.keys(weeklyPlan);
-      console.log("📥 All keys in weeklyPlan:", allKeys);
-      
-      allKeys.forEach(key => {
-        console.log(`  Key "${key}": `, weeklyPlan[key]);
-      });
-    }
+const TIME_SLOTS = ['Morning', 'Afternoon', 'Evening', 'Night'];
 
-    console.log("\n🗓️ Checking each day:");
-    days.forEach(day => {
-      const dayKey = day.toLowerCase();
-      const hasData = weeklyPlan && weeklyPlan[dayKey];
-      console.log(`  ${day} (${dayKey}): ${hasData ? '✅ HAS DATA' : '❌ NO DATA'}`);
-    });
-  }, [weeklyPlan]);
+export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';
   };
 
-  const clearDayPlan = (day) => {
-    const dayKey = day.toLowerCase();
-    console.log("🗑️ Clearing plan for:", dayKey);
-    
-    setWeeklyPlan(prevPlan => {
-      const updatedPlan = { ...prevPlan };
-      delete updatedPlan[dayKey];
-      console.log("🗑️ Updated plan:", updatedPlan);
-      return updatedPlan;
+  const getSlotOutfits = (dayKey) => {
+    const dayData = weeklyPlan?.[dayKey];
+    if (!dayData) return {};
+    if (dayData.slots) return dayData.slots;
+    if (dayData.items?.length > 0) return { Morning: { items: dayData.items } };
+    return {};
+  };
+
+  const getTotalItems = (dayKey) => {
+    const slots = getSlotOutfits(dayKey);
+    return Object.values(slots).reduce((sum, slot) => sum + (slot?.items?.length || 0), 0);
+  };
+
+  const clearSlot = (dayKey, slot) => {
+    setWeeklyPlan(prev => {
+      const updated = { ...prev };
+      const slots = { ...(updated[dayKey]?.slots || {}) };
+      delete slots[slot];
+      if (Object.keys(slots).length === 0) {
+        delete updated[dayKey];
+      } else {
+        updated[dayKey] = { ...updated[dayKey], slots };
+      }
+      return updated;
     });
   };
+
+  const clearDayPlan = (dayKey) => {
+    setWeeklyPlan(prev => {
+      const updated = { ...prev };
+      delete updated[dayKey];
+      return updated;
+    });
+  };
+
+  const setSlotMood = (dayKey, slot, mood) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      [dayKey]: {
+        ...prev[dayKey],
+        slots: {
+          ...(prev[dayKey]?.slots || {}),
+          [slot]: { ...(prev[dayKey]?.slots?.[slot] || { items: [] }), mood }
+        }
+      }
+    }));
+  };
+
+  const setSlotWeather = (dayKey, slot, weather) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      [dayKey]: {
+        ...prev[dayKey],
+        slots: {
+          ...(prev[dayKey]?.slots || {}),
+          [slot]: { ...(prev[dayKey]?.slots?.[slot] || { items: [] }), weather }
+        }
+      }
+    }));
+  };
+
+  const handlePlanOutfit = (dayKey, slot) => {
+    localStorage.setItem('plannerTargetDay', dayKey);
+    localStorage.setItem('plannerTargetSlot', slot);
+    navigateTo('styling');
+  };
+
+  const totalDaysPlanned = days.filter(day => getTotalItems(day.toLowerCase()) > 0).length;
 
   return (
     <div className="min-h-screen py-6 md:py-12" style={{ backgroundColor: colors.background }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header Title */}
+
         <div className="mb-8 md:mb-12">
-          <h1
-            className="text-3xl md:text-5xl font-light mb-2"
-            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
-          >
+          <h1 className="text-3xl md:text-5xl font-light mb-2"
+            style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
             Weekly Planner
           </h1>
           <p className="text-xs md:text-sm" style={{ color: colors.muted }}>
@@ -61,154 +95,143 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
             "Getting dressed is a form of self-expression. Plan it with intention."
           </p>
         </div>
-        {/* Summary Bar */}
-        <div
-          className="mb-8 p-4 rounded-2xl flex items-center justify-between"
-          style={{ backgroundColor: colors.surface }}
-        >
-          <p className="text-sm font-light" style={{ color: colors.heading }}>
-            Weekly Planning Progress
-          </p>
-          <p className="text-sm" style={{ color: colors.accent }}>
-            {days.filter(day => weeklyPlan && weeklyPlan[day.toLowerCase()]?.items?.length > 0).length} of 7 days planned
-          </p>
+
+        <div className="mb-8 p-4 rounded-2xl flex items-center justify-between"
+          style={{ backgroundColor: colors.surface }}>
+          <p className="text-sm font-light" style={{ color: colors.heading }}>Weekly Planning Progress</p>
+          <p className="text-sm" style={{ color: colors.accent }}>{totalDaysPlanned} of 7 days planned</p>
         </div>
 
-        {/* Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {days.map(day => {
             const dayKey = day.toLowerCase();
-            
-            const dayData = weeklyPlan ? weeklyPlan[dayKey] : null;
-            const outfitItems = dayData?.items || [];
+            const slots = getSlotOutfits(dayKey);
+            const totalItems = getTotalItems(dayKey);
+            const hasOutfit = totalItems > 0;
 
             return (
-              <div
-                key={day}
-                className="rounded-2xl p-5 md:p-6 min-h-[320px] flex flex-col justify-between transition-all duration-300 bg-white border shadow-sm"
+              <div key={day}
+                className="rounded-2xl p-5 md:p-6 flex flex-col gap-3 transition-all duration-300 border shadow-sm"
                 style={{
-                  backgroundColor: outfitItems.length > 0 ? colors.surface : 'white',
-                  borderStyle: outfitItems.length > 0 ? 'solid' : 'dashed',
-                  borderColor: outfitItems.length > 0 ? colors.border : '#E5E7EB',
-                }}
-              >
-                {/* Day Header */}
+                  backgroundColor: hasOutfit ? colors.surface : 'white',
+                  borderStyle: hasOutfit ? 'solid' : 'dashed',
+                  borderColor: hasOutfit ? colors.border : '#E5E7EB',
+                }}>
+
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-light text-sm tracking-wider uppercase" style={{ color: colors.heading }}>
-                      {day}
-                    </h3>
+                    <h3 className="font-light text-sm tracking-wider uppercase" style={{ color: colors.heading }}>{day}</h3>
                     <p className="text-[10px]" style={{ color: colors.muted }}>
-                      {outfitItems.length > 0 ? `${outfitItems.length} item${outfitItems.length > 1 ? 's' : ''} planned` : 'No outfit yet'}
+                      {hasOutfit ? `${totalItems} item${totalItems > 1 ? 's' : ''} planned` : 'No outfit yet'}
                     </p>
                   </div>
-                  
-                  {/* Delete Button - Only show if outfit exists */}
-                  {outfitItems.length > 0 && (
-                    <button
-                      onClick={() => clearDayPlan(day)}
-                      className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-50 transition-all"
-                      title="Clear this day's outfit"
-                    >
+                  {hasOutfit && (
+                    <button onClick={() => clearDayPlan(dayKey)}
+                      className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-50 transition-all">
                       <Trash2 size={14} />
                     </button>
                   )}
                 </div>
-                {/* Mood Picker */}
-                <div className="flex gap-1 mt-3 flex-wrap">
-                  {['Casual', 'Formal', 'Sporty', 'Comfy'].map(mood => (
-                    <button
-                      key={mood}
-                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
-                      style={{
-                        backgroundColor: dayData?.mood === mood ? colors.accent : 'transparent',
-                        color: dayData?.mood === mood ? 'white' : colors.muted,
-                        borderColor: dayData?.mood === mood ? colors.accent : colors.border,
-                      }}
-                      onClick={() => setWeeklyPlan(prev => ({
-                        ...prev,
-                        [dayKey]: { ...prev[dayKey], mood }
-                      }))}
-                    >
-                      {mood}
-                    </button>
-                  ))}
-                </div>
-                {/* Weather Tag */}
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {['Sunny', 'Rainy', 'Cold', 'Cloudy'].map(weather => (
-                    <button
-                      key={weather}
-                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
-                      style={{
-                        backgroundColor: dayData?.weather === weather ? colors.accent : 'transparent',
-                        color: dayData?.weather === weather ? 'white' : colors.muted,
-                        borderColor: dayData?.weather === weather ? colors.accent : colors.border,
-                      }}
-                      onClick={() => setWeeklyPlan(prev => ({
-                        ...prev,
-                        [dayKey]: { ...prev[dayKey], weather }
-                      }))}
-                    >
-                      {weather}
-                    </button>
-                  ))}
-                </div>
 
-                {/* Outfit Items List */}
-                {outfitItems.length > 0 ? (
-                  <div className="space-y-2 my-5 max-h-48 overflow-y-auto pr-1">
-                    {outfitItems.map(item => (
-                      <div
-                        key={item.id}
-                        className="p-2 rounded-xl text-xs font-light flex items-center gap-2.5 border border-gray-100"
-                        style={{ backgroundColor: colors.background }}
-                      >
-                        {/* Item Image Thumbnail */}
-                        <div
-                          className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden bg-white border border-gray-50 p-1"
-                        >
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-contain"
-                            onError={handleImageError}
-                          />
+                <div className="flex flex-col gap-2">
+                  {TIME_SLOTS.map(slot => {
+                    const slotData = slots[slot];
+                    const slotItems = slotData?.items || [];
+                    const hasSlotItems = slotItems.length > 0;
+
+                    return (
+                      <div key={slot} className="rounded-xl border p-3"
+                        style={{
+                          borderColor: hasSlotItems ? colors.border : '#E5E7EB',
+                          borderStyle: hasSlotItems ? 'solid' : 'dashed',
+                          backgroundColor: hasSlotItems ? colors.background : 'transparent',
+                        }}>
+
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: colors.accent }}>
+                            {slot}
+                          </p>
+                          {hasSlotItems && (
+                            <button onClick={() => clearSlot(dayKey, slot)}
+                              className="text-gray-300 hover:text-red-400 transition-all">
+                              <X size={12} />
+                            </button>
+                          )}
                         </div>
 
-                        {/* Item Info */}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-normal text-gray-800">{item.name}</p>
-                          <p className="text-[9px] uppercase tracking-wider text-gray-400">{item.category}</p>
-                        </div>
+                        {hasSlotItems && (
+                          <>
+                            <div className="space-y-1 mb-2 max-h-28 overflow-y-auto">
+                              {slotItems.map(item => (
+                                <div key={item.id}
+                                  className="flex items-center gap-2 p-1.5 rounded-lg border border-gray-100"
+                                  style={{ backgroundColor: 'white' }}>
+                                  <div className="w-7 h-7 rounded-md flex-shrink-0 overflow-hidden bg-white border border-gray-50 p-0.5">
+                                    <img src={item.image} alt={item.name}
+                                      className="w-full h-full object-contain" onError={handleImageError} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[10px] font-normal text-gray-800">{item.name}</p>
+                                    <p className="text-[9px] uppercase tracking-wider text-gray-400">{item.category}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-1 flex-wrap mb-1">
+                              {['Casual', 'Formal', 'Sporty', 'Comfy'].map(mood => (
+                                <button key={mood}
+                                  className="text-[8px] px-1.5 py-0.5 rounded-full border transition-all"
+                                  style={{
+                                    backgroundColor: slotData?.mood === mood ? colors.accent : 'transparent',
+                                    color: slotData?.mood === mood ? 'white' : colors.muted,
+                                    borderColor: slotData?.mood === mood ? colors.accent : colors.border,
+                                  }}
+                                  onClick={() => setSlotMood(dayKey, slot, mood)}>
+                                  {mood}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex gap-1 flex-wrap">
+                              {['Sunny', 'Rainy', 'Cold', 'Cloudy'].map(weather => (
+                                <button key={weather}
+                                  className="text-[8px] px-1.5 py-0.5 rounded-full border transition-all"
+                                  style={{
+                                    backgroundColor: slotData?.weather === weather ? colors.accent : 'transparent',
+                                    color: slotData?.weather === weather ? 'white' : colors.muted,
+                                    borderColor: slotData?.weather === weather ? colors.accent : colors.border,
+                                  }}
+                                  onClick={() => setSlotWeather(dayKey, slot, weather)}>
+                                  {weather}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+
+                        {!hasSlotItems && (
+                          <button
+                            onClick={() => handlePlanOutfit(dayKey, slot)}
+                            className="w-full flex items-center justify-center gap-1 text-[9px] tracking-widest py-1.5 rounded-lg transition-all"
+                            style={{ color: colors.muted, border: `1px dashed ${colors.border}` }}>
+                            <Plus size={10} /> Add outfit
+                          </button>
+                        )}
+                        {hasSlotItems && (
+                          <button
+                            onClick={() => handlePlanOutfit(dayKey, slot)}
+                            className="w-full text-[9px] tracking-widest py-1.5 rounded-lg transition-all mt-2"
+                            style={{ backgroundColor: colors.surfaceAlt, color: colors.heading }}>
+                            Change outfit
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="my-8 text-center py-6 flex flex-col items-center justify-center space-y-2">
-                    <CalendarDays size={24} className="text-gray-300" />
-                    <p className="text-xs italic" style={{ color: colors.muted }}>
-                      No outfit planned
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Button */}
-                <button
-                  onClick={() => navigateTo('styling')}
-                  className="w-full text-center text-[11px] tracking-widest font-medium py-3 px-3 rounded-xl transition-all duration-300 shadow-sm active:scale-95"
-                  style={{
-                    backgroundColor: outfitItems.length > 0 ? colors.surfaceAlt : colors.accent,
-                    color: outfitItems.length > 0 ? colors.heading : 'white',
-                  }}
-                >
-                  {outfitItems.length > 0 ? 'CHANGE OUTFIT' : '+ PLAN OUTFIT'}
-                </button>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
         </div>
-
       </div>
     </div>
   );
