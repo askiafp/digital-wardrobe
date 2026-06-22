@@ -380,7 +380,7 @@ export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = []
               className="w-full py-2.5 sm:py-3 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] rounded-lg sm:rounded-xl transition-all duration-300 hover:brightness-110 active:scale-[0.99] shadow-sm flex items-center justify-center gap-2"
               style={{ backgroundColor: '#800020', color: 'white' }}
             >
-              <LogOut size={12} /> TERMINATE DISCOVERY SESSION
+              <LogOut size={12} /> LOGOUT
             </button>
           </div>
 

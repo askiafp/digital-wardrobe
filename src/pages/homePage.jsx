@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { ChevronRight, Calendar, Sparkles, User, Mail } from 'lucide-react';
 import { colors } from '../constants';
 
 const heroImages = [
@@ -8,7 +8,7 @@ const heroImages = [
   '/images/hero-3.jpg',
 ];
 
-export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo }) {
+export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -19,9 +19,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const todayName = daysOfWeek[new Date().getDay()];
   const todayOutfit = weeklyPlan[todayName.toLowerCase()] || null;
-
-  // Guest = no wardrobe items yet
-  const isGuest = !wardrobe || wardrobe.length === 0;
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';
@@ -61,16 +58,17 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   }, []);
 
   useEffect(() => {
-    if (wardrobe && wardrobe.length > 0) {
+    if (wardrobe && wardrobe.length > 0 && !isGuest) {
       const shuffled = [...wardrobe].sort(() => 0.5 - Math.random());
       setRandomItems(shuffled.slice(0, 3));
+    } else {
+      setRandomItems([]);
     }
-  }, [wardrobe]);
+  }, [wardrobe, isGuest]);
 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
 
-      {/* Hero */}
       <section 
         ref={heroRef} 
         className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] min-h-[400px] sm:min-h-0 overflow-hidden flex items-center justify-center"
@@ -123,7 +121,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* Stats — only shown when user has data */}
       {!isGuest ? (
         <section className="px-6 md:px-12 py-12">
           <div className="max-w-5xl mx-auto">
@@ -181,7 +178,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </section>
       )}
 
-      {/* Today's Schedule — only shown when user has data */}
       {!isGuest && (
         <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
           <div className="max-w-5xl mx-auto">
@@ -211,7 +207,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </section>
       )}
 
-      {/* Mix & Match */}
       <section className="px-6 md:px-12 py-16 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -244,7 +239,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* Feature cards */}
       <section className="px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -275,7 +269,6 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* How-To */}
       <section className="py-20 px-6 md:px-12" style={{ backgroundColor: colors.surface }}>
         <div className="text-center mb-16 space-y-2">
           <h2 
@@ -285,7 +278,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             HOW-TO
           </h2>
           <p className="text-xs md:text-sm font-light tracking-wider text-neutral-400 uppercase">
-            3 easy steps <span className="italic font-serif lowercase tracking-normal text-neutral-500">to</span> glow up your look
+            3 easy steps to glow up your look
           </p>
         </div>
 

@@ -18,6 +18,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
   const [scrolled, setScrolled] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n?.language || 'en');
   const [displayName, setDisplayName] = useState(t('nav.profile'));
+  const [headerPhoto, setHeaderPhoto] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +38,14 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
   useEffect(() => {
     if (currentUser) {
+      const photoKey = `curation_vault_photo_${currentUser?.id || currentUser?.email || 'guest'}`;
+      try {
+        const savedPhoto = localStorage.getItem(photoKey);
+        setHeaderPhoto(savedPhoto || null);
+      } catch (_) {
+        setHeaderPhoto(null);
+      }
+
       if (currentUser.name && !currentUser.name.includes('@')) {
         setDisplayName(currentUser.name);
         return;
@@ -60,9 +69,11 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
         setDisplayName(emailTarget.split('@')[0]);
         return;
       }
+    } else {
+      setHeaderPhoto(null);
     }
     setDisplayName(t('nav.profile'));
-  }, [currentUser, t]);
+  }, [currentUser, t, currentPage]);
 
   const navItems = [
     { id: 'home', label: t('nav.home') },
@@ -175,13 +186,27 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
                 <button
                   onClick={() => handleNavClick('profile')}
-                  className="px-4 py-2 rounded-full text-sm font-light tracking-wider transition-all duration-300 ease-in-out"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-light tracking-wider transition-all duration-300 ease-in-out"
                   style={{
                     backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
                     color: currentPage === 'profile' ? 'white' : colors.heading,
+                    borderRadius: scrolled ? '9999px' : undefined,
                   }}
                 >
-                  {displayName}
+                  <div className="w-6 h-6 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0 aspect-square border border-white/20 shadow-sm">
+                    {headerPhoto ? (
+                      <img 
+                        src={headerPhoto} 
+                        alt="Header Avatar" 
+                        className="w-full h-full object-cover object-center aspect-square flex-shrink-0" 
+                      />
+                    ) : (
+                      <span className="text-[9px] font-medium uppercase text-neutral-500">
+                        {displayName ? displayName.charAt(0) : 'C'}
+                      </span>
+                    )}
+                  </div>
+                  <span>{displayName}</span>
                 </button>
               </div>
             </div>
@@ -225,13 +250,26 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
             <button
               onClick={() => handleNavClick('profile')}
-              className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
+              className="flex flex-col items-center justify-center w-full gap-2 p-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
               style={{
                 backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
                 color: currentPage === 'profile' ? 'white' : colors.heading,
               }}
             >
-              {displayName}
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center aspect-square border-2 border-white shadow-md flex-shrink-0">
+                {headerPhoto ? (
+                  <img 
+                    src={headerPhoto} 
+                    alt="Header Avatar Mobile" 
+                    className="w-full h-full object-cover object-center aspect-square flex-shrink-0" 
+                  />
+                ) : (
+                  <span className="text-sm font-medium uppercase text-neutral-500">
+                    {displayName ? displayName.charAt(0) : 'C'}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs font-medium tracking-wide mt-1">{displayName}</span>
             </button>
 
             <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border mt-1 rounded-xl" style={{ borderColor: colors.border }}>

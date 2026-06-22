@@ -22,7 +22,7 @@ export default function Footer() {
         </p>
         
         <div 
-          className="pt-2 text-[10px] sm:text-[11px] tracking-[0.15em] sm:tracking-[0.2em] uppercase font-bold"
+          className="pt-2 text-[10px] sm:text-[11px] tracking-[0.15em] sm:tracking-[0.2em] uppercase"
           style={{ color: '#000000', opacity: 1 }}
         >
           © {new Date().getFullYear()} Closetry. All rights reserved.
