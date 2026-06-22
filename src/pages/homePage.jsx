@@ -71,10 +71,10 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
 
       <section 
         ref={heroRef} 
-        className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] min-h-[400px] sm:min-h-0 overflow-hidden flex items-center justify-center"
+        className="relative w-full aspect-[16/9] overflow-hidden flex items-center justify-center"
       >
         <div
-          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top transition-all"
+          className="absolute inset-0 bg-cover bg-top transition-all"
           style={{
             backgroundImage: `url(${heroImages[currentIndex]})`,
             transform: isTransitioning ? 'scale(1.02)' : 'scale(1)',
@@ -83,7 +83,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           }}
         />
         <div
-          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top -z-10"
+          className="absolute inset-0 bg-cover bg-top -z-10"
           style={{
             backgroundImage: `url(${heroImages[nextIndex]})`,
             opacity: isTransitioning ? bgOpacity : 0,
@@ -98,22 +98,22 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 0.5s ease',
           }}
         />
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-12 max-w-4xl mx-auto h-full w-full">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-12 max-w-4xl mx-auto h-full w-full justify-center">
           <h1
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-4 sm:mb-6 leading-tight select-none"
+            className="text-[5vw] sm:text-5xl md:text-6xl font-light mb-2 sm:mb-6 leading-tight select-none"
             style={{ fontFamily: 'Cormorant Garamond, serif', color: 'white' }}
           >
             Your Wardrobe,<br />Beautifully Organized
           </h1>
           <p 
-            className="text-xs sm:text-base md:text-lg font-light mb-6 sm:mb-8 opacity-90 max-w-md sm:max-w-xl mx-auto leading-relaxed select-none" 
+            className="text-[2.2vw] sm:text-base md:text-lg font-light mb-3 sm:mb-8 opacity-90 max-w-[80%] sm:max-w-xl mx-auto leading-relaxed select-none" 
             style={{ color: 'white', fontFamily: 'DM Sans, sans-serif' }}
           >
             Reconnect with the clothes you already own. Create, plan, and style with intention.
           </p>
           <button
             onClick={() => navigateTo('wardrobe')}
-            className="px-6 py-2.5 sm:px-8 sm:py-3.5 text-[11px] sm:text-xs md:text-sm tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
+            className="px-4 py-1.5 sm:px-8 sm:py-3.5 text-[2vw] sm:text-xs md:text-sm tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             style={{ backgroundColor: colors.accent, color: 'white' }}
           >
             START STYLING

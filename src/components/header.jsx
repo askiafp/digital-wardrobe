@@ -232,25 +232,9 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
             className="absolute left-4 right-4 mt-2 p-4 rounded-2xl shadow-xl flex flex-col gap-2 border md:hidden animate-in fade-in slide-in-from-top-2 duration-300"
             style={{ backgroundColor: '#FAFAF8', borderColor: colors.border }}
           >
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
-                style={{
-                  backgroundColor: currentPage === item.id ? colors.accent : colors.surfaceAlt,
-                  color: currentPage === item.id ? 'white' : colors.heading,
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-            
-            <div className="h-px my-1" style={{ backgroundColor: colors.border }} />
-
             <button
               onClick={() => handleNavClick('profile')}
-              className="flex flex-col items-center justify-center w-full gap-2 p-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
+              className="flex flex-col items-center justify-center w-full gap-2 p-4 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
               style={{
                 backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
                 color: currentPage === 'profile' ? 'white' : colors.heading,
@@ -272,8 +256,25 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
               <span className="text-xs font-medium tracking-wide mt-1">{displayName}</span>
             </button>
 
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border mt-1 rounded-xl" style={{ borderColor: colors.border }}>
-              <span className="text-xs font-light text-gray-400 uppercase tracking-wider">Language</span>
+            <div className="h-px my-1" style={{ backgroundColor: colors.border }} />
+
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
+                style={{
+                  backgroundColor: currentPage === item.id ? colors.accent : colors.surfaceAlt,
+                  color: currentPage === item.id ? 'white' : colors.heading,
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+            
+            <div className="h-px my-1" style={{ backgroundColor: colors.border }} />
+
+            <div className="flex items-center justify-end py-1 mt-1 w-full pr-2">
               <LanguageSelect mobile={true} />
             </div>
           </div>
