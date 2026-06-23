@@ -57,6 +57,21 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
           <p className="text-xs md:text-sm" style={{ color: colors.muted }}>
             Organize your outfits day by day and step into your week with clarity.
           </p>
+          <p className="text-xs mt-3 italic" style={{ color: colors.accent }}>
+            "Getting dressed is a form of self-expression. Plan it with intention."
+          </p>
+        </div>
+        {/* Summary Bar */}
+        <div
+          className="mb-8 p-4 rounded-2xl flex items-center justify-between"
+          style={{ backgroundColor: colors.surface }}
+        >
+          <p className="text-sm font-light" style={{ color: colors.heading }}>
+            Weekly Planning Progress
+          </p>
+          <p className="text-sm" style={{ color: colors.accent }}>
+            {days.filter(day => weeklyPlan && weeklyPlan[day.toLowerCase()]?.items?.length > 0).length} of 7 days planned
+          </p>
         </div>
 
         {/* Responsive Grid */}
@@ -84,7 +99,7 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
                       {day}
                     </h3>
                     <p className="text-[10px]" style={{ color: colors.muted }}>
-                      {outfitItems.length > 0 ? 'Scheduled Look' : 'No Plan'}
+                      {outfitItems.length > 0 ? `${outfitItems.length} item${outfitItems.length > 1 ? 's' : ''} planned` : 'No outfit yet'}
                     </p>
                   </div>
                   
@@ -98,6 +113,46 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
                       <Trash2 size={14} />
                     </button>
                   )}
+                </div>
+                {/* Mood Picker */}
+                <div className="flex gap-1 mt-3 flex-wrap">
+                  {['Casual', 'Formal', 'Sporty', 'Comfy'].map(mood => (
+                    <button
+                      key={mood}
+                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
+                      style={{
+                        backgroundColor: dayData?.mood === mood ? colors.accent : 'transparent',
+                        color: dayData?.mood === mood ? 'white' : colors.muted,
+                        borderColor: dayData?.mood === mood ? colors.accent : colors.border,
+                      }}
+                      onClick={() => setWeeklyPlan(prev => ({
+                        ...prev,
+                        [dayKey]: { ...prev[dayKey], mood }
+                      }))}
+                    >
+                      {mood}
+                    </button>
+                  ))}
+                </div>
+                {/* Weather Tag */}
+                <div className="flex gap-1 mt-2 flex-wrap">
+                  {['Sunny', 'Rainy', 'Cold', 'Cloudy'].map(weather => (
+                    <button
+                      key={weather}
+                      className="text-[9px] px-2 py-1 rounded-full border transition-all"
+                      style={{
+                        backgroundColor: dayData?.weather === weather ? colors.accent : 'transparent',
+                        color: dayData?.weather === weather ? 'white' : colors.muted,
+                        borderColor: dayData?.weather === weather ? colors.accent : colors.border,
+                      }}
+                      onClick={() => setWeeklyPlan(prev => ({
+                        ...prev,
+                        [dayKey]: { ...prev[dayKey], weather }
+                      }))}
+                    >
+                      {weather}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Outfit Items List */}
