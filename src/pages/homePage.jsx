@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Sun, CloudRain, Cloud, Snowflake, Calendar, Sparkles, User, Mail } from 'lucide-react';
+import { ChevronRight, Sun, CloudRain, Cloud, Snowflake, Calendar, Sparkles } from 'lucide-react';
 import { colors } from '../constants';
 
 const heroImages = [
@@ -22,7 +22,7 @@ function getWeatherBackgroundImage(conditionIcon, tempC) {
   return '/images/default.jpg';
 }
 
-export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest }) {
+export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest, onSelectWeatherStyle }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -391,17 +391,25 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
       </section>
 
       <button
-        onClick={() => navigateTo('styling')}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex rounded-[28px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-white/10 bg-cover bg-center text-left transition-all duration-300 hover:scale-[1.02] active:scale-95 origin-bottom-right scale-85 sm:scale-90 md:scale-100"
+        onClick={() => {
+          if (onSelectWeatherStyle) {
+            onSelectWeatherStyle({
+              tempC: weather.temp,
+              condition: weather.condition
+            });
+          }
+          navigateTo('styling');
+        }}
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex rounded-[28px] md:rounded-[32px] overflow-hidden shadow-[0_24px_50px_-16px_rgba(0,0,0,0.4)] border border-white/10 bg-cover bg-center text-left transition-all duration-300 hover:scale-[1.02] active:scale-95 origin-bottom-right scale-85 sm:scale-90 md:scale-100 p-2"
         style={{ 
-          backgroundImage: `url(${getWeatherBackgroundImage(weather.icon, weather.temp)})`, 
-          width: '290px',
-          height: '135px' 
+          backgroundImage: `url(${getWeatherBackgroundImage(weather.icon, weather.temp)})`,
+          width: '324px',
+          height: '146px'
         }}
       >
-        <div className="absolute inset-0 bg-black/5" />
+        <div className="absolute inset-0 bg-black/[0.04]" />
 
-        <div className="w-1/2 h-full relative p-2.5">
+        <div className="w-1/2 h-full relative">
           {(() => {
             const filteredItems = wardrobe.filter(item => {
               const nameLower = item.name?.toLowerCase() || '';
@@ -446,24 +454,24 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             }) || wardrobe.find(item => item.category?.toLowerCase().includes('bottom') || item.category?.toLowerCase().includes('pants'));
 
             return (
-              <div className="absolute inset-0 z-10 p-3 flex flex-col justify-between">
-                <div className="flex justify-start">
+              <div className="absolute inset-0 z-10 p-1 flex flex-col justify-between h-full w-full">
+                <div className="flex justify-start pl-1">
                   {topPiece ? (
                     <img 
                       src={topPiece.image} 
                       alt="Top" 
-                      className="w-18 h-18 object-contain filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.4)] transform -rotate-6 transition-transform duration-300 hover:rotate-0"
+                      className="w-[85px] h-[85px] object-contain filter drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)] transform -rotate-12 transition-transform duration-300 hover:rotate-0"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : <div className="w-1" />}
                 </div>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-end pr-1 -mt-5">
                   {bottomPiece ? (
                     <img 
                       src={bottomPiece.image} 
                       alt="Bottom" 
-                      className="w-16 h-16 object-contain filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.4)] transform rotate-6 transition-transform duration-300 hover:rotate-0"
+                      className="w-[72px] h-[72px] object-contain filter drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)] transform rotate-12 transition-transform duration-300 hover:rotate-0"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : <div className="w-1" />}
@@ -482,40 +490,41 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
 
         <div 
-          className="w-1/2 h-full flex flex-col justify-between p-3.5 relative border-l border-white/10"
+          className="w-1/2 h-full flex flex-col justify-between p-3.5 relative border border-white/25 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.15)] rounded-[24px]"
           style={{ 
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(240,240,240,0.25) 100%)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(245,240,240,0.22) 100%)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)'
           }}
         >
-          <div>
-            <h4 className="text-xs font-semibold tracking-tight text-neutral-800 leading-none mb-0.5">
+          <div className="space-y-0.5">
+            <h4 className="text-[13px] font-bold tracking-tight text-neutral-800/95 leading-none">
               Recommended
             </h4>
-            <p className="text-[10px] text-neutral-600 font-light leading-none">
+            <p className="text-[10px] text-neutral-600/90 font-normal leading-none">
               clothes for today
             </p>
           </div>
 
-          <p className="text-[10px] font-medium text-neutral-700/90 tracking-wide my-0.5">
+          <p className="text-[11px] font-medium text-neutral-700/80 tracking-wide my-1">
             {weather.day}, {weather.time}
           </p>
 
           <div 
-            className="flex items-center gap-2 rounded-[14px] px-2.5 py-1.5 w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20"
+            className="flex items-center gap-2 px-3 py-1.5 w-full border border-white/40 shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
             style={{ 
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.4) 100%)' 
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.55) 100%)',
+              borderRadius: '18px'
             }}
           >
-            <div className="p-1 rounded-full bg-white shadow-sm flex items-center justify-center text-neutral-700">
+            <div className="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-neutral-800 flex-shrink-0">
               <WeatherIcon size={14} strokeWidth={2.5} />
             </div>
-            <div className="flex flex-col justify-center">
-              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wider leading-none mb-0.5">
+            <div className="flex flex-col justify-center min-w-0 leading-none">
+              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5 truncate">
                 {weatherInfo.label}
               </p>
-              <p className="text-sm font-bold text-neutral-800 leading-none tracking-tight">
+              <p className="text-sm font-bold text-neutral-800 tracking-tighter leading-none">
                 {weather.temp}°C
               </p>
             </div>

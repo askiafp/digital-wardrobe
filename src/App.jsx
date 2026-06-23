@@ -316,6 +316,8 @@ export default function App() {
     </div>
   );
 
+  const [selectedWeatherStyle, setSelectedWeatherStyle] = useState(null);
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.background }}>
       {isGuest && <GuestBanner />}
@@ -336,6 +338,9 @@ export default function App() {
             weeklyPlan={weeklyPlan}
             navigateTo={navigateTo}
             isGuest={isGuest}
+            onSelectWeatherStyle={(weatherData) => {
+              setSelectedWeatherStyle(weatherData);
+            }}
           />
         )}
         {currentPage === 'wardrobe' && (
@@ -380,6 +385,8 @@ export default function App() {
             setWeeklyPlan={setWeeklyPlan}
             navigateTo={navigateTo}
             isGuest={isGuest}
+            weatherFromHome={selectedWeatherStyle}
+            clearWeatherFromHome={() => setSelectedWeatherStyle(null)}
           />
         )}
         {currentPage === 'planner' && (

@@ -10,8 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// ─── Weather helpers ──────────────────────────────────────────────────────────
-
 const WMO_CODES = {
   0:  { label: 'Clear sky',        icon: 'sun' },
   1:  { label: 'Mainly clear',     icon: 'sun' },
@@ -37,8 +35,6 @@ const WMO_CODES = {
 function getWeatherMeta(code) {
   return WMO_CODES[code] || { label: 'Unknown', icon: 'cloud' };
 }
-
-// ─── Time-of-day helper ───────────────────────────────────────────────────────
 
 function getTimeOfDay() {
   const h = new Date().getHours();
@@ -102,8 +98,6 @@ function weatherScoreBoost(item, weather) {
   return boost;
 }
 
-// ─── Outfit type scoring ──────────────────────────────────────────────────────
-
 export const OUTFIT_TYPES = [
   { 
     id: 'casual',  
@@ -139,8 +133,6 @@ function getOutfitTypeScore(item, outfitType) {
   return type.styles.includes(itemStyle) ? 100 : 0;
 }
 
-// ─── WeatherIcon ──────────────────────────────────────────────────────────────
-
 function WeatherIcon({ icon, size = 20, color }) {
   if (icon === 'sun')       return <Sun       size={size} color={color || '#E8955A'} />;
   if (icon === 'rain')      return <CloudRain size={size} color={color || '#5B7DB1'} />;
@@ -154,8 +146,6 @@ function getWeatherBackgroundImage(conditionIcon, tempC) {
   if (tempC >= 25) return '/images/warm.jpg';
   return '/images/default.jpg';
 }
-
-// ─── Weather Panel ────────────────────────────────────────────────────────────
 
 function DesktopWeatherPanel({ weather, loading, error, onRetry, timeOfDay }) {
   const tips = getWeatherOutfitTips(weather);
@@ -219,8 +209,6 @@ function DesktopWeatherPanel({ weather, loading, error, onRetry, timeOfDay }) {
     </div>
   );
 }
-
-// ─── Original constants ───────────────────────────────────────────────────────
 
 const UNDERTONES = [
   {
@@ -287,8 +275,6 @@ function isGoodMatch(item, undertone) {
   }
   return true;
 }
-
-// ─── UndertoneSelectorModal ───────────────────────────────────────────────────
 
 function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   const selected = UNDERTONES.find(t => t.id === selectedTone);
@@ -360,8 +346,6 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   );
 }
 
-// ─── Auto Generate Modal ──────────────────────────────────────────────────────
-
 function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay }) {
   const [selectedType, setSelectedType] = useState(null);
 
@@ -387,7 +371,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
             </button>
           </div>
 
-          {/* Context info */}
           {window.weatherDataHasBoth && (weather || undertone) && (
             <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4 flex items-center gap-3 flex-wrap">
               {weather && (
@@ -405,7 +388,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
             </div>
           )}
 
-          {/* Outfit type grid */}
           <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-3">Select outfit style</p>
           <div className="grid grid-cols-2 gap-3 mb-2">
             {OUTFIT_TYPES.map(type => {
@@ -458,8 +440,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
     </div>
   );
 }
-
-// ─── MatchBadge ───────────────────────────────────────────────────────────────
 
 function MatchBadge({ item, undertone }) {
   if (!undertone || !isGoodMatch(item, undertone)) return null;
@@ -524,9 +504,21 @@ const STEPS = [
   { id: 'Preview',     label: 'Review',      shortLabel: 'Rev'  },
 ];
 
-// ─── Main component ───────────────────────────────────────────────────────────
+export default function StylingPage({ 
+  wardrobe, 
+  selectedOutfit, 
+  setSelectedOutfit, 
+  savedOutfits, 
+  setSavedOutfits, 
+  activeFilter, 
+  setActiveFilter, 
+  setWeeklyPlan, 
+  navigateTo, 
+  isGuest,
+  weatherFromHome,
+  clearWeatherFromHome
+}) {
 
-export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfit, savedOutfits, setSavedOutfits, setWeeklyPlan, navigateTo }) {
   const [currentStepIdx, setCurrentStepIdx]       = useState(0);
   const [skippedCategories, setSkippedCategories] = useState({});
   const [carouselIndices, setCarouselIndices]      = useState({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
@@ -534,6 +526,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || 'Morning');
   const [modalConfig, setModalConfig]              = useState({ isOpen:false, type:'success', message:'' });
   const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
+  const [generatedMood, setGeneratedMood] = useState('Casual');
 
   const [undertone, setUndertone] = useState(() => localStorage.getItem('closetry_user_undertone') || null);
   const [showUndertoneModal, setShowUndertoneModal] = useState(false);
@@ -542,6 +535,13 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [weatherError, setWeatherError]     = useState(false);
   const [timeOfDay, setTimeOfDay]           = useState(getTimeOfDay());
+
+  useEffect(() => {
+    if (weatherFromHome) {
+      setShowAutoGenerateModal(true);
+      clearWeatherFromHome();
+    }
+  }, [weatherFromHome, clearWeatherFromHome]);
 
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
@@ -651,7 +651,10 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
           });
           return;
         }
+        setGeneratedMood(typeConfig.label);
       }
+    } else {
+      setGeneratedMood('Casual');
     }
 
     const newIndices = {}, newOutfit = [], newSkips = {};
@@ -679,7 +682,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
       return scored[Math.floor(Math.random() * Math.min(3, scored.length))].item;
     };
 
-    // Execute generation for mandatory core components
     ['Tops', 'Bottoms', 'Shoes'].forEach(cat => {
       const picked = pickBest(cat);
       if (picked) { 
@@ -688,7 +690,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
       }
     });
 
-    // Execute generation for secondary optional pieces
     ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
       const alwaysInclude = cat === 'Outerwear' && weather?.conditionIcon === 'rain';
@@ -720,7 +721,23 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     setSavedOutfits([...savedOutfits, newOutfitObj]);
     if (typeof setWeeklyPlan === 'function') {
       const dayKey = selectedDay.toLowerCase();
-      setWeeklyPlan(prevPlan => { const existing = prevPlan[dayKey] || {}; return { ...prevPlan, [dayKey]: { ...existing, slots: { ...(existing.slots || {}), [selectedSlot]: { items: [...selectedOutfit] } } } }; });
+      setWeeklyPlan(prevPlan => { 
+        const existing = prevPlan[dayKey] || {}; 
+        return { 
+          ...prevPlan, 
+          [dayKey]: { 
+            ...existing, 
+            slots: { 
+              ...(existing.slots || {}), 
+              [selectedSlot]: { 
+                items: [...selectedOutfit],
+                mood: generatedMood,
+                weather: null
+              } 
+            } 
+          } 
+        }; 
+      });
     }
     setModalConfig({ isOpen:true, type:'success', message:`Outfit successfully saved to ${selectedDay}!` });
     setTimeout(() => {
@@ -735,6 +752,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     setCurrentStepIdx(0);
     setSkippedCategories({});
     setCarouselIndices({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
+    setGeneratedMood('Casual');
   };
 
   const RecommendationPanel = ({ category }) => {
@@ -777,7 +795,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const currentItems       = getSortedItems(currentStep.id);
   const currentItem        = currentItems?.[carouselIndices[currentStep.id]];
   const currentItemIsMatch = currentItem && undertone && isGoodMatch(currentItem, undertone);
-  const weatherTips        = getWeatherOutfitTips(weather);
 
   return (
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
@@ -788,12 +805,11 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
             Outfit Builder
           </h1>
           <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-gray-400">
-            Step-by-step styling session
+            Step-by-step tracking session
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 max-w-4xl mx-auto w-full">
-          {/* Undertone panel */}
           <div className="w-full flex">
             {!undertone ? (
               <button
@@ -845,7 +861,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
             )}
           </div>
 
-          {/* Weather panel */}
           <div className="w-full flex">
             <DesktopWeatherPanel weather={weather} loading={weatherLoading} error={weatherError} onRetry={fetchWeather} timeOfDay={timeOfDay} />
           </div>
@@ -854,7 +869,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
         <div className="flex flex-col gap-5 max-w-4xl mx-auto w-full">
           <div className="flex-1 min-w-0 w-full space-y-5">
 
-            {/* Step progress */}
             <div className="relative overflow-x-auto pb-2 max-w-2xl mx-auto" style={{ scrollbarWidth: 'none' }}>
               <div className="absolute top-4 left-0 right-0 h-px bg-gray-200 z-0 min-w-[340px]" />
               <div className="flex items-start justify-between relative z-10 gap-2 min-w-[340px] px-1">
@@ -875,14 +889,13 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               </div>
             </div>
 
-            {/* Auto generate prompt */}
             {currentStepIdx === 0 && selectedOutfit.length === 0 && (
               <div className="bg-amber-50/40 border border-amber-100 rounded-2xl p-4 text-center space-y-2.5 max-w-xl mx-auto">
                 <div className="flex justify-center text-amber-500"><Sparkles size={16} /></div>
                 <p className="text-xs font-light text-amber-900 leading-relaxed">
                   {undertone
                     ? `Let AI generate an outfit matching your ${selectedUndertoneData?.label} tone — pick your vibe first!`
-                    : `${Math.round(weather?.tempC || 28)}°C in Jakarta — let AI style you for ${getTimeLabel(timeOfDay).toLowerCase()}.`}
+                    : `${Math.round(weatherFromHome?.tempC || weather?.tempC || 28)}°C in Jakarta — let AI style you for ${getTimeLabel(timeOfDay).toLowerCase()}.`}
                 </p>
                 <button
                   onClick={() => setShowAutoGenerateModal(true)}
@@ -894,7 +907,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               </div>
             )}
 
-            {/* Step content */}
             {currentStep.id !== 'Preview' ? (
               <div className="flex flex-col md:flex-row gap-4 items-stretch justify-center w-full">
                 <div className="bg-white rounded-3xl border shadow-sm flex-1 overflow-hidden flex flex-col justify-between" style={{ borderColor: colors.border }}>
