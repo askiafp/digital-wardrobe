@@ -163,10 +163,30 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
                 <h3 className="font-light text-sm" style={{ color: colors.heading }}>
                   {item.name}
                 </h3>
-                <div className="flex justify-between items-start mt-2">
-                  <p className="text-xs" style={{ color: colors.muted }}>
-                    {item.category}
-                  </p>
+                
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-xs" style={{ color: colors.muted }}>
+                      {item.category}
+                    </p>
+                    {item.style && (
+                      <span 
+                        className="text-[9px] px-1.5 py-0.5 rounded-md font-medium tracking-wide uppercase scale-90 origin-left"
+                        style={{ 
+                          backgroundColor: 
+                            item.style === 'formal' ? '#F4EFEA' : 
+                            item.style === 'sporty' ? '#EBF3FE' : 
+                            item.style === 'comfy' ? '#F0FDF4' : '#F4F4F5',
+                          color: 
+                            item.style === 'formal' ? '#8C6343' : 
+                            item.style === 'sporty' ? '#2563EB' : 
+                            item.style === 'comfy' ? '#16A34A' : '#71717A'
+                        }}
+                      >
+                        {item.style}
+                      </span>
+                    )}
+                  </div>
                   {selectedOutfit.find(i => i.id === item.id) && (
                     <Heart size={14} style={{ color: colors.accent, fill: colors.accent }} />
                   )}

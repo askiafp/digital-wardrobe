@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle } from 'lucide-react';
 import { colors } from '../constants';
 
 import {
@@ -13,87 +13,72 @@ import {
 // ─── Weather helpers ──────────────────────────────────────────────────────────
 
 const WMO_CODES = {
-  0:  { label: 'Clear sky',         icon: 'sun' },
-  1:  { label: 'Mainly clear',      icon: 'sun' },
-  2:  { label: 'Partly cloudy',     icon: 'cloud-sun' },
-  3:  { label: 'Overcast',             icon: 'cloud' },
-  45: { label: 'Foggy',                icon: 'cloud' },
-  48: { label: 'Icy fog',              icon: 'cloud' },
-  51: { label: 'Light drizzle',        icon: 'rain' },
-  53: { label: 'Drizzle',              icon: 'rain' },
-  55: { label: 'Heavy drizzle',        icon: 'rain' },
-  61: { label: 'Light rain',           icon: 'rain' },
-  63: { label: 'Rain',                 icon: 'rain' },
-  65: { label: 'Heavy rain',           icon: 'rain' },
-  71: { label: 'Light snow',           icon: 'cloud' },
-  80: { label: 'Light showers',        icon: 'rain' },
-  81: { label: 'Showers',              icon: 'rain' },
-  82: { label: 'Heavy showers',        icon: 'rain' },
-  95: { label: 'Thunderstorm',         icon: 'rain' },
-  96: { label: 'Thunderstorm + hail',  icon: 'rain' },
-  99: { label: 'Thunderstorm + hail',  icon: 'rain' },
+  0:  { label: 'Clear sky',        icon: 'sun' },
+  1:  { label: 'Mainly clear',     icon: 'sun' },
+  2:  { label: 'Partly cloudy',    icon: 'cloud-sun' },
+  3:  { label: 'Overcast',         icon: 'cloud' },
+  45: { label: 'Foggy',            icon: 'cloud' },
+  48: { label: 'Icy fog',          icon: 'cloud' },
+  51: { label: 'Light drizzle',    icon: 'rain' },
+  53: { label: 'Drizzle',          icon: 'rain' },
+  55: { label: 'Heavy drizzle',    icon: 'rain' },
+  61: { label: 'Light rain',       icon: 'rain' },
+  63: { label: 'Rain',             icon: 'rain' },
+  65: { label: 'Heavy rain',       icon: 'rain' },
+  71: { label: 'Light snow',       icon: 'cloud' },
+  80: { label: 'Light showers',    icon: 'rain' },
+  81: { label: 'Showers',          icon: 'rain' },
+  82: { label: 'Heavy showers',    icon: 'rain' },
+  95: { label: 'Thunderstorm',     icon: 'rain' },
+  96: { label: 'Thunderstorm + hail', icon: 'rain' },
+  99: { label: 'Thunderstorm + hail', icon: 'rain' },
 };
 
 function getWeatherMeta(code) {
   return WMO_CODES[code] || { label: 'Unknown', icon: 'cloud' };
 }
 
+// ─── Time-of-day helper ───────────────────────────────────────────────────────
+
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h >= 5  && h < 11) return 'morning';
+  if (h >= 11 && h < 15) return 'afternoon';
+  if (h >= 15 && h < 19) return 'evening';
+  return 'night';
+}
+
+function getTimeLabel(tod) {
+  return { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' }[tod] || 'Now';
+}
+
 function getWeatherOutfitTips(weather) {
   if (!weather) return null;
   const { tempC, conditionIcon } = weather;
-
-  if (conditionIcon === 'rain') {
-    return {
-      tag: 'Rainy day',
-      tip: 'Layer up with a light jacket & opt for darker colors — rain splashes are less visible.',
-      avoid: 'Light fabrics that go see-through when wet.',
-      accent: '#5B7DB1',
-      bg: 'rgba(91,125,177,0.08)',
-      border: 'rgba(91,125,177,0.25)',
-      textColor: '#1B2A5C',
-    };
-  }
-  if (tempC >= 32) {
-    return {
-      tag: 'Very hot',
-      tip: 'Wear breathable linen or cotton in light, airy tones. Loose silhouettes keep you cool.',
-      avoid: 'Dark heavy fabrics that absorb heat.',
-      accent: '#E8955A',
-      bg: 'rgba(232,149,90,0.08)',
-      border: 'rgba(232,149,90,0.25)',
-      textColor: '#7A3A10',
-    };
-  }
-  if (tempC >= 28) {
-    return {
-      tag: 'Warm & sunny',
-      tip: "Perfect for bright colors & lightweight fits. Don't forget UV protection accessories.",
-      avoid: 'Heavy layering.',
-      accent: '#D4A843',
-      bg: 'rgba(212,168,67,0.08)',
-      border: 'rgba(212,168,67,0.25)',
-      textColor: '#6B4226',
-    };
-  }
-  if (tempC >= 23) {
-    return {
-      tag: 'Pleasant',
-      tip: 'Great weather for almost anything! Light layers work perfectly in case it cools down.',
-      avoid: null,
-      accent: '#4A9C6B',
-      bg: 'rgba(74,156,107,0.08)',
-      border: 'rgba(74,156,107,0.25)',
-      textColor: '#1B4A2C',
-    };
-  }
-  return {
-    tag: 'Cool',
-    tip: 'A light jacket or blazer is a smart choice today. Layered looks are both practical & stylish.',
+  if (conditionIcon === 'rain') return {
+    tag: 'Rainy day', tip: 'Layer up with a light jacket & opt for darker colors — rain splashes are less visible.',
+    avoid: 'Light fabrics that go see-through when wet.',
+    accent: '#5B7DB1', bg: 'rgba(91,125,177,0.08)', border: 'rgba(91,125,177,0.25)', textColor: '#1B2A5C',
+  };
+  if (tempC >= 32) return {
+    tag: 'Very hot', tip: 'Wear breathable linen or cotton in light, airy tones. Loose silhouettes keep you cool.',
+    avoid: 'Dark heavy fabrics that absorb heat.',
+    accent: '#E8955A', bg: 'rgba(232,149,90,0.08)', border: 'rgba(232,149,90,0.25)', textColor: '#7A3A10',
+  };
+  if (tempC >= 28) return {
+    tag: 'Warm & sunny', tip: "Perfect for bright colors & lightweight fits. Don't forget UV protection accessories.",
+    avoid: 'Heavy layering.',
+    accent: '#D4A843', bg: 'rgba(212,168,67,0.08)', border: 'rgba(212,168,67,0.25)', textColor: '#6B4226',
+  };
+  if (tempC >= 23) return {
+    tag: 'Pleasant', tip: 'Great weather for almost anything! Light layers work perfectly in case it cools down.',
     avoid: null,
-    accent: '#8B7DB1',
-    bg: 'rgba(139,125,177,0.08)',
-    border: 'rgba(139,125,177,0.25)',
-    textColor: '#3B2A5C',
+    accent: '#4A9C6B', bg: 'rgba(74,156,107,0.08)', border: 'rgba(74,156,107,0.25)', textColor: '#1B4A2C',
+  };
+  return {
+    tag: 'Cool', tip: 'A light jacket or blazer is a smart choice today. Layered looks are both practical & stylish.',
+    avoid: null,
+    accent: '#8B7DB1', bg: 'rgba(139,125,177,0.08)', border: 'rgba(139,125,177,0.25)', textColor: '#3B2A5C',
   };
 }
 
@@ -102,20 +87,56 @@ function weatherScoreBoost(item, weather) {
   const { tempC, conditionIcon } = weather;
   const hex = item.color.toLowerCase();
   let boost = 0;
-
   if (conditionIcon === 'rain') {
     const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    const brightness = (r*299 + g*587 + b*114) / 1000;
     if (brightness < 100) boost += 40;
     if (item.category === 'Outerwear') boost += 60;
   }
   if (tempC >= 30) {
     const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    const brightness = (r*299 + g*587 + b*114) / 1000;
     if (brightness > 180) boost += 30;
     if (item.category === 'Outerwear') boost -= 40;
   }
   return boost;
+}
+
+// ─── Outfit type scoring ──────────────────────────────────────────────────────
+
+export const OUTFIT_TYPES = [
+  { 
+    id: 'casual',  
+    label: 'Casual',  
+    icon: Sparkles, 
+    styles: ['casual', 'minimalist', 'streetwear'] 
+  },
+  { 
+    id: 'formal',  
+    label: 'Formal',  
+    icon: Briefcase, 
+    styles: ['formal', 'business', 'classic'] 
+  },
+  { 
+    id: 'sporty',  
+    label: 'Sporty',  
+    icon: Activity, 
+    styles: ['sporty', 'athletic', 'activewear'] 
+  },
+  { 
+    id: 'comfy',   
+    label: 'Comfy',   
+    icon: Cloud, 
+    styles: ['comfy', 'lounge', 'minimalist'] 
+  },
+];
+
+function getOutfitTypeScore(item, outfitType) {
+  if (!outfitType) return 0;
+  const type = OUTFIT_TYPES.find(t => t.id === outfitType);
+  if (!type) return 0;
+  const itemStyle = (item.style || '').toLowerCase();
+  return type.styles.includes(itemStyle) ? 100 : 0;
 }
 
 // ─── WeatherIcon ──────────────────────────────────────────────────────────────
@@ -124,39 +145,25 @@ function WeatherIcon({ icon, size = 20, color }) {
   if (icon === 'sun')       return <Sun       size={size} color={color || '#E8955A'} />;
   if (icon === 'rain')      return <CloudRain size={size} color={color || '#5B7DB1'} />;
   if (icon === 'cloud-sun') return <Cloud     size={size} color={color || '#9E9E9E'} />;
-  return                            <Cloud     size={size} color={color || '#9E9E9E'} />;
+  return                               <Cloud     size={size} color={color || '#9E9E9E'} />;
 }
 
-// ─── Weather Background Images ──────────────────────────────────────────────
-
 function getWeatherBackgroundImage(conditionIcon, tempC) {
-  if (conditionIcon === 'rain') {
-    return '/images/rain.jpg';
-  }
-  
-  if (tempC >= 30) {
-    return '/images/hot.jpg';
-  }
-  
-  if (tempC >= 25) {
-    return '/images/warm.jpg';
-  }
-  
+  if (conditionIcon === 'rain') return '/images/rain.jpg';
+  if (tempC >= 30) return '/images/hot.jpg';
+  if (tempC >= 25) return '/images/warm.jpg';
   return '/images/default.jpg';
 }
 
-// ─── Responsive Weather Card Component ───────────────────────────────────────
+// ─── Weather Panel ────────────────────────────────────────────────────────────
 
-function DesktopWeatherPanel({ weather, loading, error, onRetry }) {
+function DesktopWeatherPanel({ weather, loading, error, onRetry, timeOfDay }) {
   const tips = getWeatherOutfitTips(weather);
   const backgroundImage = weather ? getWeatherBackgroundImage(weather.conditionIcon, weather.tempC) : null;
 
   if (loading) {
-    return (
-      <div className="w-full bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 border border-gray-300 shadow-sm animate-pulse min-h-[120px] sm:min-h-[135px] md:min-h-[145px]" />
-    );
+    return <div className="w-full bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 border border-gray-300 shadow-sm animate-pulse min-h-[120px] sm:min-h-[135px] md:min-h-[145px]" />;
   }
-
   if (error || !weather || !tips) {
     return (
       <div className="w-full bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 border border-dashed border-gray-200 flex items-center justify-center min-h-[120px] sm:min-h-[135px] md:min-h-[145px]">
@@ -169,67 +176,43 @@ function DesktopWeatherPanel({ weather, loading, error, onRetry }) {
   }
 
   return (
-    <div 
+    <div
       className="w-full rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 border shadow-lg flex flex-col justify-between min-h-[120px] sm:min-h-[135px] md:min-h-[145px] relative overflow-hidden transition-all duration-300"
-      style={{ 
+      style={{
         backgroundImage: `linear-gradient(135deg, rgba(10,10,20,0.4) 0%, rgba(20,30,50,0.3) 100%), url('${backgroundImage}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        borderColor: 'rgba(255,255,255,0.15)'
+        backgroundSize: 'cover', backgroundPosition: 'center', borderColor: 'rgba(255,255,255,0.15)'
       }}
     >
       <div className="absolute inset-0 rounded-2xl sm:rounded-3xl pointer-events-none" style={{ boxShadow: 'inset 0 0 60px rgba(0,0,0,0.15)' }} />
-      
       <div className="flex justify-between items-start gap-2 z-10 relative flex-wrap">
         <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
           <div className="p-1.5 sm:p-2 md:p-2.5 rounded-lg sm:rounded-2xl flex-shrink-0 backdrop-blur-md" style={{ background: 'rgba(255,255,255,0.12)' }}>
-            <WeatherIcon 
-              icon={weather.conditionIcon} 
-              size={window.innerWidth < 640 ? 18 : window.innerWidth < 1024 ? 22 : 24} 
-              color="#FFFFFF" 
-            />
+            <WeatherIcon icon={weather.conditionIcon} size={window.innerWidth < 640 ? 18 : 22} color="#FFFFFF" />
           </div>
-          
           <div className="min-w-0 flex flex-col justify-center">
             <p className="text-lg sm:text-xl md:text-2xl font-light tracking-tight leading-tight text-white drop-shadow-sm" style={{ fontSize: 'clamp(16px, 3vw, 28px)' }}>
               {Math.round(weather.tempC)}°C
             </p>
-            <p className="text-[8px] sm:text-[9px] md:text-[10px] font-light uppercase tracking-widest truncate mt-0.5 sm:mt-1 text-white/85 drop-shadow-sm" style={{ fontSize: 'clamp(7px, 1.5vw, 10px)' }}>
-              {weather.condition} · Jakarta
+            <p className="text-[8px] sm:text-[9px] md:text-[10px] font-light uppercase tracking-widest truncate mt-0.5 sm:mt-1 text-white/85 drop-shadow-sm">
+              {weather.condition} · {getTimeLabel(timeOfDay)}
             </p>
           </div>
         </div>
-        <span 
-          className="text-[6px] sm:text-[7px] md:text-[7px] font-bold tracking-[0.1em] sm:tracking-[0.15em] px-2 sm:px-3 md:px-3 py-1 sm:py-1.5 rounded-full text-gray-900 uppercase flex-shrink-0 backdrop-blur-md shadow-sm whitespace-nowrap" 
-          style={{ background: 'rgba(255,255,255,0.9)', fontSize: 'clamp(6px, 1.2vw, 8px)' }}
-        >
+        <span className="text-[6px] sm:text-[7px] font-bold tracking-[0.1em] sm:tracking-[0.15em] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-gray-900 uppercase flex-shrink-0 backdrop-blur-md shadow-sm whitespace-nowrap" style={{ background: 'rgba(255,255,255,0.9)', fontSize: 'clamp(6px, 1.2vw, 8px)' }}>
           {tips.tag}
         </span>
       </div>
-      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-[8px] sm:text-[9px] md:text-[10px] pt-2 sm:pt-3 md:pt-3 border-t border-white/15 mt-2 sm:mt-3 md:mt-3 z-10 relative flex-wrap" style={{ fontSize: 'clamp(8px, 1.3vw, 10px)' }}>
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-[8px] sm:text-[9px] md:text-[10px] pt-2 sm:pt-3 border-t border-white/15 mt-2 sm:mt-3 z-10 relative flex-wrap" style={{ fontSize: 'clamp(8px, 1.3vw, 10px)' }}>
         <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-          <Droplets 
-            size={window.innerWidth < 640 ? 10 : window.innerWidth < 1024 ? 11 : 12} 
-            color="rgba(255,255,255,0.95)" 
-            strokeWidth={2.5} 
-            className="flex-shrink-0"
-          />
+          <Droplets size={window.innerWidth < 640 ? 10 : 12} color="rgba(255,255,255,0.95)" strokeWidth={2.5} className="flex-shrink-0" />
           <span className="text-white/90 drop-shadow-sm font-light truncate">
-            {weather.humidity}% 
-            <span className="opacity-60 text-[7px] sm:text-[8px] ml-0.5">Humidity</span>
+            {weather.humidity}% <span className="opacity-60 text-[7px] sm:text-[8px] ml-0.5">Humidity</span>
           </span>
         </div>
-
         <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-          <Wind 
-            size={window.innerWidth < 640 ? 10 : window.innerWidth < 1024 ? 11 : 12} 
-            color="rgba(255,255,255,0.95)" 
-            strokeWidth={2.5}
-            className="flex-shrink-0"
-          />
+          <Wind size={window.innerWidth < 640 ? 10 : 12} color="rgba(255,255,255,0.95)" strokeWidth={2.5} className="flex-shrink-0" />
           <span className="text-white/90 drop-shadow-sm font-light truncate">
-            {Math.round(weather.wind)} km/h 
-            <span className="opacity-60 text-[7px] sm:text-[8px] ml-0.5">Wind</span>
+            {Math.round(weather.wind)} km/h <span className="opacity-60 text-[7px] sm:text-[8px] ml-0.5">Wind</span>
           </span>
         </div>
       </div>
@@ -237,31 +220,11 @@ function DesktopWeatherPanel({ weather, loading, error, onRetry }) {
   );
 }
 
-function WeatherSidebarCard({ weather, weatherTips }) {
-  if (!weather || !weatherTips) return null;
-  return (
-    <div className="mb-4">
-      <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-2">Today's Weather</p>
-      <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: weatherTips.bg, border: `1px solid ${weatherTips.border}` }}>
-        <WeatherIcon icon={weather.conditionIcon} size={24} color={weatherTips.accent} />
-        <div className="flex-1 min-w-0">
-          <p className="font-medium" style={{ color: weatherTips.textColor, fontSize: 13 }}>
-            {Math.round(weather.tempC)}°C
-          </p>
-          <p style={{ color: weatherTips.accent, fontSize: 10 }}>{weather.condition}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Original constants & logic ──────────────────────────────────────────────
+// ─── Original constants ───────────────────────────────────────────────────────
 
 const UNDERTONES = [
   {
-    id: 'warm',
-    label: 'Warm',
-    description: 'Yellow, peach & golden hues',
+    id: 'warm', label: 'Warm', description: 'Yellow, peach & golden hues',
     swatches: ['#F5C07A', '#E8955A', '#D4824A'],
     bestColors: ['#8B5E3C','#7A5230','#6B4226','#9C6B3C','#D4A843','#4A4A4A','#BC7642'],
     avoidColors: ['#5B7DB1','#3B5998','#1B2A5C','#F2C4CE','#E8A0B0'],
@@ -269,9 +232,7 @@ const UNDERTONES = [
     exampleColors: ['Brown', 'Gold', 'Camel', 'Olive']
   },
   {
-    id: 'cool',
-    label: 'Cool',
-    description: 'Pink, red & bluish hues',
+    id: 'cool', label: 'Cool', description: 'Pink, red & bluish hues',
     swatches: ['#C4B5D8', '#8EB0D8', '#E8A0B0'],
     bestColors: ['#5B7DB1','#3B5998','#1B2A5C','#E8A0B0','#F2C4CE','#9E9E9E','#E8E8E8','#F5F5F5','#FAFAFA','#F0EDE0'],
     avoidColors: ['#8B5E3C','#7A5230','#6B4226','#D4A843','#9C6B3C'],
@@ -279,9 +240,7 @@ const UNDERTONES = [
     exampleColors: ['Navy', 'Blush Pink', 'Cool Grey', 'White']
   },
   {
-    id: 'neutral',
-    label: 'Neutral',
-    description: 'Balanced mix of warm & cool',
+    id: 'neutral', label: 'Neutral', description: 'Balanced mix of warm & cool',
     swatches: ['#D4B896', '#C4A882', '#B89870'],
     bestColors: ['#8B5E3C','#9E9E9E','#4A4A4A','#E8E8E8','#F5F5F5','#FAFAFA','#F0EDE0','#5B7DB1','#E8A0B0','#D4A843'],
     avoidColors: [],
@@ -297,17 +256,22 @@ function hexDistance(hex1, hex2) {
   return Math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2);
 }
 
-function getItemScore(item, undertone, weather) {
-  if (!undertone) return weatherScoreBoost(item, weather);
-  const tone = UNDERTONES.find(t => t.id === undertone);
-  if (!tone) return weatherScoreBoost(item, weather);
-  const minBestDist = Math.min(...tone.bestColors.map(c => hexDistance(item.color, c)));
-  let score = Math.max(0, 300 - minBestDist);
-  if (tone.avoidColors.length > 0) {
-    const minAvoidDist = Math.min(...tone.avoidColors.map(c => hexDistance(item.color, c)));
-    if (minAvoidDist < 80) score -= 120;
+function getItemScore(item, undertone, weather, outfitType) {
+  let score = 0;
+  if (undertone) {
+    const tone = UNDERTONES.find(t => t.id === undertone);
+    if (tone) {
+      const minBestDist = Math.min(...tone.bestColors.map(c => hexDistance(item.color, c)));
+      score += Math.max(0, 300 - minBestDist);
+      if (tone.avoidColors.length > 0) {
+        const minAvoidDist = Math.min(...tone.avoidColors.map(c => hexDistance(item.color, c)));
+        if (minAvoidDist < 80) score -= 120;
+      }
+    }
   }
-  return score + weatherScoreBoost(item, weather);
+  score += weatherScoreBoost(item, weather);
+  score += getOutfitTypeScore(item, outfitType);
+  return score;
 }
 
 function isGoodMatch(item, undertone) {
@@ -345,7 +309,7 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
             </button>
           </div>
           <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4">
-            <p className="text-[10px] text-gray-500 font-light leading-relaxed" style={{ fontSize: 'clamp(10px, 1.5vw, 11px)' }}>
+            <p className="text-[10px] text-gray-500 font-light leading-relaxed">
               <span className="font-medium text-gray-600">Tips:</span> Check the veins on your wrist — green/yellow = <span className="text-amber-600 font-medium">Warm</span>, blue/purple = <span className="text-blue-500 font-medium">Cool</span>, mix of both = <span className="text-stone-500 font-medium">Neutral</span>
             </p>
           </div>
@@ -371,7 +335,9 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
                     ))}
                   </div>
                 </div>
-                {selectedTone === tone.id ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}><Check size={10} className="text-white" /></div> : <div className="w-5 h-5 rounded-full border-2 border-gray-200 flex-shrink-0" />}
+                {selectedTone === tone.id
+                  ? <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.accent }}><Check size={10} className="text-white" /></div>
+                  : <div className="w-5 h-5 rounded-full border-2 border-gray-200 flex-shrink-0" />}
               </button>
             ))}
           </div>
@@ -394,6 +360,107 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   );
 }
 
+// ─── Auto Generate Modal ──────────────────────────────────────────────────────
+
+function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay }) {
+  const [selectedType, setSelectedType] = useState(null);
+
+  return (
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center z-[9999] bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+      <div className="bg-white w-full rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-gray-100 flex flex-col" style={{ maxWidth: 'min(100%, 440px)', maxHeight: '92dvh' }}>
+        <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-200" />
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-5 pt-5 pb-3" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="font-light" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading, fontSize: 24 }}>
+                Auto Generate
+              </h2>
+              <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 mt-0.5">
+                Pick your vibe for today
+              </p>
+            </div>
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0">
+              <X size={16} className="text-gray-500" />
+            </button>
+          </div>
+
+          {/* Context info */}
+          {window.weatherDataHasBoth && (weather || undertone) && (
+            <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4 flex items-center gap-3 flex-wrap">
+              {weather && (
+                <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                  <WeatherIcon icon={weather.conditionIcon} size={12} color="#9E9E9E" />
+                  {Math.round(weather.tempC)}°C · {getTimeLabel(timeOfDay)}
+                </span>
+              )}
+              {undertone && (
+                <span className="text-[10px] text-gray-500">
+                  Undertone: <span className="font-medium text-gray-700 capitalize">{undertone}</span>
+                </span>
+              )}
+              <span className="text-[10px] text-gray-400 font-light">will influence picks</span>
+            </div>
+          )}
+
+          {/* Outfit type grid */}
+          <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-3">Select outfit style</p>
+          <div className="grid grid-cols-2 gap-3 mb-2">
+            {OUTFIT_TYPES.map(type => {
+              const IconComponent = type.icon;
+
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => setSelectedType(prev => prev === type.id ? null : type.id)}
+                  className={`flex flex-col items-center gap-2 py-4 px-3 rounded-2xl border-2 transition-all active:scale-[0.97] ${
+                    selectedType === type.id
+                      ? 'border-amber-400 bg-amber-50/40 shadow-sm'
+                      : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {IconComponent && (
+                    <IconComponent 
+                      size={22} 
+                      className={selectedType === type.id ? "text-amber-500" : "text-gray-400"} 
+                    />
+                  )}
+                  
+                  <span className="text-xs font-medium text-gray-700">{type.label}</span>
+                  {selectedType === type.id && (
+                    <span className="text-[8px] text-amber-600 font-semibold tracking-wide uppercase">Selected</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[9px] text-gray-400 text-center mt-2 font-light">
+            {selectedType ? `AI will prioritize ${selectedType} style items from your wardrobe` : 'Skip to generate based on weather & undertone only'}
+          </p>
+        </div>
+
+        <div className="flex-shrink-0 border-t border-gray-50 p-5 space-y-2">
+          <button
+            onClick={() => { onGenerate(selectedType); }}
+            className="w-full py-3.5 text-[11px] tracking-[0.2em] font-semibold text-white rounded-xl transition-all shadow-md hover:brightness-95 active:scale-[0.98] flex items-center justify-center gap-2"
+            style={{ backgroundColor: colors.accent }}
+          >
+            <Sparkles size={13} />
+            {selectedType ? `GENERATE ${selectedType.toUpperCase()} OUTFIT` : 'GENERATE OUTFIT'}
+          </button>
+          <button onClick={onClose} className="w-full py-2.5 text-[10px] text-gray-400 hover:text-gray-600 tracking-widest transition-colors">
+            CANCEL
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MatchBadge ───────────────────────────────────────────────────────────────
+
 function MatchBadge({ item, undertone }) {
   if (!undertone || !isGoodMatch(item, undertone)) return null;
   return (
@@ -404,7 +471,7 @@ function MatchBadge({ item, undertone }) {
 }
 
 function CuratedLookPanel({ selectedOutfit, undertone, selectedUndertoneData }) {
-  const order = ['Tops', 'Outerwear', 'Bottoms', 'Accessories', 'Shoes', 'Bags'];
+  const order = ['Tops', 'Outerwear', 'Bottoms', 'Accessories', 'Boxes', 'Bags', 'Shoes'];
   const sortedOutfit = [...selectedOutfit].sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));
   const hasItems = selectedOutfit.length > 0;
   return (
@@ -465,35 +532,38 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const [carouselIndices, setCarouselIndices]      = useState({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
   const [selectedDay, setSelectedDay]              = useState('Monday');
   const [modalConfig, setModalConfig]              = useState({ isOpen:false, type:'success', message:'' });
-  
-  const [undertone, setUndertone]                  = useState(() => {
-    return localStorage.getItem('closetry_user_undertone') || null;
-  });
+  const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
+
+  const [undertone, setUndertone] = useState(() => localStorage.getItem('closetry_user_undertone') || null);
   const [showUndertoneModal, setShowUndertoneModal] = useState(false);
 
-  const [weather, setWeather]             = useState(null);
+  const [weather, setWeather]               = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
-  const [weatherError, setWeatherError]   = useState(false);
+  const [weatherError, setWeatherError]     = useState(false);
+  const [timeOfDay, setTimeOfDay]           = useState(getTimeOfDay());
 
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
     setWeatherError(false);
+    const tod = getTimeOfDay();
+    setTimeOfDay(tod);
+
     try {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&current=temperature_2m,apparent_temperature,weathercode,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&temperature_unit=celsius&timezone=Asia%2FJakarta';
-      const res = await fetch(url);
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&hourly=temperature_2m,apparent_temperature,weathercode,relative_humidity_2m,wind_speed_10m&current=temperature_2m,apparent_temperature,weathercode,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&temperature_unit=celsius&timezone=Asia%2FJakarta';
+      const res  = await fetch(url);
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
-      const c    = data.current;
-      const meta = getWeatherMeta(c.weathercode);
-      setWeather({
-        tempC:         c.temperature_2m,
-        feelsLike:     c.apparent_temperature,
-        humidity:      c.relative_humidity_2m,
-        wind:          c.wind_speed_10m,
-        condition:     meta.label,
-        conditionIcon: meta.icon,
-        code:          c.weathercode,
-      });
+
+      const now      = new Date();
+      const hour     = now.getHours();
+      const hourly   = data.hourly;
+      const idx      = hourly.time.findIndex(t => new Date(t).getHours() === hour && new Date(t).toDateString() === now.toDateString());
+      const source   = idx >= 0
+        ? { temp: hourly.temperature_2m[idx], feels: hourly.apparent_temperature[idx], hum: hourly.relative_humidity_2m[idx], wind: hourly.wind_speed_10m[idx], code: hourly.weathercode[idx] }
+        : { temp: data.current.temperature_2m, feels: data.current.apparent_temperature, hum: data.current.relative_humidity_2m, wind: data.current.wind_speed_10m, code: data.current.weathercode };
+
+      const meta = getWeatherMeta(source.code);
+      setWeather({ tempC: source.temp, feelsLike: source.feels, humidity: source.hum, wind: source.wind, condition: meta.label, conditionIcon: meta.icon, code: source.code });
     } catch {
       setWeatherError(true);
     } finally {
@@ -503,13 +573,15 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
 
   useEffect(() => { fetchWeather(); }, [fetchWeather]);
 
+  useEffect(() => {
+    const interval = setInterval(() => setTimeOfDay(getTimeOfDay()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSelectUndertone = (toneId) => {
     setUndertone(toneId);
-    if (toneId) {
-      localStorage.setItem('closetry_user_undertone', toneId);
-    } else {
-      localStorage.removeItem('closetry_user_undertone');
-    }
+    if (toneId) localStorage.setItem('closetry_user_undertone', toneId);
+    else localStorage.removeItem('closetry_user_undertone');
   };
 
   const daysOfWeek = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -525,10 +597,10 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     Shoes:       wardrobe.filter(i => i.category === 'Shoes'),
   };
 
-  const getSortedItems = (category) => {
+  const getSortedItems = (category, outfitType = null) => {
     const items = itemsByCategory[category] || [];
-    if (!undertone && !weather) return items;
-    return [...items].sort((a,b) => getItemScore(b, undertone, weather) - getItemScore(a, undertone, weather));
+    if (!undertone && !weather && !outfitType) return items;
+    return [...items].sort((a,b) => getItemScore(b, undertone, weather, outfitType) - getItemScore(a, undertone, weather, outfitType));
   };
 
   const handleScrollItem = (direction) => {
@@ -560,42 +632,81 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     if (currentStepIdx < STEPS.length - 1) setCurrentStepIdx(currentStepIdx + 1);
   };
 
-  const handlePrevStep = () => {
-    if (currentStepIdx > 0) setCurrentStepIdx(currentStepIdx - 1);
-  };
+  const handlePrevStep = () => { if (currentStepIdx > 0) setCurrentStepIdx(currentStepIdx - 1); };
 
-  const generateAIOutfit = () => {
-    const newIndices = {}, newOutfit = [], newSkips = {};
-    const pickBest = (category) => {
-      const items = itemsByCategory[category];
-      if (!items || items.length === 0) return null;
-      if (undertone || weather) {
-        const scored = [...items]
-          .map(item => ({ item, score: getItemScore(item, undertone, weather) }))
-          .sort((a,b) => b.score - a.score);
-        return scored[Math.floor(Math.random() * Math.min(3, scored.length))].item;
+  const generateAIOutfit = (outfitType = null) => {
+    if (outfitType) {
+      const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
+      if (typeConfig) {
+        const hasValidTops = itemsByCategory['Tops'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidBottoms = itemsByCategory['Bottoms'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidShoes = itemsByCategory['Shoes'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+
+        if (!hasValidTops || !hasValidBottoms || !hasValidShoes) {
+          setModalConfig({ 
+            isOpen: true, 
+            type: 'error', 
+            message: `Sorry, there is no ${typeConfig.label} style available in your wardrobe!` 
+          });
+          return;
+        }
       }
-      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    const newIndices = {}, newOutfit = [], newSkips = {};
+    
+    const pickBest = (category) => {
+      let items = itemsByCategory[category] || [];
+      if (items.length === 0) return null;
+      
+      if (outfitType) {
+        const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
+        if (typeConfig) {
+          const filteredByStyle = items.filter(item => 
+            typeConfig.styles.includes((item.style || '').toLowerCase())
+          );
+          if (filteredByStyle.length > 0) {
+            items = filteredByStyle;
+          }
+        }
+      }
+      
+      const scored = [...items]
+        .map(item => ({ item, score: getItemScore(item, undertone, weather, outfitType) }))
+        .sort((a, b) => b.score - a.score);
+        
+      return scored[Math.floor(Math.random() * Math.min(3, scored.length))].item;
     };
-    ['Tops','Bottoms','Shoes'].forEach(cat => {
+
+    // Execute generation for mandatory core components
+    ['Tops', 'Bottoms', 'Shoes'].forEach(cat => {
       const picked = pickBest(cat);
-      if (picked) { newIndices[cat] = itemsByCategory[cat].indexOf(picked); newOutfit.push(picked); }
+      if (picked) { 
+        newIndices[cat] = itemsByCategory[cat].indexOf(picked); 
+        newOutfit.push(picked); 
+      }
     });
-    ['Outerwear','Bags','Accessories'].forEach(cat => {
+
+    // Execute generation for secondary optional pieces
+    ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
       const alwaysInclude = cat === 'Outerwear' && weather?.conditionIcon === 'rain';
       if (items && items.length > 0 && (alwaysInclude || Math.random() > 0.5)) {
         const picked = pickBest(cat);
-        newIndices[cat] = itemsByCategory[cat].indexOf(picked);
-        newOutfit.push(picked);
+        if (picked) {
+          newIndices[cat] = itemsByCategory[cat].indexOf(picked);
+          newOutfit.push(picked);
+        }
       } else {
         newSkips[cat] = true;
       }
     });
+
     setCarouselIndices(prev => ({ ...prev, ...newIndices }));
     setSkippedCategories(newSkips);
     setSelectedOutfit(newOutfit);
     setCurrentStepIdx(STEPS.length - 1);
+    setShowAutoGenerateModal(false); 
   };
 
   const saveAndScheduleOutfit = () => {
@@ -603,7 +714,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
       setModalConfig({ isOpen:true, type:'error', message:'Please select at least one clothing item!' });
       return;
     }
-    const outfitId = Date.now();
+    const outfitId     = Date.now();
     const newOutfitObj = { id: outfitId, items: [...selectedOutfit] };
     setSavedOutfits([...savedOutfits, newOutfitObj]);
     if (typeof setWeeklyPlan === 'function') {
@@ -634,9 +745,9 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
         <p className="text-[9px] uppercase tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1">
           Recommended for {selectedUndertoneData?.label} undertone
         </p>
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling:'touch' }}>
           {goodItems.map(item => {
-            const sorted = getSortedItems(category);
+            const sorted    = getSortedItems(category);
             const sortedIdx = sorted.findIndex(i => i.id === item.id);
             return (
               <button
@@ -661,10 +772,10 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     );
   };
 
-  const currentItems     = getSortedItems(currentStep.id);
-  const currentItem      = currentItems?.[carouselIndices[currentStep.id]];
+  const currentItems       = getSortedItems(currentStep.id);
+  const currentItem        = currentItems?.[carouselIndices[currentStep.id]];
   const currentItemIsMatch = currentItem && undertone && isGoodMatch(currentItem, undertone);
-  const weatherTips     = getWeatherOutfitTips(weather);
+  const weatherTips        = getWeatherOutfitTips(weather);
 
   return (
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
@@ -680,7 +791,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 max-w-4xl mx-auto w-full">
-          
+          {/* Undertone panel */}
           <div className="w-full flex">
             {!undertone ? (
               <button
@@ -695,12 +806,9 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <p className="text-sm font-semibold text-amber-900 tracking-tight flex items-center gap-1.5">
-                      Skin Undertone
-                      <Sparkles size={13} className="text-amber-500 animate-pulse" />
+                      Skin Undertone <Sparkles size={13} className="text-amber-500 animate-pulse" />
                     </p>
-                    <p className="text-[11px] text-amber-700/80 font-light leading-relaxed truncate xs:whitespace-normal">
-                      Calibrate your personal layout configuration for optimized color results.
-                    </p>
+                    <p className="text-[11px] text-amber-700/80 font-light leading-relaxed">Calibrate your color preferences for smarter outfit picks.</p>
                   </div>
                 </div>
                 <div className="flex justify-end mt-2">
@@ -735,21 +843,16 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
             )}
           </div>
 
+          {/* Weather panel */}
           <div className="w-full flex">
-            <DesktopWeatherPanel 
-              weather={weather} 
-              loading={weatherLoading} 
-              error={weatherError} 
-              onRetry={fetchWeather} 
-            />
+            <DesktopWeatherPanel weather={weather} loading={weatherLoading} error={weatherError} onRetry={fetchWeather} timeOfDay={timeOfDay} />
           </div>
-
         </div>
 
         <div className="flex flex-col gap-5 max-w-4xl mx-auto w-full">
-          
           <div className="flex-1 min-w-0 w-full space-y-5">
-            
+
+            {/* Step progress */}
             <div className="relative overflow-x-auto pb-2 max-w-2xl mx-auto" style={{ scrollbarWidth: 'none' }}>
               <div className="absolute top-4 left-0 right-0 h-px bg-gray-200 z-0 min-w-[340px]" />
               <div className="flex items-start justify-between relative z-10 gap-2 min-w-[340px] px-1">
@@ -757,11 +860,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                   <div key={step.id} className="flex flex-col items-center" style={{ flex: '1 1 0', minWidth: 0 }}>
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] transition-all duration-300 border-2 bg-white flex-shrink-0"
-                      style={{
-                        backgroundColor: idx <= currentStepIdx ? colors.accent : 'white',
-                        borderColor:     idx <= currentStepIdx ? colors.accent : '#E5E7EB',
-                        color:           idx <= currentStepIdx ? 'white' : '#9CA3AF',
-                      }}
+                      style={{ backgroundColor: idx <= currentStepIdx ? colors.accent : 'white', borderColor: idx <= currentStepIdx ? colors.accent : '#E5E7EB', color: idx <= currentStepIdx ? 'white' : '#9CA3AF' }}
                     >
                       {idx < currentStepIdx ? <Check size={11} /> : idx + 1}
                     </div>
@@ -774,20 +873,26 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               </div>
             </div>
 
+            {/* Auto generate prompt */}
             {currentStepIdx === 0 && selectedOutfit.length === 0 && (
               <div className="bg-amber-50/40 border border-amber-100 rounded-2xl p-4 text-center space-y-2.5 max-w-xl mx-auto">
                 <div className="flex justify-center text-amber-500"><Sparkles size={16} /></div>
                 <p className="text-xs font-light text-amber-900 leading-relaxed">
-                  {undertone 
-                    ? `Struggling to style today? AI can pick a color palette matching your ${selectedUndertoneData?.label} tone!`
-                    : `It's ${Math.round(weather?.tempC || 28)}°C in Jakarta — let AI generate your outfit configuration!`}
+                  {undertone
+                    ? `Let AI generate an outfit matching your ${selectedUndertoneData?.label} tone — pick your vibe first!`
+                    : `${Math.round(weather?.tempC || 28)}°C in Jakarta — let AI style you for ${getTimeLabel(timeOfDay).toLowerCase()}.`}
                 </p>
-                <button onClick={generateAIOutfit} className="px-5 py-2.5 text-xs text-white rounded-xl font-medium transition-all shadow-sm flex items-center justify-center gap-1.5 mx-auto active:scale-95 hover:brightness-95" style={{ backgroundColor: colors.accent }}>
+                <button
+                  onClick={() => setShowAutoGenerateModal(true)}
+                  className="px-5 py-2.5 text-xs text-white rounded-xl font-medium transition-all shadow-sm flex items-center justify-center gap-1.5 mx-auto active:scale-95 hover:brightness-95"
+                  style={{ backgroundColor: colors.accent }}
+                >
                   <Sparkles size={12} /> AUTO GENERATE OUTFIT
                 </button>
               </div>
             )}
 
+            {/* Step content */}
             {currentStep.id !== 'Preview' ? (
               <div className="flex flex-col md:flex-row gap-4 items-stretch justify-center w-full">
                 <div className="bg-white rounded-3xl border shadow-sm flex-1 overflow-hidden flex flex-col justify-between" style={{ borderColor: colors.border }}>
@@ -809,7 +914,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                       <button onClick={() => handleScrollItem(-1)} disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1} className="p-2 rounded-full border bg-white shadow-sm disabled:opacity-20 active:scale-90 transition-all">
                         <ChevronLeft size={18} style={{ color: colors.heading }} />
                       </button>
-
                       <div className={`relative flex-1 rounded-2xl flex flex-col items-center justify-center p-4 border border-dashed transition-all aspect-square ${skippedCategories[currentStep.id] ? 'bg-red-50/30 border-red-200' : currentItemIsMatch ? 'bg-amber-50/40 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                         {skippedCategories[currentStep.id] ? (
                           <div className="text-red-400 text-center"><p className="text-xs font-medium">OMITTED</p></div>
@@ -827,7 +931,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                           <div className="text-gray-400 text-center"><p className="text-xs">No items available</p></div>
                         )}
                       </div>
-
                       <button onClick={() => handleScrollItem(1)} disabled={skippedCategories[currentStep.id] || !currentItems || currentItems.length <= 1} className="p-2 rounded-full border bg-white shadow-sm disabled:opacity-20 active:scale-90 transition-all">
                         <ChevronRight size={18} style={{ color: colors.heading }} />
                       </button>
@@ -856,15 +959,14 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               <div className="w-full flex justify-center">
                 <div className="bg-white rounded-3xl p-5 border shadow-sm w-[380px]" style={{ borderColor: colors.border }}>
                   <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-6 text-center">Lookbook Preview</p>
-                  
                   <div className="relative w-full h-[580px] flex items-center justify-center overflow-hidden bg-gray-50/50 rounded-2xl">
                     {selectedOutfit.length > 0 ? (
-                      <div className="relative w-full h-full">                        
+                      <div className="relative w-full h-full">
                         {selectedOutfit.filter(i => i.category === 'Tops').map(item => (
                           <div key={item.id} className="absolute top-8 right-8 w-full h-64 flex items-center justify-center -translate-x-14 z-10 scale-100">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
                           </div>
-                        ))}                        
+                        ))}
                         {selectedOutfit.filter(i => i.category === 'Bottoms').map(item => (
                           <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
@@ -875,7 +977,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
                           </div>
                         ))}
-
                         {selectedOutfit.filter(i => i.category === 'Outerwear').map(item => (
                           <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
                             <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
@@ -909,7 +1010,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                         </SelectContent>
                       </Select>
                     </div>
-
                     <div className="flex gap-2">
                       <button onClick={saveAndScheduleOutfit} className="flex-[2] text-xs font-medium text-white rounded-xl py-3 tracking-widest transition-all active:scale-[0.98]" style={{ backgroundColor: colors.accent }}>
                         SAVE & SCHEDULE
@@ -930,26 +1030,49 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
       </div>
 
       {showUndertoneModal && (
-        <UndertoneSelectorModal 
-          selectedTone={undertone} 
-          onSelect={handleSelectUndertone} 
-          onClose={() => setShowUndertoneModal(false)} 
+        <UndertoneSelectorModal selectedTone={undertone} onSelect={handleSelectUndertone} onClose={() => setShowUndertoneModal(false)} />
+      )}
+
+      {showAutoGenerateModal && (
+        <AutoGenerateModal
+          onGenerate={generateAIOutfit}
+          onClose={() => setShowAutoGenerateModal(false)}
+          undertone={undertone}
+          weather={weather}
+          timeOfDay={timeOfDay}
         />
       )}
 
       {modalConfig.isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl text-center w-full max-w-xs border border-gray-100 relative p-6">
+          <div className="bg-white rounded-2xl shadow-2xl text-center w-full max-w-xs border border-gray-100 relative p-6 flex flex-col items-center">
             {modalConfig.type === 'error' && (
-              <button onClick={() => setModalConfig(prev => ({ ...prev, isOpen: false }))} className="absolute top-4 right-4 text-gray-400 p-1 hover:bg-gray-50 rounded-full">
+              <button 
+                onClick={() => setModalConfig(prev => ({ ...prev, isOpen: false }))} 
+                className="absolute top-4 right-4 text-gray-400 p-1 hover:bg-gray-50 rounded-full transition-colors"
+              >
                 <X size={16} />
               </button>
             )}
-            <div className="text-4xl mb-3">{modalConfig.type === 'success' ? '✨' : '⚠️'}</div>
+            
+            <div 
+              className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
+                modalConfig.type === 'success' ? 'bg-amber-50 text-amber-500' : 'bg-red-50 text-red-500'
+              }`}
+            >
+              {modalConfig.type === 'success' ? (
+                <Sparkles size={22} className="animate-pulse" />
+              ) : (
+                <AlertTriangle size={22} />
+              )}
+            </div>
+
             <h3 className={`text-base font-medium mb-1 ${modalConfig.type === 'success' ? 'text-gray-900' : 'text-red-500'}`}>
               {modalConfig.type === 'success' ? 'Outfit Scheduled!' : 'Action Required'}
             </h3>
-            <p className="text-gray-500 text-xs tracking-wide font-light leading-relaxed">{modalConfig.message}</p>
+            <p className="text-gray-500 text-xs tracking-wide font-light leading-relaxed max-w-[200px]">
+              {modalConfig.message}
+            </p>
           </div>
         </div>
       )}

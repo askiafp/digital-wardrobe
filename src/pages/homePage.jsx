@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { ChevronRight, Calendar, Sparkles, User, Mail } from 'lucide-react';
 import { colors } from '../constants';
 
 const heroImages = [
@@ -8,7 +8,7 @@ const heroImages = [
   '/images/hero-3.jpg',
 ];
 
-export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo }) {
+export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -58,22 +58,23 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   }, []);
 
   useEffect(() => {
-    if (wardrobe && wardrobe.length > 0) {
+    if (wardrobe && wardrobe.length > 0 && !isGuest) {
       const shuffled = [...wardrobe].sort(() => 0.5 - Math.random());
       setRandomItems(shuffled.slice(0, 3));
+    } else {
+      setRandomItems([]);
     }
-  }, [wardrobe]);
+  }, [wardrobe, isGuest]);
 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
 
       <section 
         ref={heroRef} 
-        className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] min-h-[400px] sm:min-h-0 overflow-hidden flex items-center justify-center"
+        className="relative w-full aspect-[16/9] overflow-hidden flex items-center justify-center"
       >
-
         <div
-          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top transition-all"
+          className="absolute inset-0 bg-cover bg-top transition-all"
           style={{
             backgroundImage: `url(${heroImages[currentIndex]})`,
             transform: isTransitioning ? 'scale(1.02)' : 'scale(1)',
@@ -81,16 +82,14 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 1.2s ease-in-out, transform 7s linear',
           }}
         />
-
         <div
-          className="absolute inset-0 bg-cover bg-[center_top_15%] sm:bg-top -z-10"
+          className="absolute inset-0 bg-cover bg-top -z-10"
           style={{
             backgroundImage: `url(${heroImages[nextIndex]})`,
             opacity: isTransitioning ? bgOpacity : 0,
             transition: 'opacity 1.2s ease-in-out',
           }}
         />
-
         <div
           className="absolute inset-0"
           style={{
@@ -99,23 +98,22 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 0.5s ease',
           }}
         />
-
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-12 max-w-4xl mx-auto h-full w-full">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-12 max-w-4xl mx-auto h-full w-full justify-center">
           <h1
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-4 sm:mb-6 leading-tight select-none"
+            className="text-[5vw] sm:text-5xl md:text-6xl font-light mb-2 sm:mb-6 leading-tight select-none"
             style={{ fontFamily: 'Cormorant Garamond, serif', color: 'white' }}
           >
             Your Wardrobe,<br />Beautifully Organized
           </h1>
           <p 
-            className="text-xs sm:text-base md:text-lg font-light mb-6 sm:mb-8 opacity-90 max-w-md sm:max-w-xl mx-auto leading-relaxed select-none" 
+            className="text-[2.2vw] sm:text-base md:text-lg font-light mb-3 sm:mb-8 opacity-90 max-w-[80%] sm:max-w-xl mx-auto leading-relaxed select-none" 
             style={{ color: 'white', fontFamily: 'DM Sans, sans-serif' }}
           >
             Reconnect with the clothes you already own. Create, plan, and style with intention.
           </p>
           <button
             onClick={() => navigateTo('wardrobe')}
-            className="px-6 py-2.5 sm:px-8 sm:py-3.5 text-[11px] sm:text-xs md:text-sm tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
+            className="px-4 py-1.5 sm:px-8 sm:py-3.5 text-[2vw] sm:text-xs md:text-sm tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             style={{ backgroundColor: colors.accent, color: 'white' }}
           >
             START STYLING
@@ -123,63 +121,91 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      <section className="px-6 md:px-12 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {wardrobe?.length || 0}
+      {!isGuest ? (
+        <section className="px-6 md:px-12 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {wardrobe.length}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Pieces in Your Closet
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Pieces in Your Closet
-              </p>
-            </div>
-            <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {savedOutfits?.length || 0}
+              <div className="text-center space-y-2 border-b md:border-b-0 md:border-r pb-6 md:pb-0 last:border-0" style={{ borderColor: colors.border }}>
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {savedOutfits?.length || 0}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Outfits Saved
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Outfits Saved
-              </p>
-            </div>
-            <div className="text-center space-y-2 pb-0 last:border-0">
-              <div className="text-4xl font-light" style={{ color: colors.accent }}>
-                {Object.keys(weeklyPlan || {}).length}
+              <div className="text-center space-y-2 pb-0 last:border-0">
+                <div className="text-4xl font-light" style={{ color: colors.accent }}>
+                  {Object.keys(weeklyPlan || {}).length}
+                </div>
+                <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
+                  Days Planned
+                </p>
               </div>
-              <p className="text-xs tracking-widest uppercase font-semibold text-neutral-400">
-                Days Planned
-              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="px-6 md:px-12 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-3xl border p-8 md:p-10 text-center space-y-4 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.01)]" style={{ borderColor: colors.border }}>
+              <Sparkles size={28} style={{ color: colors.accent }} className="mx-auto" />
+              <h2
+                className="text-2xl md:text-3xl font-light"
+                style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}
+              >
+                Welcome to Your Curation Vault
+              </h2>
+              <p className="text-sm font-light text-neutral-400 max-w-md mx-auto leading-relaxed">
+                Start by adding pieces to your wardrobe. Your stats, outfits, and weekly plan will appear here once you do.
+              </p>
+              <button
+                onClick={() => navigateTo('wardrobe')}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs tracking-widest font-semibold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-md active:scale-[0.98]"
+                style={{ backgroundColor: colors.accent, color: 'white' }}
+              >
+                ADD YOUR FIRST PIECE <ChevronRight size={12} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
-      <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4 text-center md:text-left flex-col md:flex-row">
-              <div className="p-4 rounded-2xl bg-neutral-50" style={{ color: colors.accent }}>
-                <Calendar size={24} />
+      {!isGuest && (
+        <section className="px-6 md:px-12 py-10 border-t" style={{ borderColor: colors.border }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4 text-center md:text-left flex-col md:flex-row">
+                <div className="p-4 rounded-2xl bg-neutral-50" style={{ color: colors.accent }}>
+                  <Calendar size={24} />
+                </div>
+                <div>
+                  <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-neutral-400 block mb-0.5">
+                    Today's Schedule ({todayName})
+                  </span>
+                  <h3 className="text-lg font-medium text-neutral-800">
+                    {todayOutfit ? `Ready to wear: ${todayOutfit.name || 'Your Curated Look'}` : "No look scheduled for today yet."}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-neutral-400 block mb-0.5">
-                  Today's Schedule ({todayName})
-                </span>
-                <h3 className="text-lg font-medium text-neutral-800">
-                  {todayOutfit ? `Ready to wear: ${todayOutfit.name || 'Your Curated Look'}` : "No look scheduled for today yet."}
-                </h3>
-              </div>
+              <button 
+                onClick={() => navigateTo('planner')}
+                className="text-xs font-semibold tracking-wider uppercase border px-5 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                style={{ borderColor: colors.border, color: colors.heading }}
+              >
+                {todayOutfit ? 'Open Planner' : 'Schedule Now'} <ChevronRight size={12} />
+              </button>
             </div>
-            <button 
-              onClick={() => navigateTo('planner')}
-              className="text-xs font-semibold tracking-wider uppercase border px-5 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-              style={{ borderColor: colors.border, color: colors.heading }}
-            >
-              {todayOutfit ? 'Open Planner' : 'Schedule Now'} <ChevronRight size={12} />
-            </button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="px-6 md:px-12 py-16 border-t" style={{ borderColor: colors.border }}>
         <div className="max-w-5xl mx-auto">
@@ -252,7 +278,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             HOW-TO
           </h2>
           <p className="text-xs md:text-sm font-light tracking-wider text-neutral-400 uppercase">
-            3 easy steps <span className="italic font-serif lowercase tracking-normal text-neutral-500">to</span> glow up your look
+            3 easy steps to glow up your look
           </p>
         </div>
 
