@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { Heart, Plus, Trash2, X } from 'lucide-react';
+import { Heart, Plus, Trash2, X, Edit2 } from 'lucide-react';
 import { colors, categories } from '../constants';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutfit, activeFilter, setActiveFilter, onAddPhoto, onDeleteItem, isGuest }) {
+export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutfit, activeFilter, setActiveFilter, onAddPhoto, onDeleteItem, onEditItem, isGuest }) {
   const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const [editItem, setEditItem] = useState(null);
 
   const filteredWardrobe = activeFilter === 'All' 
     ? wardrobe 
@@ -39,6 +47,28 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
   const cancelDelete = (e) => {
     e.stopPropagation();
     setDeleteTargetId(null);
+  };
+
+  const openEditModal = (item, e) => {
+    e.stopPropagation();
+    setEditItem({
+      id: item.id,
+      name: item.name || '',
+      category: item.category || '',
+      style: item.style ? item.style.charAt(0).toUpperCase() + item.style.slice(1) : ''
+    });
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (onEditItem && editItem) {
+      onEditItem(editItem.id, {
+        name: editItem.name,
+        category: editItem.category,
+        style: editItem.style
+      });
+    }
+    setEditItem(null);
   };
 
   if (isGuest) {
@@ -141,12 +171,20 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
                   transform: selectedOutfit.find(i => i.id === item.id) ? 'scale(0.98)' : 'scale(1)',
                 }}
               >
-                <button
-                  onClick={(e) => openDeleteConfirmation(item.id, e)}
-                  className="absolute top-3 right-3 z-10 p-2 bg-white/80 backdrop-blur-md rounded-xl text-gray-400 hover:text-red-500 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-90"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="absolute top-3 right-3 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <button
+                    onClick={(e) => openEditModal(item, e)}
+                    className="p-2 bg-white/80 backdrop-blur-md rounded-xl text-gray-400 hover:text-gray-700 hover:bg-white shadow-sm active:scale-90"
+                  >
+                    <Edit2 size={13} />
+                  </button>
+                  <button
+                    onClick={(e) => openDeleteConfirmation(item.id, e)}
+                    className="p-2 bg-white/80 backdrop-blur-md rounded-xl text-gray-400 hover:text-red-500 hover:bg-white shadow-sm active:scale-90"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
 
                 <div
                   className="aspect-[3/4] rounded-2xl mb-3 overflow-hidden group-hover:shadow-lg transition-all duration-150 flex items-center justify-center"
@@ -204,6 +242,90 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
           )}
         </div>
       </div>
+
+      {/* ── Custom Edit Item Modal ─────────────────────────────────────────── */}
+      {editItem && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999] bg-black/30 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div 
+            className="bg-white/95 backdrop-blur-md w-full max-w-[400px] rounded-[32px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12)] border p-6 relative flex flex-col transition-all max-h-[90vh] overflow-y-auto"
+            style={{ borderColor: colors.border, scrollbarWidth: 'none' }}
+          >
+            <button
+              onClick={() => setEditItem(null)}
+              className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-600 p-1.5 rounded-full hover:bg-neutral-50 transition-colors"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="mb-5">
+              <h2 className="text-2xl font-light mb-0.5" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
+                Edit Piece Info
+              </h2>
+              <p className="text-[10px] text-neutral-400 uppercase tracking-[0.18em] font-light">Update details of your item</p>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Item Name</label>
+                <input
+                  type="text" 
+                  required
+                  value={editItem.name}
+                  onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
+                  className="w-full px-4 py-2.5 text-sm text-neutral-800 bg-neutral-50/60 border rounded-xl focus:outline-none focus:ring-1 transition-all"
+                  style={{ borderColor: colors.border, '--tw-ring-color': colors.accent }}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Category</label>
+                  <Select
+                    value={editItem.category}
+                    onValueChange={(val) => setEditItem({ ...editItem, category: val })}
+                  >
+                    <SelectTrigger className="w-full px-4 py-2.5 text-sm text-neutral-800 bg-neutral-50/60 border rounded-xl focus:outline-none focus:ring-1" style={{ borderColor: colors.border, height: 'auto' }}>
+                      <SelectValue placeholder="Select Category" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border shadow-lg z-[10000] bg-white">
+                      {categories.filter(cat => cat !== 'All').map(cat => (
+                        <SelectItem key={cat} value={cat} className="text-sm cursor-pointer rounded-lg font-light">{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Style</label>
+                  <Select 
+                    value={editItem.style} 
+                    onValueChange={(val) => setEditItem({ ...editItem, style: val })}
+                  >
+                    <SelectTrigger className="w-full px-4 py-2.5 text-sm text-neutral-800 bg-neutral-50/60 border rounded-xl focus:outline-none focus:ring-1" style={{ borderColor: colors.border, height: 'auto' }}>
+                      <SelectValue placeholder="Select Style" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border shadow-lg z-[10000] bg-white">
+                      {['Casual', 'Formal', 'Comfy', 'Sporty'].map(st => (
+                        <SelectItem key={st} value={st} className="text-sm cursor-pointer rounded-lg capitalize font-light">{st}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  className="w-full py-3.5 text-[11px] tracking-[0.2em] font-medium text-white rounded-xl transition-all duration-300 shadow-sm hover:brightness-105 active:scale-[0.98]" 
+                  style={{ backgroundColor: colors.accent }}
+                >
+                  SAVE CHANGES
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ── Custom Delete Confirmation Modal ────────────────────────────────────── */}
       {deleteTargetId && (

@@ -8,20 +8,19 @@ const heroImages = [
   '/images/hero-3.jpg',
 ];
 
-// Dummy data cuaca — nanti bisa diganti API asli
-const weatherDummy = {
-  condition: 'Sunny', // 'Sunny' | 'Rainy' | 'Cloudy' | 'Snowy'
-  temp: 22,
-  day: 'Sunday',
-  time: '9 am',
+const weatherConfig = {
+  Sunny: { icon: Sun, label: 'Sunny' },
+  Rainy: { icon: CloudRain, label: 'Rainy' },
+  Cloudy: { icon: Cloud, label: 'Cloudy' },
+  Snowy: { icon: Snowflake, label: 'Snowy' },
 };
 
-const weatherConfig = {
-  Sunny: { icon: Sun, label: 'Sunny', bg: '/images/weather-sunny.jpg' },
-  Rainy: { icon: CloudRain, label: 'Rainy', bg: '/images/weather-rainy.jpg' },
-  Cloudy: { icon: Cloud, label: 'Cloudy', bg: '/images/weather-cloudy.jpg' },
-  Snowy: { icon: Snowflake, label: 'Snowy', bg: '/images/weather-snowy.jpg' },
-};
+function getWeatherBackgroundImage(conditionIcon, tempC) {
+  if (conditionIcon === 'rain') return '/images/rain.jpg';
+  if (tempC >= 30) return '/images/hot.jpg';
+  if (tempC >= 25) return '/images/warm.jpg';
+  return '/images/default.jpg';
+}
 
 export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,18 +30,68 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   const [randomItems, setRandomItems] = useState([]);
   const heroRef = useRef(null);
 
-  const [weather] = useState(weatherDummy);
-  const weatherInfo = weatherConfig[weather.condition];
+  const [weather, setWeather] = useState({
+    condition: 'Sunny',
+    temp: 28,
+    day: 'Today',
+    time: 'Now'
+  });
+
+  const weatherInfo = weatherConfig[weather.condition] || weatherConfig.Sunny;
   const WeatherIcon = weatherInfo.icon;
 
-  // Auto slide every 4 seconds
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const todayName = daysOfWeek[new Date().getDay()];
   const todayOutfit = weeklyPlan[todayName.toLowerCase()] || null;
 
-  const handleImageError = (e) => {
-    e.target.style.display = 'none';
-  };
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch(
+          'https://api.open-meteo.com/v1/forecast?latitude=-6.2146&longitude=106.8451&current=temperature_2m,weather_code&timezone=Asia%2FJakarta'
+        );
+        const data = await response.json();
+        if (data && data.current) {
+          const code = data.current.weather_code;
+          let cond = 'Sunny';
+          let iconName = 'clear';
+
+          if (code >= 1 && code <= 3) {
+            cond = 'Cloudy';
+            iconName = 'cloudy';
+          } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99)) {
+            cond = 'Rainy';
+            iconName = 'rain'; 
+          } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+            cond = 'Snowy';
+            iconName = 'snow';
+          } else if (code === 0) {
+            cond = 'Sunny';
+            iconName = 'clear';
+          }
+
+          const now = new Date();
+          const currentHour = now.getHours();
+          const period = currentHour >= 12 ? 'pm' : 'am';
+          const displayHour = currentHour % 12 || 12;
+
+          setWeather({
+            condition: cond,
+            icon: iconName,
+            temp: Math.round(data.current.temperature_2m),
+            day: todayName,
+            time: `${displayHour} ${period}`
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch real-time Jakarta weather data:', error);
+      }
+    };
+
+    fetchWeather();
+    const weatherInterval = setInterval(fetchWeather, 900000);
+    return () => clearInterval(weatherInterval);
+  }, [todayName]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -118,7 +167,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             transition: 'opacity 0.5s ease',
           }}
         />
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-12 max-w-4xl mx-auto h-full w-full justify-center">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-12 max-w-4xl mx-auto h-full w-full">
           <h1
             className="text-[5vw] sm:text-5xl md:text-6xl font-light mb-2 sm:mb-6 leading-tight select-none"
             style={{ fontFamily: 'Cormorant Garamond, serif', color: 'white' }}
@@ -303,7 +352,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto relative">
-          <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between relative group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
+          <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-3xl md:text-4xl font-light opacity-35 select-none" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent }}>01</span>
@@ -315,7 +364,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             </div>
           </div>
 
-          <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between relative group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
+          <div className="rounded-3xl p-6 md:p-8 bg-white border border-neutral-100 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col justify-between group hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 min-w-0">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-3xl md:text-4xl font-light opacity-35 select-none" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent }}>02</span>
@@ -341,40 +390,132 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      {/* ── Weather Widget (Fixed, nempel pojok kanan bawah) ── */}
       <button
         onClick={() => navigateTo('styling')}
-        className="fixed bottom-6 right-6 z-50 flex rounded-3xl overflow-hidden shadow-2xl transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-        style={{ width: '320px', height: '150px' }}
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex rounded-[28px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.25)] border border-white/10 bg-cover bg-center text-left transition-all duration-300 hover:scale-[1.02] active:scale-95 origin-bottom-right scale-85 sm:scale-90 md:scale-100"
+        style={{ 
+          backgroundImage: `url(${getWeatherBackgroundImage(weather.icon, weather.temp)})`, 
+          width: '290px',
+          height: '135px' 
+        }}
       >
-        {/* Background image kiri */}
-        <div
-          className="w-1/2 h-full bg-cover bg-center"
-          style={{ backgroundImage: `url(${weatherInfo.bg})` }}
-        />
+        <div className="absolute inset-0 bg-black/5" />
 
-        {/* Info kanan */}
-        <div
-          className="w-1/2 h-full flex flex-col justify-center px-4 text-left backdrop-blur-md"
-          style={{ backgroundColor: 'rgba(255,255,255,0.55)' }}
+        <div className="w-1/2 h-full relative p-2.5">
+          {(() => {
+            const filteredItems = wardrobe.filter(item => {
+              const nameLower = item.name?.toLowerCase() || '';
+              const catLower = item.category?.toLowerCase() || '';
+              const styleLower = item.style?.toLowerCase() || '';
+
+              if (weather.condition === 'Rainy') {
+                return (
+                  catLower.includes('outer') || 
+                  catLower.includes('pants') ||
+                  nameLower.includes('hoodie') || 
+                  nameLower.includes('jacket') || 
+                  nameLower.includes('sweater') ||
+                  styleLower.includes('comfy')
+                );
+              } else if (weather.condition === 'Sunny') {
+                return (
+                  catLower.includes('top') || 
+                  catLower.includes('bottom') ||
+                  nameLower.includes('t-shirt') || 
+                  nameLower.includes('shirt') || 
+                  nameLower.includes('short') ||
+                  styleLower.includes('casual')
+                );
+              } else {
+                return (
+                  nameLower.includes('shirt') || 
+                  catLower.includes('pants') || 
+                  styleLower.includes('formal')
+                );
+              }
+            });
+
+            const topPiece = filteredItems.find(item => {
+              const cat = item.category?.toLowerCase() || '';
+              return cat.includes('top') || cat.includes('outer') || item.name?.toLowerCase().includes('shirt');
+            }) || wardrobe.find(item => item.category?.toLowerCase().includes('top'));
+
+            const bottomPiece = filteredItems.find(item => {
+              const cat = item.category?.toLowerCase() || '';
+              return cat.includes('bottom') || cat.includes('pants') || item.name?.toLowerCase().includes('short');
+            }) || wardrobe.find(item => item.category?.toLowerCase().includes('bottom') || item.category?.toLowerCase().includes('pants'));
+
+            return (
+              <div className="absolute inset-0 z-10 p-3 flex flex-col justify-between">
+                <div className="flex justify-start">
+                  {topPiece ? (
+                    <img 
+                      src={topPiece.image} 
+                      alt="Top" 
+                      className="w-18 h-18 object-contain filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.4)] transform -rotate-6 transition-transform duration-300 hover:rotate-0"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : <div className="w-1" />}
+                </div>
+                
+                <div className="flex justify-end">
+                  {bottomPiece ? (
+                    <img 
+                      src={bottomPiece.image} 
+                      alt="Bottom" 
+                      className="w-16 h-16 object-contain filter drop-shadow-[0_8px_10px_rgba(0,0,0,0.4)] transform rotate-6 transition-transform duration-300 hover:rotate-0"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : <div className="w-1" />}
+                </div>
+
+                {!topPiece && !bottomPiece && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[9px] text-white/90 font-medium tracking-widest uppercase backdrop-blur-md bg-black/30 px-2 py-0.5 rounded-md">
+                      Empty Closet
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+
+        <div 
+          className="w-1/2 h-full flex flex-col justify-between p-3.5 relative border-l border-white/10"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(240,240,240,0.25) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
         >
-          <h4 className="text-sm font-bold leading-tight" style={{ color: colors.heading }}>
-            Recommended
-          </h4>
-          <p className="text-xs mb-2" style={{ color: colors.body }}>
-            clothes for today
-          </p>
-          <p className="text-xs mb-2" style={{ color: colors.body }}>
+          <div>
+            <h4 className="text-xs font-semibold tracking-tight text-neutral-800 leading-none mb-0.5">
+              Recommended
+            </h4>
+            <p className="text-[10px] text-neutral-600 font-light leading-none">
+              clothes for today
+            </p>
+          </div>
+
+          <p className="text-[10px] font-medium text-neutral-700/90 tracking-wide my-0.5">
             {weather.day}, {weather.time}
           </p>
 
-          <div className="flex items-center gap-2 bg-white/70 rounded-full px-3 py-1.5 w-fit">
-            <WeatherIcon size={18} style={{ color: colors.accent }} />
-            <div>
-              <p className="text-[10px] leading-none" style={{ color: colors.muted }}>
+          <div 
+            className="flex items-center gap-2 rounded-[14px] px-2.5 py-1.5 w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20"
+            style={{ 
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.4) 100%)' 
+            }}
+          >
+            <div className="p-1 rounded-full bg-white shadow-sm flex items-center justify-center text-neutral-700">
+              <WeatherIcon size={14} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wider leading-none mb-0.5">
                 {weatherInfo.label}
               </p>
-              <p className="text-sm font-bold leading-none" style={{ color: colors.heading }}>
+              <p className="text-sm font-bold text-neutral-800 leading-none tracking-tight">
                 {weather.temp}°C
               </p>
             </div>
