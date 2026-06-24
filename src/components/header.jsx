@@ -229,40 +229,42 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
         {isMobileMenuOpen && (
           <div 
-            className="absolute left-4 right-4 mt-2 p-4 rounded-2xl shadow-xl flex flex-col gap-2 border md:hidden animate-in fade-in slide-in-from-top-2 duration-300"
+            className="absolute left-4 right-4 mt-2 p-3 rounded-2xl shadow-xl flex flex-col gap-1.5 border md:hidden animate-in fade-in slide-in-from-top-2 duration-300 z-[9999]"
             style={{ backgroundColor: '#FAFAF8', borderColor: colors.border }}
           >
-            <button
-              onClick={() => handleNavClick('profile')}
-              className="flex flex-col items-center justify-center w-full gap-2 p-4 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
-              style={{
-                backgroundColor: currentPage === 'profile' ? colors.accent : colors.surfaceAlt,
-                color: currentPage === 'profile' ? 'white' : colors.heading,
-              }}
-            >
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center aspect-square border-2 border-white shadow-md flex-shrink-0">
-                {headerPhoto ? (
-                  <img 
-                    src={headerPhoto} 
-                    alt="Header Avatar Mobile" 
-                    className="w-full h-full object-cover object-center aspect-square flex-shrink-0" 
-                  />
-                ) : (
-                  <span className="text-sm font-medium uppercase text-neutral-500">
-                    {displayName ? displayName.charAt(0) : 'C'}
-                  </span>
-                )}
-              </div>
-              <span className="text-xs font-medium tracking-wide mt-1">{displayName}</span>
-            </button>
+            <div className="flex items-center justify-between gap-3 p-2 rounded-xl" style={{ backgroundColor: colors.surfaceAlt }}>
+              <button
+                onClick={() => handleNavClick('profile')}
+                className="flex items-center gap-2.5 flex-1 min-w-0 text-left transition-all duration-200"
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center aspect-square border border-white shadow-sm flex-shrink-0">
+                  {headerPhoto ? (
+                    <img 
+                      src={headerPhoto} 
+                      alt="Header Avatar Mobile" 
+                      className="w-full h-full object-cover object-center aspect-square flex-shrink-0" 
+                    />
+                  ) : (
+                    <span className="text-xs font-medium uppercase text-neutral-500">
+                      {displayName ? displayName.charAt(0) : 'C'}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-medium tracking-wide text-neutral-700 truncate">{displayName}</span>
+              </button>
 
-            <div className="h-px my-1" style={{ backgroundColor: colors.border }} />
+              <div className="flex-shrink-0 scale-90 origin-right">
+                <LanguageSelect mobile={true} />
+              </div>
+            </div>
+
+            <div className="h-px my-0.5" style={{ backgroundColor: colors.border }} />
 
             {navItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-light tracking-wider transition-all duration-200"
+                className="block w-full text-left px-4 py-2.5 rounded-xl text-xs font-light tracking-wider transition-all duration-200"
                 style={{
                   backgroundColor: currentPage === item.id ? colors.accent : colors.surfaceAlt,
                   color: currentPage === item.id ? 'white' : colors.heading,
@@ -271,12 +273,6 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
                 {item.label}
               </button>
             ))}
-            
-            <div className="h-px my-1" style={{ backgroundColor: colors.border }} />
-
-            <div className="flex items-center justify-end py-1 mt-1 w-full pr-2">
-              <LanguageSelect mobile={true} />
-            </div>
           </div>
         )}
       </div>

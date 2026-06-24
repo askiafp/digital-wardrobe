@@ -47,6 +47,7 @@ export default function App() {
     return { wardrobe: finalWardrobe, outfits: saved.outfits || [], weeklyPlan: saved.weeklyPlan || {} };
   };
 
+  const [outfitFromHome, setOutfitFromHome] = useState(null);
   const [currentPage, setCurrentPage]       = useState('home');
   const [selectedOutfit, setSelectedOutfit] = useState([]);
   const [activeFilter, setActiveFilter]     = useState('All');
@@ -338,6 +339,7 @@ export default function App() {
             weeklyPlan={weeklyPlan}
             navigateTo={navigateTo}
             isGuest={isGuest}
+            onSelectRecommendedOutfit={setOutfitFromHome}
             onSelectWeatherStyle={(weatherData) => {
               setSelectedWeatherStyle(weatherData);
             }}

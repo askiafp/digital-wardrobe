@@ -516,6 +516,7 @@ export default function StylingPage({
   navigateTo, 
   isGuest,
   weatherFromHome,
+  outfitFromHome,
   clearWeatherFromHome
 }) {
 
@@ -535,13 +536,6 @@ export default function StylingPage({
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [weatherError, setWeatherError]     = useState(false);
   const [timeOfDay, setTimeOfDay]           = useState(getTimeOfDay());
-
-  useEffect(() => {
-    if (weatherFromHome) {
-      setShowAutoGenerateModal(true);
-      clearWeatherFromHome();
-    }
-  }, [weatherFromHome, clearWeatherFromHome]);
 
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
@@ -578,6 +572,114 @@ export default function StylingPage({
     const interval = setInterval(() => setTimeOfDay(getTimeOfDay()), 60000);
     return () => clearInterval(interval);
   }, []);
+
+
+  useEffect(() => {
+    if (!weatherFromHome) return;
+
+    const tempWeather = {
+      tempC:         Number(weatherFromHome.tempC) || 28,
+      feelsLike:     Number(weatherFromHome.tempC) || 28,
+      humidity:      75,
+      wind:          10,
+      condition:     weatherFromHome.condition   || 'Clear sky',
+      conditionIcon: weatherFromHome.conditionIcon || 'sun',
+      code: 0,
+    };
+
+    setWeather(tempWeather);
+
+    if (weatherFromHome.recommendedOutfit && Array.isArray(weatherFromHome.recommendedOutfit)) {
+      const preselected = weatherFromHome.recommendedOutfit;
+      setSelectedOutfit(preselected);
+      
+      const newIndices = { Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Bags: 0, Shoes: 0 };
+      const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+      
+      const categoriesList = ['Tops', 'Bottoms', 'Outerwear', 'Accessories', 'Bags', 'Shoes'];
+      for (let i = 0; i < categoriesList.length; i++) {
+        const cat = categoriesList[i];
+        const matchedItem = preselected.find(item => item.category === cat);
+        const fullCategoryItems = wardrobe.filter(item => item.category === cat);
+        if (matchedItem && fullCategoryItems.length > 0) {
+          const idx = fullCategoryItems.findIndex(item => item.id === matchedItem.id);
+          if (idx >= 0) {
+            newIndices[cat] = idx;
+            newSkips[cat] = false;
+          }
+        }
+      }
+      
+      setCarouselIndices(newIndices);
+      setSkippedCategories(newSkips);
+      setCurrentStepIdx(6); 
+    } else {
+      setShowAutoGenerateModal(true);
+    }
+
+    clearWeatherFromHome();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weatherFromHome, wardrobe]);
+
+  useEffect(() => {
+    if (!outfitFromHome?.length) return;
+
+    setSelectedOutfit(outfitFromHome);
+
+    const newIndices = {};
+    const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+
+    outfitFromHome.forEach(item => {
+      if (!item?.category) return;
+
+      const fullCategoryItems = wardrobe.filter(i => i.category === item.category);
+      const idx = fullCategoryItems.findIndex(i => i.id === item.id);
+      
+      if (idx >= 0) {
+        newIndices[item.category] = idx;
+        newSkips[item.category] = false;
+      }
+    });
+
+    setCarouselIndices(prev => ({ ...prev, ...newIndices }));
+    setSkippedCategories(newSkips);
+    setCurrentStepIdx(6); 
+
+    clearOutfitFromHome?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outfitFromHome, wardrobe]);
+
+  useEffect(() => {
+    if (!outfitFromHome?.length) return;
+
+    setSelectedOutfit(outfitFromHome);
+
+    const newIndices = {};
+    const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+
+    outfitFromHome.forEach(item => {
+      if (!item?.category) return;
+
+      const categoryItems = itemsByCategory[item.category] || [];
+      const idx = categoryItems.findIndex(i => i.id === item.id);
+      
+      if (idx >= 0) {
+        newIndices[item.category] = idx;
+        newSkips[item.category] = false;
+      }
+    });
+
+    setCarouselIndices(prev => ({
+      ...prev,
+      ...newIndices
+    }));
+    setSkippedCategories(newSkips);
+
+    setCurrentStepIdx(STEPS.length - 1);
+
+    clearOutfitFromHome?.();
+
+  }, [outfitFromHome]);
 
   const handleSelectUndertone = (toneId) => {
     setUndertone(toneId);
@@ -635,20 +737,18 @@ export default function StylingPage({
 
   const handlePrevStep = () => { if (currentStepIdx > 0) setCurrentStepIdx(currentStepIdx - 1); };
 
-  const generateAIOutfit = (outfitType = null) => {
+  const generateAIOutfitWithWeather = (outfitType = null, activeWeather = null) => {
+    const resolvedWeather = activeWeather || weather;
+
     if (outfitType) {
       const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
       if (typeConfig) {
-        const hasValidTops = itemsByCategory['Tops'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidTops    = itemsByCategory['Tops'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
         const hasValidBottoms = itemsByCategory['Bottoms'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
-        const hasValidShoes = itemsByCategory['Shoes'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidShoes   = itemsByCategory['Shoes'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
 
         if (!hasValidTops || !hasValidBottoms || !hasValidShoes) {
-          setModalConfig({ 
-            isOpen: true, 
-            type: 'error', 
-            message: `Sorry, there is no ${typeConfig.label} style available in your wardrobe!` 
-          });
+          setModalConfig({ isOpen: true, type: 'error', message: `Sorry, there is no ${typeConfig.label} style available in your wardrobe!` });
           return;
         }
         setGeneratedMood(typeConfig.label);
@@ -658,41 +758,37 @@ export default function StylingPage({
     }
 
     const newIndices = {}, newOutfit = [], newSkips = {};
-    
+
     const pickBest = (category) => {
       let items = itemsByCategory[category] || [];
       if (items.length === 0) return null;
-      
+
       if (outfitType) {
         const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
         if (typeConfig) {
-          const filteredByStyle = items.filter(item => 
-            typeConfig.styles.includes((item.style || '').toLowerCase())
-          );
-          if (filteredByStyle.length > 0) {
-            items = filteredByStyle;
-          }
+          const filteredByStyle = items.filter(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+          if (filteredByStyle.length > 0) items = filteredByStyle;
         }
       }
-      
+
       const scored = [...items]
-        .map(item => ({ item, score: getItemScore(item, undertone, weather, outfitType) }))
+        .map(item => ({ item, score: getItemScore(item, undertone, resolvedWeather, outfitType) }))
         .sort((a, b) => b.score - a.score);
-        
+
       return scored[Math.floor(Math.random() * Math.min(3, scored.length))].item;
     };
 
     ['Tops', 'Bottoms', 'Shoes'].forEach(cat => {
       const picked = pickBest(cat);
-      if (picked) { 
-        newIndices[cat] = itemsByCategory[cat].indexOf(picked); 
-        newOutfit.push(picked); 
+      if (picked) {
+        newIndices[cat] = itemsByCategory[cat].indexOf(picked);
+        newOutfit.push(picked);
       }
     });
 
     ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
-      const alwaysInclude = cat === 'Outerwear' && weather?.conditionIcon === 'rain';
+      const alwaysInclude = cat === 'Outerwear' && resolvedWeather?.conditionIcon === 'rain';
       if (items && items.length > 0 && (alwaysInclude || Math.random() > 0.5)) {
         const picked = pickBest(cat);
         if (picked) {
@@ -708,7 +804,11 @@ export default function StylingPage({
     setSkippedCategories(newSkips);
     setSelectedOutfit(newOutfit);
     setCurrentStepIdx(STEPS.length - 1);
-    setShowAutoGenerateModal(false); 
+    setShowAutoGenerateModal(false);
+  };
+
+  const generateAIOutfit = (outfitType = null) => {
+    generateAIOutfitWithWeather(outfitType, null);
   };
 
   const saveAndScheduleOutfit = () => {
@@ -976,36 +1076,65 @@ export default function StylingPage({
                   <div className="relative w-full h-[580px] flex items-center justify-center overflow-hidden bg-gray-50/50 rounded-2xl">
                     {selectedOutfit.length > 0 ? (
                       <div className="relative w-full h-full">
-                        {selectedOutfit.filter(i => i.category === 'Tops').map(item => (
-                          <div key={item.id} className="absolute top-8 right-8 w-full h-64 flex items-center justify-center -translate-x-14 z-10 scale-100">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Bottoms').map(item => (
-                          <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Shoes').map(item => (
-                          <div key={item.id} className="absolute bottom-6 right-10 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Outerwear').map(item => (
-                          <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Accessories').map(item => (
-                          <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Bags').map(item => (
-                          <div key={item.id} className="absolute bottom-10 left-0 w-full h-48 flex items-center justify-center translate-x-16 z-20 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_12px_12px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Tops');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-8 right-3 w-full h-64 flex items-center justify-center -translate-x-14 z-10 scale-100">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Bottoms');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Shoes');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute bottom-6 right-10 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Outerwear');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Accessories');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-60">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Bags');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute bottom-10 left-0 w-full h-48 flex items-center justify-center translate-x-16 z-20 scale-80">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_12px_12px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="text-gray-300 italic text-sm">Canvas is empty...</div>

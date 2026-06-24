@@ -23,6 +23,7 @@ function getWeatherBackgroundImage(conditionIcon, tempC) {
 }
 
 export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan = {}, navigateTo, isGuest, onSelectWeatherStyle }) {
+  const [isWidgetHidden, setIsWidgetHidden] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -61,7 +62,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
             iconName = 'cloudy';
           } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99)) {
             cond = 'Rainy';
-            iconName = 'rain'; 
+            iconName = 'rain';
           } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
             cond = 'Snowy';
             iconName = 'snow';
@@ -138,8 +139,8 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
 
-      <section 
-        ref={heroRef} 
+      <section
+        ref={heroRef}
         className="relative w-full aspect-[16/9] overflow-hidden flex items-center justify-center"
       >
         <div
@@ -174,8 +175,8 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           >
             Your Wardrobe,<br />Beautifully Organized
           </h1>
-          <p 
-            className="text-[2.2vw] sm:text-base md:text-lg font-light mb-3 sm:mb-8 opacity-90 max-w-[80%] sm:max-w-xl mx-auto leading-relaxed select-none" 
+          <p
+            className="text-[2.2vw] sm:text-base md:text-lg font-light mb-3 sm:mb-8 opacity-90 max-w-[80%] sm:max-w-xl mx-auto leading-relaxed select-none"
             style={{ color: 'white', fontFamily: 'DM Sans, sans-serif' }}
           >
             Reconnect with the clothes you already own. Create, plan, and style with intention.
@@ -264,7 +265,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
                   </h3>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => navigateTo('planner')}
                 className="text-xs font-semibold tracking-wider uppercase border px-5 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                 style={{ borderColor: colors.border, color: colors.heading }}
@@ -340,8 +341,8 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
 
       <section className="py-20 px-6 md:px-12" style={{ backgroundColor: colors.surface }}>
         <div className="text-center mb-16 space-y-2">
-          <h2 
-            className="text-3xl md:text-4xl font-bold tracking-wide" 
+          <h2
+            className="text-3xl md:text-4xl font-bold tracking-wide"
             style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.accent }}
           >
             HOW-TO
@@ -390,147 +391,175 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         </div>
       </section>
 
-      <button
-        onClick={() => {
-          if (onSelectWeatherStyle) {
-            onSelectWeatherStyle({
-              tempC: weather.temp,
-              condition: weather.condition
-            });
+      {(() => {
+        const filteredItems = wardrobe.filter(item => {
+          const nameLower = item.name?.toLowerCase() || '';
+          const catLower = item.category?.toLowerCase() || '';
+          const styleLower = item.style?.toLowerCase() || '';
+          if (weather.condition === 'Rainy') {
+            return (catLower.includes('outer') || catLower.includes('pants') || catLower.includes('shoes') || nameLower.includes('hoodie') || nameLower.includes('jacket') || nameLower.includes('sweater') || nameLower.includes('boot') || styleLower.includes('comfy'));
+          } else if (weather.condition === 'Sunny') {
+            return (catLower.includes('top') || catLower.includes('bottom') || catLower.includes('shoes') || nameLower.includes('t-shirt') || nameLower.includes('shirt') || nameLower.includes('short') || nameLower.includes('sandal') || nameLower.includes('sneaker') || styleLower.includes('casual'));
+          } else {
+            return (nameLower.includes('shirt') || catLower.includes('pants') || catLower.includes('shoes') || styleLower.includes('formal') || nameLower.includes('loafers') || nameLower.includes('flat'));
           }
-          navigateTo('styling');
-        }}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex rounded-[28px] md:rounded-[32px] overflow-hidden shadow-[0_24px_50px_-16px_rgba(0,0,0,0.4)] border border-white/10 bg-cover bg-center text-left transition-all duration-300 hover:scale-[1.02] active:scale-95 origin-bottom-right scale-85 sm:scale-90 md:scale-100 p-2"
-        style={{ 
-          backgroundImage: `url(${getWeatherBackgroundImage(weather.icon, weather.temp)})`,
-          width: '324px',
-          height: '146px'
-        }}
-      >
-        <div className="absolute inset-0 bg-black/[0.04]" />
+        });
 
-        <div className="w-1/2 h-full relative">
-          {(() => {
-            const filteredItems = wardrobe.filter(item => {
-              const nameLower = item.name?.toLowerCase() || '';
-              const catLower = item.category?.toLowerCase() || '';
-              const styleLower = item.style?.toLowerCase() || '';
+        const bottomPiece = filteredItems.find(item => item.category?.toLowerCase() === 'bottoms') || 
+                            wardrobe.find(item => item.category?.toLowerCase() === 'bottoms');
 
-              if (weather.condition === 'Rainy') {
-                return (
-                  catLower.includes('outer') || 
-                  catLower.includes('pants') ||
-                  nameLower.includes('hoodie') || 
-                  nameLower.includes('jacket') || 
-                  nameLower.includes('sweater') ||
-                  styleLower.includes('comfy')
-                );
-              } else if (weather.condition === 'Sunny') {
-                return (
-                  catLower.includes('top') || 
-                  catLower.includes('bottom') ||
-                  nameLower.includes('t-shirt') || 
-                  nameLower.includes('shirt') || 
-                  nameLower.includes('short') ||
-                  styleLower.includes('casual')
-                );
-              } else {
-                return (
-                  nameLower.includes('shirt') || 
-                  catLower.includes('pants') || 
-                  styleLower.includes('formal')
-                );
-              }
-            });
+        const outerwearPiece = weather.condition === 'Rainy' 
+          ? (filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || wardrobe.find(item => item.category?.toLowerCase() === 'outerwear'))
+          : null;
 
-            const topPiece = filteredItems.find(item => {
-              const cat = item.category?.toLowerCase() || '';
-              return cat.includes('top') || cat.includes('outer') || item.name?.toLowerCase().includes('shirt');
-            }) || wardrobe.find(item => item.category?.toLowerCase().includes('top'));
+        const topPiece = filteredItems.find(item => item.category?.toLowerCase() === 'tops' && item.id !== outerwearPiece?.id) || 
+                         wardrobe.find(item => item.category?.toLowerCase() === 'tops' && item.id !== outerwearPiece?.id);
 
-            const bottomPiece = filteredItems.find(item => {
-              const cat = item.category?.toLowerCase() || '';
-              return cat.includes('bottom') || cat.includes('pants') || item.name?.toLowerCase().includes('short');
-            }) || wardrobe.find(item => item.category?.toLowerCase().includes('bottom') || item.category?.toLowerCase().includes('pants'));
-
-            return (
-              <div className="absolute inset-0 z-10 p-1 flex flex-col justify-between h-full w-full">
-                <div className="flex justify-start pl-1">
-                  {topPiece ? (
-                    <img 
-                      src={topPiece.image} 
-                      alt="Top" 
-                      className="w-[85px] h-[85px] object-contain filter drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)] transform -rotate-12 transition-transform duration-300 hover:rotate-0"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                  ) : <div className="w-1" />}
-                </div>
-                
-                <div className="flex justify-end pr-1 -mt-5">
-                  {bottomPiece ? (
-                    <img 
-                      src={bottomPiece.image} 
-                      alt="Bottom" 
-                      className="w-[72px] h-[72px] object-contain filter drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)] transform rotate-12 transition-transform duration-300 hover:rotate-0"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                  ) : <div className="w-1" />}
-                </div>
-
-                {!topPiece && !bottomPiece && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[9px] text-white/90 font-medium tracking-widest uppercase backdrop-blur-md bg-black/30 px-2 py-0.5 rounded-md">
-                      Empty Closet
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-
-        <div 
-          className="w-1/2 h-full flex flex-col justify-between p-3.5 relative border border-white/25 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.15)] rounded-[24px]"
-          style={{ 
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(245,240,240,0.22) 100%)',
-            backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)'
-          }}
-        >
-          <div className="space-y-0.5">
-            <h4 className="text-[13px] font-bold tracking-tight text-neutral-800/95 leading-none">
-              Recommended
-            </h4>
-            <p className="text-[10px] text-neutral-600/90 font-normal leading-none">
-              clothes for today
-            </p>
-          </div>
-
-          <p className="text-[11px] font-medium text-neutral-700/80 tracking-wide my-1">
-            {weather.day}, {weather.time}
-          </p>
-
+        const shoesPiece = filteredItems.find(item => item.category?.toLowerCase() === 'shoes') || 
+                           wardrobe.find(item => item.category?.toLowerCase() === 'shoes');
+                                   
+        return (
           <div 
-            className="flex items-center gap-2 px-3 py-1.5 w-full border border-white/40 shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
-            style={{ 
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.55) 100%)',
-              borderRadius: '18px'
-            }}
+            className={`fixed bottom-4 md:bottom-6 z-[60] flex items-center transition-transform duration-500 ease-[cubic-bezier(0.3,1,0.3,1)] ${
+              isWidgetHidden ? "right-0 translate-x-full" : "right-4 md:right-6 translate-x-0"
+            }`}
           >
-            <div className="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-neutral-800 flex-shrink-0">
-              <WeatherIcon size={14} strokeWidth={2.5} />
-            </div>
-            <div className="flex flex-col justify-center min-w-0 leading-none">
-              <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5 truncate">
-                {weatherInfo.label}
-              </p>
-              <p className="text-sm font-bold text-neutral-800 tracking-tighter leading-none">
-                {weather.temp}°C
-              </p>
-            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsWidgetHidden(!isWidgetHidden);
+              }}
+              className="absolute -left-7 md:-left-8 bg-white/85 backdrop-blur-md p-1.5 md:p-2 rounded-l-xl border-y border-l border-white/40 shadow-[-4px_4px_12px_rgba(0,0,0,0.08)] text-neutral-500 hover:text-neutral-800 transition-colors"
+            >
+              {isWidgetHidden ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                if (onSelectWeatherStyle) {
+                  onSelectWeatherStyle({
+                    tempC: weather.temp || 28,
+                    condition: weather.condition || 'Clear sky',
+                    conditionIcon: weather.icon || 'sun',
+                    recommendedOutfit: [topPiece, bottomPiece, outerwearPiece, shoesPiece].filter(Boolean)
+                  });
+                }
+                navigateTo('styling');
+              }}
+              className="flex rounded-[20px] md:rounded-[28px] overflow-hidden shadow-[0_24px_50px_-16px_rgba(0,0,0,0.4)] border border-white/20 bg-cover bg-center text-left transition-all duration-300 hover:scale-[1.02] active:scale-95 relative"
+              style={{ 
+                backgroundImage: `url(${getWeatherBackgroundImage(weather.icon, weather.temp)})`,
+                width: 'clamp(240px, 72vw, 300px)',
+                height: 'clamp(108px, 30vw, 138px)',
+                padding: 'clamp(5px, 1.5vw, 8px)'
+              }}
+            >
+              <div className="absolute inset-0 bg-black/[0.04]" />
+
+              <div className="w-[44%] h-full relative">
+                <div className="absolute inset-0 z-10 p-1 flex flex-col justify-between h-full w-full">
+                  <div className="flex justify-start">
+                    {topPiece ? (
+                      <img 
+                        src={topPiece.image} 
+                        alt="Top" 
+                        className="object-contain filter drop-shadow-[0_8px_12px_rgba(0,0,0,0.4)] transform -rotate-12 transition-transform duration-300 hover:rotate-0"
+                        style={{ width: 'clamp(56px, 16vw, 80px)', height: 'clamp(56px, 16vw, 80px)' }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : <div className="w-1" />}
+                  </div>
+                  
+                  <div className="flex justify-end -mt-9 pr-0.5">
+                    {bottomPiece ? (
+                      <img 
+                        src={bottomPiece.image} 
+                        alt="Bottom" 
+                        className="object-contain filter drop-shadow-[0_8px_12px_rgba(0,0,0,0.4)] transform rotate-12 transition-transform duration-300 hover:rotate-0"
+                        style={{ width: 'clamp(62px, 18vw, 88px)', height: 'clamp(62px, 18vw, 88px)' }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : <div className="w-1" />}
+                  </div>
+
+                  {!topPiece && !bottomPiece && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[9px] text-white/90 font-medium tracking-widest uppercase backdrop-blur-md bg-black/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                        Empty
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div 
+                className="w-[56%] h-full flex flex-col justify-between relative border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_rgba(0,0,0,0.15)] rounded-[16px] md:rounded-[20px]"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(245,240,240,0.3) 100%)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  padding: 'clamp(8px, 2.5vw, 14px)'
+                }}
+              >
+                <div>
+                  <h4 
+                    className="font-bold tracking-tight text-neutral-800/95 leading-none whitespace-nowrap"
+                    style={{ fontSize: 'clamp(10px, 3vw, 13px)' }}
+                  >
+                    Recommended
+                  </h4>
+                  <p 
+                    className="text-neutral-600/90 font-medium leading-[1.2] whitespace-nowrap"
+                    style={{ fontSize: 'clamp(8px, 2.2vw, 10px)' }}
+                  >
+                    clothes for today
+                  </p>
+                </div>
+
+                <p 
+                  className="font-semibold text-neutral-800/90 tracking-wide mt-auto mb-1 leading-none whitespace-nowrap"
+                  style={{ fontSize: 'clamp(9px, 2.5vw, 11px)' }}
+                >
+                  {weather.day}, {weather.time}
+                </p>
+
+                <div 
+                  className="flex items-center gap-1.5 w-full border border-white/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] rounded-full md:rounded-full"
+                  style={{ 
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                    padding: 'clamp(5px, 1.8vw, 7px) clamp(6px, 2vw, 10px)'
+                  }}
+                >
+                  <div 
+                    className="rounded-full bg-white shadow-sm flex items-center justify-center text-neutral-800 flex-shrink-0"
+                    style={{ width: 'clamp(20px, 6vw, 28px)', height: 'clamp(20px, 6vw, 28px)' }}
+                  >
+                    <WeatherIcon size={11} strokeWidth={2.5} />
+                  </div>
+                  <div className="flex flex-col justify-center min-w-0 leading-none">
+                    <p 
+                      className="font-bold text-neutral-500 uppercase tracking-wider mb-0.5 truncate whitespace-nowrap"
+                      style={{ fontSize: 'clamp(6px, 1.8vw, 8px)' }}
+                    >
+                      {weatherInfo.label}
+                    </p>
+                    <p 
+                      className="font-bold text-neutral-800 tracking-tighter leading-none whitespace-nowrap"
+                      style={{ fontSize: 'clamp(10px, 3vw, 14px)' }}
+                    >
+                      {weather.temp}°C
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </button>
           </div>
-        </div>
-      </button>
+        );
+      })()}
 
     </div>
   );
