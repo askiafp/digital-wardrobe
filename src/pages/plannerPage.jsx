@@ -91,9 +91,6 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
           <p className="text-xs md:text-sm" style={{ color: colors.muted }}>
             Organize your outfits day by day and step into your week with clarity.
           </p>
-          <p className="text-xs mt-3 italic" style={{ color: colors.accent }}>
-            "Getting dressed is a form of self-expression. Plan it with intention."
-          </p>
         </div>
 
         <div className="mb-8 p-4 rounded-2xl flex items-center justify-between"

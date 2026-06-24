@@ -523,8 +523,8 @@ export default function StylingPage({
   const [currentStepIdx, setCurrentStepIdx]       = useState(0);
   const [skippedCategories, setSkippedCategories] = useState({});
   const [carouselIndices, setCarouselIndices]      = useState({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
-  const [selectedDay, setSelectedDay] = useState(() => { const s = localStorage.getItem('plannerTargetDay'); return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Monday'; });
-  const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || 'Morning');
+  const [selectedDay, setSelectedDay] = useState(() => { const s = localStorage.getItem('plannerTargetDay'); return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; });
+  const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || '');
   const [modalConfig, setModalConfig]              = useState({ isOpen:false, type:'success', message:'' });
   const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
   const [generatedMood, setGeneratedMood] = useState('Casual');
@@ -563,6 +563,15 @@ export default function StylingPage({
       setWeatherError(true);
     } finally {
       setWeatherLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem('plannerTargetDay')) {
+      localStorage.removeItem('plannerTargetDay');
+    }
+    if (localStorage.getItem('plannerTargetSlot')) {
+      localStorage.removeItem('plannerTargetSlot');
     }
   }, []);
 
@@ -862,7 +871,7 @@ export default function StylingPage({
     if (goodItems.length === 0) return null;
     return (
       <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-3">
-        <p className="text-[9px] uppercase tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1">
+        <p className="text-[10px] sm:text-[9px] uppercase tracking-[0.05em] sm:tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1 whitespace-nowrap origin-left scale-[0.85] sm:scale-100">
           Recommended for {selectedUndertoneData?.label} undertone
         </p>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling:'touch' }}>
@@ -1146,7 +1155,7 @@ export default function StylingPage({
                       <p className="text-[10px] tracking-wider uppercase text-gray-400">Add to Planner</p>
                       <Select value={selectedDay} onValueChange={setSelectedDay}>
                         <SelectTrigger className="w-full bg-gray-50 rounded-xl border text-black focus:ring-1 focus:ring-amber-200" style={{ borderColor: colors.border, height: 44 }}>
-                          <SelectValue placeholder="Select a day" />
+                          <SelectValue placeholder="Select a Day" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border rounded-xl shadow-lg">
                           {daysOfWeek.map(day => <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light">{day}</SelectItem>)}
@@ -1154,7 +1163,7 @@ export default function StylingPage({
                       </Select>
                       <Select value={selectedSlot} onValueChange={setSelectedSlot}>
                         <SelectTrigger className="w-full bg-gray-50 rounded-xl border text-black" style={{ borderColor: colors.border, height: 44 }}>
-                          <SelectValue placeholder="Select time slot" />
+                          <SelectValue placeholder="Select Time Slot" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border rounded-xl shadow-lg">
                           {['Morning','Afternoon','Evening','Night'].map(slot => <SelectItem key={slot} value={slot} className="cursor-pointer text-sm font-light">{slot}</SelectItem>)}
