@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Trash2, CalendarDays, Plus, X } from 'lucide-react';
+import { Trash2, CalendarDays, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { days, colors } from '../constants';
 
 const TIME_SLOTS = ['Morning', 'Afternoon', 'Evening', 'Night'];
 
 export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
+  const [expandedDays, setExpandedDays] = useState({});
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';
@@ -21,6 +22,13 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
   const getTotalItems = (dayKey) => {
     const slots = getSlotOutfits(dayKey);
     return Object.values(slots).reduce((sum, slot) => sum + (slot?.items?.length || 0), 0);
+  };
+
+  const toggleDayExpand = (dayKey) => {
+    setExpandedDays(prev => ({
+      ...prev,
+      [dayKey]: !prev[dayKey]
+    }));
   };
 
   const clearSlot = (dayKey, slot) => {
@@ -99,38 +107,47 @@ export default function PlannerPage({ weeklyPlan, setWeeklyPlan, navigateTo }) {
           <p className="text-sm" style={{ color: colors.accent }}>{totalDaysPlanned} of 7 days planned</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {days.map(day => {
             const dayKey = day.toLowerCase();
             const slots = getSlotOutfits(dayKey);
             const totalItems = getTotalItems(dayKey);
             const hasOutfit = totalItems > 0;
+            const isExpanded = !!expandedDays[dayKey];
 
             return (
               <div key={day}
-                className="rounded-2xl p-5 md:p-6 flex flex-col gap-3 transition-all duration-300 border shadow-sm"
+                className="rounded-2xl p-4 md:p-6 flex flex-col gap-3 transition-all duration-300 border shadow-sm cursor-pointer sm:cursor-default"
+                onClick={() => {
+                  if (window.innerWidth < 640) toggleDayExpand(dayKey);
+                }}
                 style={{
                   backgroundColor: hasOutfit ? colors.surface : 'white',
                   borderStyle: hasOutfit ? 'solid' : 'dashed',
                   borderColor: hasOutfit ? colors.border : '#E5E7EB',
                 }}>
 
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-light text-sm tracking-wider uppercase" style={{ color: colors.heading }}>{day}</h3>
                     <p className="text-[10px]" style={{ color: colors.muted }}>
                       {hasOutfit ? `${totalItems} item${totalItems > 1 ? 's' : ''} planned` : 'No outfit yet'}
                     </p>
                   </div>
-                  {hasOutfit && (
-                    <button onClick={() => clearDayPlan(dayKey)}
-                      className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-50 transition-all">
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {hasOutfit && (
+                      <button onClick={() => clearDayPlan(dayKey)}
+                        className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-50 transition-all">
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                    <div className="sm:hidden text-gray-400 p-1">
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className={`${isExpanded ? 'flex' : 'hidden'} sm:flex flex-col gap-2`} onClick={(e) => e.stopPropagation()}>
                   {TIME_SLOTS.map(slot => {
                     const slotData = slots[slot];
                     const slotItems = slotData?.items || [];
