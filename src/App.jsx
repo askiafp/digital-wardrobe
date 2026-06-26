@@ -298,6 +298,8 @@ export default function App() {
     setDeleteModal({ isOpen: false, itemId: null });
   };
 
+  const [selectedWeatherStyle, setSelectedWeatherStyle] = useState(null);
+
   if (!isAuthenticated) return <LoginPage onLogin={handleLogin} />;
 
   const GuestBanner = () => (
@@ -316,8 +318,6 @@ export default function App() {
       </button>
     </div>
   );
-
-  const [selectedWeatherStyle, setSelectedWeatherStyle] = useState(null);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.background }}>

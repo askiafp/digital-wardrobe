@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle, Eye } from 'lucide-react';
 import { colors } from '../constants';
 
 import {
@@ -728,10 +728,26 @@ export default function StylingPage({
   };
 
   const handleSelectNone = () => {
-    const category = currentStep.id;
-    setSkippedCategories({ ...skippedCategories, [category]: true });
-    setSelectedOutfit(prev => prev.filter(i => i.category !== category));
-    if (currentStepIdx < STEPS.length - 1) setCurrentStepIdx(currentStepIdx + 1);
+    const categoryId = currentStep.id;
+    
+    setSkippedCategories(prev => {
+      const isAlreadySkipped = !!prev[categoryId];
+      
+      if (isAlreadySkipped) {
+        const updated = { ...prev };
+        delete updated[categoryId];
+        return updated;
+      } else {
+        return {
+          ...prev,
+          [categoryId]: true
+        };
+      }
+    });
+
+    if (!skippedCategories[currentStep.id]) {
+      setSelectedOutfit(prev => prev.filter(item => item.category !== currentStep.id));
+    }
   };
 
   const handleNextStep = () => {
@@ -963,7 +979,7 @@ export default function StylingPage({
                 </div>
                 <div className="flex justify-end mt-2">
                   <button onClick={() => setShowUndertoneModal(true)} className="text-[9px] tracking-widest font-semibold text-gray-500 hover:text-amber-700 border border-gray-200 hover:border-amber-200 bg-white hover:bg-amber-50/30 px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95">
-                    RE-CALIBRATE
+                    CHANGE SKIN TONE
                   </button>
                 </div>
               </div>
@@ -1028,8 +1044,8 @@ export default function StylingPage({
                         onClick={handleSelectNone}
                         className={`text-xs px-3 py-1.5 rounded-xl border border-dashed flex items-center gap-1.5 transition-all ${skippedCategories[currentStep.id] ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400'}`}
                       >
-                        <EyeOff size={11} />
-                        <span>{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
+                        {skippedCategories[currentStep.id] ? <Eye size={11} /> : <EyeOff size={11} />}
+                        <span>{skippedCategories[currentStep.id] ? 'ENABLE ITEM' : 'SKIP / NONE'}</span>
                       </button>
                     </div>
 

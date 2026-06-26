@@ -33,15 +33,30 @@ const resources = {
         pieces: "pakaian"
       }
     }
+  },
+  ja: {
+    translation: {
+      nav: {
+        home: "ホーム",        // Hōmu
+        wardrobe: "ワードローブ", // Wādorōbu
+        styling: "スタイリング",  // Sutairingu
+        planner: "プランナー",    // Purannā
+        analytics: "インサイト",  // Insaito
+        profile: "プロフィール"  // Purofīru
+      },
+      header: {
+        pieces: "着"            // 'Chaku' 
+      }
+    }
   }
 };
 
 i18n
-  .use(LanguageDetector) // Otomatis mendeteksi bahasa browser user
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en', // Bahasa cadangan jika bahasa user tidak terdaftar
+    fallbackLng: 'en', 
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],

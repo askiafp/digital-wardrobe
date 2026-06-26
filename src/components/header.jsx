@@ -89,13 +89,17 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
   };
 
   const changeLanguage = (lng) => {
-    const langCode = lng === 'English' ? 'en' : 'id';
+    const langCode = lng === 'English' ? 'en' : lng === 'Japanese' ? 'ja' : 'id';
     i18n.changeLanguage(langCode);
     setCurrentLang(langCode);
   };
 
   function LanguageSelect({ mobile = false }) {
-    const selectValue = currentLang.startsWith('id') ? 'Indonesian' : 'English';
+    const selectValue = currentLang.startsWith('id') 
+      ? 'Indonesian' 
+      : currentLang.startsWith('ja') 
+        ? 'Japanese' 
+        : 'English';
     
     return (
       <Select value={selectValue} onValueChange={changeLanguage}>
@@ -107,26 +111,44 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
         >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="bg-white border rounded-xl shadow-lg min-w-[120px] z-[9999]">
-          <SelectItem value="English" className="cursor-pointer">
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/xl" id="flag-icons-gb" viewBox="0 0 640 480" className="size-4 rounded-sm flex-shrink-0">
-                <path fill="#012169" d="M0 0h640v480H0z" />
-                <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z" />
-                <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z" />
-                <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z" />
-                <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z" />
-              </svg>
-              <span className="text-sm font-light">English</span>
+        <SelectContent className="bg-white border rounded-xl shadow-lg min-w-[140px] z-[9999] p-1">
+          
+          <SelectItem value="English" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
+            <div className="flex items-center gap-2.5 w-full m-0 p-0">
+              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
+                  <path fill="#012169" d="M0 0h640v480H0z" />
+                  <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z" />
+                  <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z" />
+                  <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z" />
+                  <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z" />
+                </svg>
+              </div>
+              <span className="text-sm font-light text-neutral-700">English</span>
             </div>
           </SelectItem>
-          <SelectItem value="Indonesian" className="cursor-pointer">
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/xl" id="flag-icons-id" viewBox="0 0 640 480" className="size-4 rounded-sm border flex-shrink-0">
-                <path fill="#e70011" d="M0 0h640v240H0Z" />
-                <path fill="#fff" d="M0 240h640v240H0Z" />
-              </svg>
-              <span className="text-sm font-light">Indonesian</span>
+
+          <SelectItem value="Indonesian" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
+            <div className="flex items-center gap-2.5 w-full m-0 p-0">
+              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
+                  <path fill="#e70011" d="M0 0h640v240H0Z" />
+                  <path fill="#fff" d="M0 240h640v240H0Z" />
+                </svg>
+              </div>
+              <span className="text-sm font-light text-neutral-700">Indonesian</span>
+            </div>
+          </SelectItem>
+          
+          <SelectItem value="Japanese" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
+            <div className="flex items-center gap-2.5 w-full m-0 p-0">
+              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
+                  <path fill="#fff" d="M0 0h640v480H0z" />
+                  <circle cx="320" cy="240" r="144" fill="#bc002d" />
+                </svg>
+              </div>
+              <span className="text-sm font-light text-neutral-700">Japanese</span>
             </div>
           </SelectItem>
         </SelectContent>
