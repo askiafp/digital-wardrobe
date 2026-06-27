@@ -7,7 +7,6 @@ export default function AnalyticsPage({ wardrobe = [], savedOutfits = [] }) {
     e.target.style.display = 'none';
   };
 
-  // Menghitung kategori terbanyak dengan aman
   const mostWornCategory = wardrobe.length > 0 
     ? categories.slice(1).reduce((best, cat) => {
         const count = wardrobe.filter(i => i.category === cat).length;
@@ -16,18 +15,15 @@ export default function AnalyticsPage({ wardrobe = [], savedOutfits = [] }) {
       }, categories[1] || 'None')
     : 'None';
 
-  // Helper function untuk menghitung rata-rata items per outfit
   const avgItemsPerOutfit = savedOutfits.length > 0
     ? Math.round(savedOutfits.reduce((sum, o) => sum + o.items.length, 0) / savedOutfits.length)
     : 0;
 
   return (
     <div style={{ backgroundColor: colors.background }} className="min-h-screen">
-      {/* Header Section - Responsive padding */}
       <div className="px-3 sm:px-4 md:px-8 lg:px-12 py-6 sm:py-8 md:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto">
           
-          {/* Title & Subtitle */}
           <div className="mb-6 sm:mb-8 md:mb-12 lg:mb-16">
             <h1
               className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-light mb-1 sm:mb-2 leading-tight"
@@ -40,7 +36,6 @@ export default function AnalyticsPage({ wardrobe = [], savedOutfits = [] }) {
             </p>
           </div>
 
-          {/* Main Grid Layout */}
           <div className="space-y-4 sm:space-y-5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-4 lg:gap-6">
             
             {/* 1. Weekly Usage Chart */}

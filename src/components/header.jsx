@@ -1,23 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { colors } from '../constants';
 import logo from '../../public/images/logo.png';
 import { cn } from '@/lib/utils';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 export default function Header({ currentPage, navigateTo, wardrobe, currentUser, onLogout }) {
-  const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [currentLang, setCurrentLang] = useState(i18n?.language || 'en');
-  const [displayName, setDisplayName] = useState(t('nav.profile'));
+  const [displayName, setDisplayName] = useState("Profile");
   const [headerPhoto, setHeaderPhoto] = useState(null);
 
   useEffect(() => {
@@ -72,89 +62,21 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
     } else {
       setHeaderPhoto(null);
     }
-    setDisplayName(t('nav.profile'));
-  }, [currentUser, t, currentPage]);
+    setDisplayName("Profile");
+  }, [currentUser, currentPage]);
 
   const navItems = [
-    { id: 'home', label: t('nav.home') },
-    { id: 'wardrobe', label: t('nav.wardrobe') },
-    { id: 'styling', label: t('nav.styling') },
-    { id: 'planner', label: t('nav.planner') },
-    { id: 'analytics', label: t('nav.analytics') },
+    { id: 'home', label: "Home" },
+    { id: 'wardrobe', label: "Wardrobe" },
+    { id: 'styling', label: "Styling" },
+    { id: 'planner', label: "Planner" },
+    { id: 'analytics', label: "Insights" },
   ];
 
   const handleNavClick = (page) => {
     navigateTo(page);
     setIsMobileMenuOpen(false);
   };
-
-  const changeLanguage = (lng) => {
-    const langCode = lng === 'English' ? 'en' : lng === 'Japanese' ? 'ja' : 'id';
-    i18n.changeLanguage(langCode);
-    setCurrentLang(langCode);
-  };
-
-  function LanguageSelect({ mobile = false }) {
-    const selectValue = currentLang.startsWith('id') 
-      ? 'Indonesian' 
-      : currentLang.startsWith('ja') 
-        ? 'Japanese' 
-        : 'English';
-    
-    return (
-      <Select value={selectValue} onValueChange={changeLanguage}>
-        <SelectTrigger
-          className={cn(
-            "items-center gap-2 px-2 transition-colors border-0 rounded-full w-fit focus:ring-0 focus-visible:ring-0 shadow-none h-auto bg-transparent",
-            mobile ? "flex text-gray-600 hover:bg-gray-100" : "hidden lg:flex text-gray-600 hover:bg-gray-100 mr-4"
-          )}
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-white border rounded-xl shadow-lg min-w-[140px] z-[9999] p-1">
-          
-          <SelectItem value="English" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
-            <div className="flex items-center gap-2.5 w-full m-0 p-0">
-              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
-                  <path fill="#012169" d="M0 0h640v480H0z" />
-                  <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z" />
-                  <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z" />
-                  <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z" />
-                  <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z" />
-                </svg>
-              </div>
-              <span className="text-sm font-light text-neutral-700">English</span>
-            </div>
-          </SelectItem>
-
-          <SelectItem value="Indonesian" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
-            <div className="flex items-center gap-2.5 w-full m-0 p-0">
-              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
-                  <path fill="#e70011" d="M0 0h640v240H0Z" />
-                  <path fill="#fff" d="M0 240h640v240H0Z" />
-                </svg>
-              </div>
-              <span className="text-sm font-light text-neutral-700">Indonesian</span>
-            </div>
-          </SelectItem>
-          
-          <SelectItem value="Japanese" className="cursor-pointer !pl-2.5 [&>span]:line-clamp-none hover:bg-neutral-50 rounded-lg">
-            <div className="flex items-center gap-2.5 w-full m-0 p-0">
-              <div className="w-5 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-sm border border-black/5 flex items-center justify-center bg-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" className="w-full h-full object-cover">
-                  <path fill="#fff" d="M0 0h640v480H0z" />
-                  <circle cx="320" cy="240" r="144" fill="#bc002d" />
-                </svg>
-              </div>
-              <span className="text-sm font-light text-neutral-700">Japanese</span>
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  }
 
   return (
     <>
@@ -203,9 +125,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
                 ))}
               </nav>
 
-              <div className="flex items-center gap-6 pl-8 border-l transition-colors duration-500" style={{ borderColor: colors.border }}>
-                <LanguageSelect mobile={false} />
-
+              <div className="flex items-center pl-8 border-l transition-colors duration-500" style={{ borderColor: colors.border }}>
                 <button
                   onClick={() => handleNavClick('profile')}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-light tracking-wider transition-all duration-300 ease-in-out"
@@ -235,7 +155,7 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
 
             <div className="md:hidden flex items-center gap-4 flex-shrink-0">
               <p className="text-[11px] font-light" style={{ color: colors.muted }}>
-                {wardrobe.length} {t('header.pieces')}
+                {wardrobe.length} pieces
               </p>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -274,10 +194,6 @@ export default function Header({ currentPage, navigateTo, wardrobe, currentUser,
                 </div>
                 <span className="text-xs font-medium tracking-wide text-neutral-700 truncate">{displayName}</span>
               </button>
-
-              <div className="flex-shrink-0 scale-90 origin-right">
-                <LanguageSelect mobile={true} />
-              </div>
             </div>
 
             <div className="h-px my-0.5" style={{ backgroundColor: colors.border }} />
