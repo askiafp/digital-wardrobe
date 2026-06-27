@@ -10,7 +10,7 @@ import ProfilePage from './pages/profilePage';
 import Header from './components/header';
 import { colors, initialWardrobeData, categories } from './constants';
 import Footer from './pages/footer';
-import { X, Plus, ChevronDown, Trash2, LogIn } from 'lucide-react';
+import { X, Plus, Trash2, LogIn } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -29,7 +29,7 @@ export default function App() {
       const customProfile = localStorage.getItem(storageKey);
       if (customProfile) {
         const parsedProfile = JSON.parse(customProfile);
-        if (parsedProfile.name) return { ...parsedUser, name: parsedProfile.name };
+        return { ...parsedUser, ...parsedProfile };
       }
     } catch (_) {}
     return parsedUser;
@@ -47,11 +47,12 @@ export default function App() {
     return { wardrobe: finalWardrobe, outfits: saved.outfits || [], weeklyPlan: saved.weeklyPlan || {} };
   };
 
+  const [outfitFromHome, setOutfitFromHome] = useState(null);
   const [currentPage, setCurrentPage]       = useState('home');
   const [selectedOutfit, setSelectedOutfit] = useState([]);
   const [activeFilter, setActiveFilter]     = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newItemData, setNewItemData]        = useState({ name: '', category: '', image: '', preview: '' });
+  const [newItemData, setNewItemData]        = useState({ name: '', category: '', style: '', image: '', preview: '' });
 
   const [wardrobe, setWardrobe] = useState(() => {
     const saved = localStorage.getItem('currentUser');
@@ -127,16 +128,14 @@ export default function App() {
       const customProfile = localStorage.getItem(storageKey);
       if (customProfile) {
         const parsedProfile = JSON.parse(customProfile);
-        if (parsedProfile.name) {
-          fullUserData.name = parsedProfile.name;
-        }
+        fullUserData = { ...fullUserData, ...parsedProfile };
       } else {
         const allUsers = localStorage.getItem('users_database') || localStorage.getItem('users');
         if (allUsers) {
           const db = JSON.parse(allUsers);
           const matchedData = db.find(u => u.email === userData.email);
-          if (matchedData?.name) {
-            fullUserData.name = matchedData.name;
+          if (matchedData) {
+            fullUserData = { ...fullUserData, ...matchedData };
           }
         }
       }
@@ -165,6 +164,26 @@ export default function App() {
     setWeeklyPlan({});
     setSelectedOutfit([]);
     setCurrentPage('home');
+  };
+
+  const handleUpdateProfile = (updatedProfileData) => {
+    const updatedUser = { ...currentUser, ...updatedProfileData };
+    setCurrentUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+    try {
+      const storageKey = `curation_vault_profile_${currentUser?.id || currentUser?.email || 'guest'}`;
+      localStorage.setItem(storageKey, JSON.stringify(updatedProfileData));
+
+      const allUsers = localStorage.getItem('users_database') || localStorage.getItem('users');
+      if (allUsers) {
+        const db = JSON.parse(allUsers);
+        const updatedDb = db.map(u => u.email === currentUser.email ? { ...u, ...updatedProfileData } : u);
+        localStorage.setItem('users_database', JSON.stringify(updatedDb));
+      }
+    } catch (e) {
+      console.error('Failed to back up profile info:', e);
+    }
   };
 
   const handleImagePick = (e) => {
@@ -234,15 +253,41 @@ export default function App() {
     const newItem = {
       id: Date.now(), 
       name: newItemData.name, 
-      category: newItemData.category,
+      category: newItemData.category || 'Tops',
       color: '#1A1A1A', 
       image: newItemData.image, 
       lastWorn: 'Just now', 
-      style: autoStyle,
+      style: newItemData.style?.toLowerCase() || autoStyle,
     };
     setWardrobe(prev => [newItem, ...prev]);
     setIsAddModalOpen(false);
-    setNewItemData({ name: '', category: 'Tops', image: '', preview: '' });
+    setNewItemData({ name: '', category: '', style: '', image: '', preview: '' });
+  };
+
+  const handleEditItem = (itemId, updatedData) => {
+    setWardrobe(prev => prev.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          name: updatedData.name,
+          category: updatedData.category,
+          style: updatedData.style.toLowerCase()
+        };
+      }
+      return item;
+    }));
+    
+    setSelectedOutfit(prev => prev.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          name: updatedData.name,
+          category: updatedData.category,
+          style: updatedData.style.toLowerCase()
+        };
+      }
+      return item;
+    }));
   };
 
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, itemId: null });
@@ -252,6 +297,8 @@ export default function App() {
     setSelectedOutfit(prev => prev.filter(i => i.id !== deleteModal.itemId));
     setDeleteModal({ isOpen: false, itemId: null });
   };
+
+  const [selectedWeatherStyle, setSelectedWeatherStyle] = useState(null);
 
   if (!isAuthenticated) return <LoginPage onLogin={handleLogin} />;
 
@@ -292,6 +339,10 @@ export default function App() {
             weeklyPlan={weeklyPlan}
             navigateTo={navigateTo}
             isGuest={isGuest}
+            onSelectRecommendedOutfit={setOutfitFromHome}
+            onSelectWeatherStyle={(weatherData) => {
+              setSelectedWeatherStyle(weatherData);
+            }}
           />
         )}
         {currentPage === 'wardrobe' && (
@@ -306,6 +357,7 @@ export default function App() {
               setIsAddModalOpen(true);
             }}
             onDeleteItem={handleDeleteItem}
+            onEditItem={handleEditItem}
             isGuest={isGuest}
           />
         )}
@@ -315,10 +367,7 @@ export default function App() {
         {currentPage === 'profile' && (
           <ProfilePage
             currentUser={currentUser}
-            setCurrentUser={(updatedUser) => {
-              setCurrentUser(updatedUser);
-              localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-            }}
+            setCurrentUser={handleUpdateProfile}
             onLogout={handleLogout}
             isGuest={isGuest}
             wardrobe={wardrobe}
@@ -338,6 +387,8 @@ export default function App() {
             setWeeklyPlan={setWeeklyPlan}
             navigateTo={navigateTo}
             isGuest={isGuest}
+            weatherFromHome={selectedWeatherStyle}
+            clearWeatherFromHome={() => setSelectedWeatherStyle(null)}
           />
         )}
         {currentPage === 'planner' && (

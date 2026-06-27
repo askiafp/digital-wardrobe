@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle, Eye } from 'lucide-react';
 import { colors } from '../constants';
 
 import {
@@ -9,8 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// ─── Weather helpers ──────────────────────────────────────────────────────────
 
 const WMO_CODES = {
   0:  { label: 'Clear sky',        icon: 'sun' },
@@ -37,8 +35,6 @@ const WMO_CODES = {
 function getWeatherMeta(code) {
   return WMO_CODES[code] || { label: 'Unknown', icon: 'cloud' };
 }
-
-// ─── Time-of-day helper ───────────────────────────────────────────────────────
 
 function getTimeOfDay() {
   const h = new Date().getHours();
@@ -102,8 +98,6 @@ function weatherScoreBoost(item, weather) {
   return boost;
 }
 
-// ─── Outfit type scoring ──────────────────────────────────────────────────────
-
 export const OUTFIT_TYPES = [
   { 
     id: 'casual',  
@@ -139,8 +133,6 @@ function getOutfitTypeScore(item, outfitType) {
   return type.styles.includes(itemStyle) ? 100 : 0;
 }
 
-// ─── WeatherIcon ──────────────────────────────────────────────────────────────
-
 function WeatherIcon({ icon, size = 20, color }) {
   if (icon === 'sun')       return <Sun       size={size} color={color || '#E8955A'} />;
   if (icon === 'rain')      return <CloudRain size={size} color={color || '#5B7DB1'} />;
@@ -154,8 +146,6 @@ function getWeatherBackgroundImage(conditionIcon, tempC) {
   if (tempC >= 25) return '/images/warm.jpg';
   return '/images/default.jpg';
 }
-
-// ─── Weather Panel ────────────────────────────────────────────────────────────
 
 function DesktopWeatherPanel({ weather, loading, error, onRetry, timeOfDay }) {
   const tips = getWeatherOutfitTips(weather);
@@ -219,8 +209,6 @@ function DesktopWeatherPanel({ weather, loading, error, onRetry, timeOfDay }) {
     </div>
   );
 }
-
-// ─── Original constants ───────────────────────────────────────────────────────
 
 const UNDERTONES = [
   {
@@ -287,8 +275,6 @@ function isGoodMatch(item, undertone) {
   }
   return true;
 }
-
-// ─── UndertoneSelectorModal ───────────────────────────────────────────────────
 
 function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   const selected = UNDERTONES.find(t => t.id === selectedTone);
@@ -360,8 +346,6 @@ function UndertoneSelectorModal({ selectedTone, onSelect, onClose }) {
   );
 }
 
-// ─── Auto Generate Modal ──────────────────────────────────────────────────────
-
 function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay }) {
   const [selectedType, setSelectedType] = useState(null);
 
@@ -387,7 +371,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
             </button>
           </div>
 
-          {/* Context info */}
           {window.weatherDataHasBoth && (weather || undertone) && (
             <div className="bg-gray-50 rounded-xl px-4 py-2.5 mb-4 flex items-center gap-3 flex-wrap">
               {weather && (
@@ -405,7 +388,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
             </div>
           )}
 
-          {/* Outfit type grid */}
           <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-3">Select outfit style</p>
           <div className="grid grid-cols-2 gap-3 mb-2">
             {OUTFIT_TYPES.map(type => {
@@ -458,8 +440,6 @@ function AutoGenerateModal({ onGenerate, onClose, undertone, weather, timeOfDay 
     </div>
   );
 }
-
-// ─── MatchBadge ───────────────────────────────────────────────────────────────
 
 function MatchBadge({ item, undertone }) {
   if (!undertone || !isGoodMatch(item, undertone)) return null;
@@ -524,16 +504,30 @@ const STEPS = [
   { id: 'Preview',     label: 'Review',      shortLabel: 'Rev'  },
 ];
 
-// ─── Main component ───────────────────────────────────────────────────────────
+export default function StylingPage({ 
+  wardrobe, 
+  selectedOutfit, 
+  setSelectedOutfit, 
+  savedOutfits, 
+  setSavedOutfits, 
+  activeFilter, 
+  setActiveFilter, 
+  setWeeklyPlan, 
+  navigateTo, 
+  isGuest,
+  weatherFromHome,
+  outfitFromHome,
+  clearWeatherFromHome
+}) {
 
-export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfit, savedOutfits, setSavedOutfits, setWeeklyPlan, navigateTo }) {
   const [currentStepIdx, setCurrentStepIdx]       = useState(0);
   const [skippedCategories, setSkippedCategories] = useState({});
   const [carouselIndices, setCarouselIndices]      = useState({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
-  const [selectedDay, setSelectedDay] = useState(() => { const s = localStorage.getItem('plannerTargetDay'); return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Monday'; });
-  const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || 'Morning');
+  const [selectedDay, setSelectedDay] = useState(() => { const s = localStorage.getItem('plannerTargetDay'); return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; });
+  const [selectedSlot, setSelectedSlot] = useState(() => localStorage.getItem('plannerTargetSlot') || '');
   const [modalConfig, setModalConfig]              = useState({ isOpen:false, type:'success', message:'' });
   const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
+  const [generatedMood, setGeneratedMood] = useState('Casual');
 
   const [undertone, setUndertone] = useState(() => localStorage.getItem('closetry_user_undertone') || null);
   const [showUndertoneModal, setShowUndertoneModal] = useState(false);
@@ -572,12 +566,129 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     }
   }, []);
 
+  useEffect(() => {
+    if (localStorage.getItem('plannerTargetDay')) {
+      localStorage.removeItem('plannerTargetDay');
+    }
+    if (localStorage.getItem('plannerTargetSlot')) {
+      localStorage.removeItem('plannerTargetSlot');
+    }
+  }, []);
+
   useEffect(() => { fetchWeather(); }, [fetchWeather]);
 
   useEffect(() => {
     const interval = setInterval(() => setTimeOfDay(getTimeOfDay()), 60000);
     return () => clearInterval(interval);
   }, []);
+
+
+  useEffect(() => {
+    if (!weatherFromHome) return;
+
+    const tempWeather = {
+      tempC:         Number(weatherFromHome.tempC) || 28,
+      feelsLike:     Number(weatherFromHome.tempC) || 28,
+      humidity:      75,
+      wind:          10,
+      condition:     weatherFromHome.condition   || 'Clear sky',
+      conditionIcon: weatherFromHome.conditionIcon || 'sun',
+      code: 0,
+    };
+
+    setWeather(tempWeather);
+
+    if (weatherFromHome.recommendedOutfit && Array.isArray(weatherFromHome.recommendedOutfit)) {
+      const preselected = weatherFromHome.recommendedOutfit;
+      setSelectedOutfit(preselected);
+      
+      const newIndices = { Tops: 0, Bottoms: 0, Outerwear: 0, Accessories: 0, Bags: 0, Shoes: 0 };
+      const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+      
+      const categoriesList = ['Tops', 'Bottoms', 'Outerwear', 'Accessories', 'Bags', 'Shoes'];
+      for (let i = 0; i < categoriesList.length; i++) {
+        const cat = categoriesList[i];
+        const matchedItem = preselected.find(item => item.category === cat);
+        const fullCategoryItems = wardrobe.filter(item => item.category === cat);
+        if (matchedItem && fullCategoryItems.length > 0) {
+          const idx = fullCategoryItems.findIndex(item => item.id === matchedItem.id);
+          if (idx >= 0) {
+            newIndices[cat] = idx;
+            newSkips[cat] = false;
+          }
+        }
+      }
+      
+      setCarouselIndices(newIndices);
+      setSkippedCategories(newSkips);
+      setCurrentStepIdx(6); 
+    } else {
+      setShowAutoGenerateModal(true);
+    }
+
+    clearWeatherFromHome();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weatherFromHome, wardrobe]);
+
+  useEffect(() => {
+    if (!outfitFromHome?.length) return;
+
+    setSelectedOutfit(outfitFromHome);
+
+    const newIndices = {};
+    const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+
+    outfitFromHome.forEach(item => {
+      if (!item?.category) return;
+
+      const fullCategoryItems = wardrobe.filter(i => i.category === item.category);
+      const idx = fullCategoryItems.findIndex(i => i.id === item.id);
+      
+      if (idx >= 0) {
+        newIndices[item.category] = idx;
+        newSkips[item.category] = false;
+      }
+    });
+
+    setCarouselIndices(prev => ({ ...prev, ...newIndices }));
+    setSkippedCategories(newSkips);
+    setCurrentStepIdx(6); 
+
+    clearOutfitFromHome?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outfitFromHome, wardrobe]);
+
+  useEffect(() => {
+    if (!outfitFromHome?.length) return;
+
+    setSelectedOutfit(outfitFromHome);
+
+    const newIndices = {};
+    const newSkips = { Tops: true, Bottoms: true, Outerwear: true, Accessories: true, Bags: true, Shoes: true };
+
+    outfitFromHome.forEach(item => {
+      if (!item?.category) return;
+
+      const categoryItems = itemsByCategory[item.category] || [];
+      const idx = categoryItems.findIndex(i => i.id === item.id);
+      
+      if (idx >= 0) {
+        newIndices[item.category] = idx;
+        newSkips[item.category] = false;
+      }
+    });
+
+    setCarouselIndices(prev => ({
+      ...prev,
+      ...newIndices
+    }));
+    setSkippedCategories(newSkips);
+
+    setCurrentStepIdx(STEPS.length - 1);
+
+    clearOutfitFromHome?.();
+
+  }, [outfitFromHome]);
 
   const handleSelectUndertone = (toneId) => {
     setUndertone(toneId);
@@ -617,10 +728,26 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   };
 
   const handleSelectNone = () => {
-    const category = currentStep.id;
-    setSkippedCategories({ ...skippedCategories, [category]: true });
-    setSelectedOutfit(prev => prev.filter(i => i.category !== category));
-    if (currentStepIdx < STEPS.length - 1) setCurrentStepIdx(currentStepIdx + 1);
+    const categoryId = currentStep.id;
+    
+    setSkippedCategories(prev => {
+      const isAlreadySkipped = !!prev[categoryId];
+      
+      if (isAlreadySkipped) {
+        const updated = { ...prev };
+        delete updated[categoryId];
+        return updated;
+      } else {
+        return {
+          ...prev,
+          [categoryId]: true
+        };
+      }
+    });
+
+    if (!skippedCategories[currentStep.id]) {
+      setSelectedOutfit(prev => prev.filter(item => item.category !== currentStep.id));
+    }
   };
 
   const handleNextStep = () => {
@@ -635,63 +762,58 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
 
   const handlePrevStep = () => { if (currentStepIdx > 0) setCurrentStepIdx(currentStepIdx - 1); };
 
-  const generateAIOutfit = (outfitType = null) => {
+  const generateAIOutfitWithWeather = (outfitType = null, activeWeather = null) => {
+    const resolvedWeather = activeWeather || weather;
+
     if (outfitType) {
       const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
       if (typeConfig) {
-        const hasValidTops = itemsByCategory['Tops'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidTops    = itemsByCategory['Tops'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
         const hasValidBottoms = itemsByCategory['Bottoms'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
-        const hasValidShoes = itemsByCategory['Shoes'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+        const hasValidShoes   = itemsByCategory['Shoes'].some(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
 
         if (!hasValidTops || !hasValidBottoms || !hasValidShoes) {
-          setModalConfig({ 
-            isOpen: true, 
-            type: 'error', 
-            message: `Sorry, there is no ${typeConfig.label} style available in your wardrobe!` 
-          });
+          setModalConfig({ isOpen: true, type: 'error', message: `Sorry, there is no ${typeConfig.label} style available in your wardrobe!` });
           return;
         }
+        setGeneratedMood(typeConfig.label);
       }
+    } else {
+      setGeneratedMood('Casual');
     }
 
     const newIndices = {}, newOutfit = [], newSkips = {};
-    
+
     const pickBest = (category) => {
       let items = itemsByCategory[category] || [];
       if (items.length === 0) return null;
-      
+
       if (outfitType) {
         const typeConfig = OUTFIT_TYPES.find(t => t.id === outfitType);
         if (typeConfig) {
-          const filteredByStyle = items.filter(item => 
-            typeConfig.styles.includes((item.style || '').toLowerCase())
-          );
-          if (filteredByStyle.length > 0) {
-            items = filteredByStyle;
-          }
+          const filteredByStyle = items.filter(item => typeConfig.styles.includes((item.style || '').toLowerCase()));
+          if (filteredByStyle.length > 0) items = filteredByStyle;
         }
       }
-      
+
       const scored = [...items]
-        .map(item => ({ item, score: getItemScore(item, undertone, weather, outfitType) }))
+        .map(item => ({ item, score: getItemScore(item, undertone, resolvedWeather, outfitType) }))
         .sort((a, b) => b.score - a.score);
-        
+
       return scored[Math.floor(Math.random() * Math.min(3, scored.length))].item;
     };
 
-    // Execute generation for mandatory core components
     ['Tops', 'Bottoms', 'Shoes'].forEach(cat => {
       const picked = pickBest(cat);
-      if (picked) { 
-        newIndices[cat] = itemsByCategory[cat].indexOf(picked); 
-        newOutfit.push(picked); 
+      if (picked) {
+        newIndices[cat] = itemsByCategory[cat].indexOf(picked);
+        newOutfit.push(picked);
       }
     });
 
-    // Execute generation for secondary optional pieces
     ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
-      const alwaysInclude = cat === 'Outerwear' && weather?.conditionIcon === 'rain';
+      const alwaysInclude = cat === 'Outerwear' && resolvedWeather?.conditionIcon === 'rain';
       if (items && items.length > 0 && (alwaysInclude || Math.random() > 0.5)) {
         const picked = pickBest(cat);
         if (picked) {
@@ -707,7 +829,11 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     setSkippedCategories(newSkips);
     setSelectedOutfit(newOutfit);
     setCurrentStepIdx(STEPS.length - 1);
-    setShowAutoGenerateModal(false); 
+    setShowAutoGenerateModal(false);
+  };
+
+  const generateAIOutfit = (outfitType = null) => {
+    generateAIOutfitWithWeather(outfitType, null);
   };
 
   const saveAndScheduleOutfit = () => {
@@ -720,7 +846,23 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     setSavedOutfits([...savedOutfits, newOutfitObj]);
     if (typeof setWeeklyPlan === 'function') {
       const dayKey = selectedDay.toLowerCase();
-      setWeeklyPlan(prevPlan => { const existing = prevPlan[dayKey] || {}; return { ...prevPlan, [dayKey]: { ...existing, slots: { ...(existing.slots || {}), [selectedSlot]: { items: [...selectedOutfit] } } } }; });
+      setWeeklyPlan(prevPlan => { 
+        const existing = prevPlan[dayKey] || {}; 
+        return { 
+          ...prevPlan, 
+          [dayKey]: { 
+            ...existing, 
+            slots: { 
+              ...(existing.slots || {}), 
+              [selectedSlot]: { 
+                items: [...selectedOutfit],
+                mood: generatedMood,
+                weather: null
+              } 
+            } 
+          } 
+        }; 
+      });
     }
     setModalConfig({ isOpen:true, type:'success', message:`Outfit successfully saved to ${selectedDay}!` });
     setTimeout(() => {
@@ -735,6 +877,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     setCurrentStepIdx(0);
     setSkippedCategories({});
     setCarouselIndices({ Tops:0, Bottoms:0, Outerwear:0, Accessories:0, Bags:0, Shoes:0 });
+    setGeneratedMood('Casual');
   };
 
   const RecommendationPanel = ({ category }) => {
@@ -744,7 +887,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
     if (goodItems.length === 0) return null;
     return (
       <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-3">
-        <p className="text-[9px] uppercase tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1">
+        <p className="text-[10px] sm:text-[9px] uppercase tracking-[0.05em] sm:tracking-[0.15em] text-amber-700 font-medium mb-2 flex items-center gap-1 whitespace-nowrap origin-left scale-[0.85] sm:scale-100">
           Recommended for {selectedUndertoneData?.label} undertone
         </p>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth:'none', WebkitOverflowScrolling:'touch' }}>
@@ -777,7 +920,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
   const currentItems       = getSortedItems(currentStep.id);
   const currentItem        = currentItems?.[carouselIndices[currentStep.id]];
   const currentItemIsMatch = currentItem && undertone && isGoodMatch(currentItem, undertone);
-  const weatherTips        = getWeatherOutfitTips(weather);
 
   return (
     <div className="min-h-screen py-6 md:py-10 lg:py-14" style={{ backgroundColor: colors.background }}>
@@ -788,12 +930,11 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
             Outfit Builder
           </h1>
           <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-gray-400">
-            Step-by-step styling session
+            Step-by-step tracking session
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 max-w-4xl mx-auto w-full">
-          {/* Undertone panel */}
           <div className="w-full flex">
             {!undertone ? (
               <button
@@ -838,14 +979,13 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                 </div>
                 <div className="flex justify-end mt-2">
                   <button onClick={() => setShowUndertoneModal(true)} className="text-[9px] tracking-widest font-semibold text-gray-500 hover:text-amber-700 border border-gray-200 hover:border-amber-200 bg-white hover:bg-amber-50/30 px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95">
-                    RE-CALIBRATE
+                    CHANGE SKIN TONE
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Weather panel */}
           <div className="w-full flex">
             <DesktopWeatherPanel weather={weather} loading={weatherLoading} error={weatherError} onRetry={fetchWeather} timeOfDay={timeOfDay} />
           </div>
@@ -854,7 +994,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
         <div className="flex flex-col gap-5 max-w-4xl mx-auto w-full">
           <div className="flex-1 min-w-0 w-full space-y-5">
 
-            {/* Step progress */}
             <div className="relative overflow-x-auto pb-2 max-w-2xl mx-auto" style={{ scrollbarWidth: 'none' }}>
               <div className="absolute top-4 left-0 right-0 h-px bg-gray-200 z-0 min-w-[340px]" />
               <div className="flex items-start justify-between relative z-10 gap-2 min-w-[340px] px-1">
@@ -875,14 +1014,13 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               </div>
             </div>
 
-            {/* Auto generate prompt */}
             {currentStepIdx === 0 && selectedOutfit.length === 0 && (
               <div className="bg-amber-50/40 border border-amber-100 rounded-2xl p-4 text-center space-y-2.5 max-w-xl mx-auto">
                 <div className="flex justify-center text-amber-500"><Sparkles size={16} /></div>
                 <p className="text-xs font-light text-amber-900 leading-relaxed">
                   {undertone
                     ? `Let AI generate an outfit matching your ${selectedUndertoneData?.label} tone — pick your vibe first!`
-                    : `${Math.round(weather?.tempC || 28)}°C in Jakarta — let AI style you for ${getTimeLabel(timeOfDay).toLowerCase()}.`}
+                    : `${Math.round(weatherFromHome?.tempC || weather?.tempC || 28)}°C in Jakarta — let AI style you for ${getTimeLabel(timeOfDay).toLowerCase()}.`}
                 </p>
                 <button
                   onClick={() => setShowAutoGenerateModal(true)}
@@ -894,7 +1032,6 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
               </div>
             )}
 
-            {/* Step content */}
             {currentStep.id !== 'Preview' ? (
               <div className="flex flex-col md:flex-row gap-4 items-stretch justify-center w-full">
                 <div className="bg-white rounded-3xl border shadow-sm flex-1 overflow-hidden flex flex-col justify-between" style={{ borderColor: colors.border }}>
@@ -907,8 +1044,8 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                         onClick={handleSelectNone}
                         className={`text-xs px-3 py-1.5 rounded-xl border border-dashed flex items-center gap-1.5 transition-all ${skippedCategories[currentStep.id] ? 'bg-red-50 text-red-500 border-red-200' : 'bg-white text-gray-400'}`}
                       >
-                        <EyeOff size={11} />
-                        <span>{skippedCategories[currentStep.id] ? 'NONE ACTIVE' : 'SKIP / NONE'}</span>
+                        {skippedCategories[currentStep.id] ? <Eye size={11} /> : <EyeOff size={11} />}
+                        <span>{skippedCategories[currentStep.id] ? 'ENABLE ITEM' : 'SKIP / NONE'}</span>
                       </button>
                     </div>
 
@@ -964,36 +1101,65 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                   <div className="relative w-full h-[580px] flex items-center justify-center overflow-hidden bg-gray-50/50 rounded-2xl">
                     {selectedOutfit.length > 0 ? (
                       <div className="relative w-full h-full">
-                        {selectedOutfit.filter(i => i.category === 'Tops').map(item => (
-                          <div key={item.id} className="absolute top-8 right-8 w-full h-64 flex items-center justify-center -translate-x-14 z-10 scale-100">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Bottoms').map(item => (
-                          <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Shoes').map(item => (
-                          <div key={item.id} className="absolute bottom-6 right-10 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Outerwear').map(item => (
-                          <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Accessories').map(item => (
-                          <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)]" />
-                          </div>
-                        ))}
-                        {selectedOutfit.filter(i => i.category === 'Bags').map(item => (
-                          <div key={item.id} className="absolute bottom-10 left-0 w-full h-48 flex items-center justify-center translate-x-16 z-20 scale-80">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_12px_12px_rgba(0,0,0,0.15)]" />
-                          </div>
-                        ))}
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Tops');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-8 right-3 w-full h-64 flex items-center justify-center -translate-x-14 z-10 scale-100">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Bottoms');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-40 left-0 w-full h-[400px] flex items-center justify-center -translate-x-14 z-20 scale-135">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Shoes');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute bottom-6 right-10 w-full h-28 flex items-center justify-center -translate-x-14 z-30 scale-80">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Outerwear');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-10 right-1 w-full h-64 flex items-center justify-center translate-x-16 z-10 scale-100">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Accessories');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute top-72 left-0 w-full h-20 flex items-center justify-center translate-x-16 z-20 scale-60">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,0.1)]" />
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const item = selectedOutfit.find(i => i.category === 'Bags');
+                          if (!item) return null;
+                          return (
+                            <div key={item.id} className="absolute bottom-10 left-0 w-full h-48 flex items-center justify-center translate-x-16 z-20 scale-80">
+                              <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_12px_12px_rgba(0,0,0,0.15)]" />
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="text-gray-300 italic text-sm">Canvas is empty...</div>
@@ -1005,7 +1171,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                       <p className="text-[10px] tracking-wider uppercase text-gray-400">Add to Planner</p>
                       <Select value={selectedDay} onValueChange={setSelectedDay}>
                         <SelectTrigger className="w-full bg-gray-50 rounded-xl border text-black focus:ring-1 focus:ring-amber-200" style={{ borderColor: colors.border, height: 44 }}>
-                          <SelectValue placeholder="Select a day" />
+                          <SelectValue placeholder="Select a Day" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border rounded-xl shadow-lg">
                           {daysOfWeek.map(day => <SelectItem key={day} value={day} className="cursor-pointer text-sm font-light">{day}</SelectItem>)}
@@ -1013,7 +1179,7 @@ export default function StylingPage({ wardrobe, selectedOutfit, setSelectedOutfi
                       </Select>
                       <Select value={selectedSlot} onValueChange={setSelectedSlot}>
                         <SelectTrigger className="w-full bg-gray-50 rounded-xl border text-black" style={{ borderColor: colors.border, height: 44 }}>
-                          <SelectValue placeholder="Select time slot" />
+                          <SelectValue placeholder="Select Time Slot" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border rounded-xl shadow-lg">
                           {['Morning','Afternoon','Evening','Night'].map(slot => <SelectItem key={slot} value={slot} className="cursor-pointer text-sm font-light">{slot}</SelectItem>)}

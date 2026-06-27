@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { colors } from '../constants';
-import { useTranslation } from 'react-i18next';
 import { Camera, Shirt, Calendar, Sparkles, User, Mail, Settings, ShieldAlert, LogOut, ArrowLeft, UserCheck } from 'lucide-react';
 import {
   Select,
@@ -39,7 +38,6 @@ const defaultForm = (user, saved) => ({
 });
 
 export default function ProfilePage({ currentUser, setCurrentUser, wardrobe = [], days = [], weeklyPlan = {}, onLogout }) {
-  const { t } = useTranslation();
   const [isEditingPage, setIsEditingPage] = useState(false); 
   const [profilePhoto, setProfilePhoto] = useState(() => loadPhoto(currentUser));
   const [formData, setFormData] = useState(() => {

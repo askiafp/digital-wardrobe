@@ -1,7 +1,5 @@
-/* 1. Tambahkan ini di baris paling atas */
 @import "tailwindcss";
 
-/* 2. Biarkan font import kamu di bawahnya */
 @import '@fontsource/cormorant-garamond/300.css';
 @import '@fontsource/cormorant-garamond/400.css';
 @import '@fontsource/dm-sans/400.css';
@@ -10,8 +8,6 @@
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
-
-/* 3. HAPUS tulisan @tailwind utilities; */
 
 /* CSS Variables for Colors */
 :root {
