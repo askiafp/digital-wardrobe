@@ -813,8 +813,15 @@ export default function StylingPage({
 
     ['Outerwear', 'Bags', 'Accessories'].forEach(cat => {
       const items = itemsByCategory[cat];
-      const alwaysInclude = cat === 'Outerwear' && resolvedWeather?.conditionIcon === 'rain';
-      if (items && items.length > 0 && (alwaysInclude || Math.random() > 0.5)) {
+      let include = Math.random() > 0.5;
+      if (cat === 'Outerwear') {
+        if (resolvedWeather?.conditionIcon === 'rain' || resolvedWeather?.condition === 'Rainy') {
+          include = true;
+        } else if (resolvedWeather?.tempC >= 28 || resolvedWeather?.conditionIcon === 'sun' || resolvedWeather?.condition === 'Sunny') {
+          include = false;
+        }
+      }
+      if (items && items.length > 0 && include) {
         const picked = pickBest(cat);
         if (picked) {
           newIndices[cat] = itemsByCategory[cat].indexOf(picked);

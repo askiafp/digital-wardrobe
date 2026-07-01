@@ -11,9 +11,13 @@ export default function LoginPage({ onLogin }) {
   const [name, setName]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe]     = useState(false);
+  const [passwordWarning, setPasswordWarning] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setPasswordWarning('');
+    if (isLoading) return;
 
     if (!email || !password) {
       alert('Please fill in all fields');
@@ -23,13 +27,21 @@ export default function LoginPage({ onLogin }) {
       alert('Please enter your name');
       return;
     }
+    if (password !== '123') {
+      setPasswordWarning('The password must be 123. Please change your password first.');
+      return;
+    }
 
-    onLogin({
-      id:      email,                                      
-      name:    isSignUp ? name : email.split('@')[0],
-      email:   email,
-      isGuest: false,
-    });
+    setIsLoading(true);
+    setTimeout(() => {
+      onLogin({
+        id:      email,
+        name:    isSignUp ? name : email.split('@')[0],
+        email:   email,
+        isGuest: false,
+      });
+      setIsLoading(false);
+    }, 600);
   };
 
   const handleGuest = () => {
@@ -84,11 +96,16 @@ export default function LoginPage({ onLogin }) {
                 <input
                   type={field.type}
                   value={field.val}
-                  onChange={(e) => field.set(e.target.value)}
+                  disabled={isLoading}
+                  onChange={(e) => {
+                    field.set(e.target.value);
+                    if (field.id === 'password') setPasswordWarning('');
+                  }}
                   placeholder={field.id === 'email' ? 'your.email@example.com' : field.id === 'name' ? 'Enter your full name' : 'Enter your password'}
                   className={cn(
                     "w-full pl-11 py-3 rounded-xl border text-sm font-light bg-neutral-50/30 transition-all duration-200 placeholder:text-neutral-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200/60",
-                    field.id === 'password' ? 'pr-11' : 'pr-4'
+                    field.id === 'password' ? 'pr-11' : 'pr-4',
+                    isLoading && 'cursor-not-allowed opacity-70'
                   )}
                   style={{
                     borderColor:     colors.border,
@@ -99,13 +116,19 @@ export default function LoginPage({ onLogin }) {
                 {field.id === 'password' && (
                   <button
                     type="button"
+                    disabled={isLoading}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 p-1 rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 active:scale-95 transition-all z-10"
+                    className="absolute right-4 p-1 rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 active:scale-95 transition-all z-10 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 )}
               </div>
+              {field.id === 'password' && passwordWarning && (
+                <p className="text-[10px] leading-relaxed text-red-500 font-light">
+                  {passwordWarning}
+                </p>
+              )}
             </div>
           ))}
 
@@ -134,16 +157,18 @@ export default function LoginPage({ onLogin }) {
 
           <button
             type="submit"
-            className="w-full py-3.5 text-xs tracking-[0.2em] font-medium rounded-xl transition-all duration-300 shadow-sm hover:brightness-105 active:scale-[0.99] text-white mt-2"
+            disabled={isLoading}
+            className="w-full py-3.5 text-xs tracking-[0.2em] font-medium rounded-xl transition-all duration-300 shadow-sm hover:brightness-105 active:scale-[0.99] text-white mt-2 disabled:cursor-not-allowed disabled:opacity-70"
             style={{ backgroundColor: colors.accent }}
           >
-            {isSignUp ? 'CREATE ACCOUNT' : 'SIGN IN'}
+            {isLoading ? 'LOADING...' : isSignUp ? 'CREATE ACCOUNT' : 'SIGN IN'}
           </button>
         </form>
 
         <div className="text-center space-y-5">
           <button
             onClick={() => {
+              if (isLoading) return;
               setIsSignUp(!isSignUp);
               setName('');
               setEmail('');
@@ -164,7 +189,8 @@ export default function LoginPage({ onLogin }) {
           <div>
             <button
               onClick={handleGuest}
-              className="text-[10px] tracking-[0.2em] font-light text-neutral-400 hover:text-neutral-600 border-b border-transparent hover:border-current transition-all"
+              disabled={isLoading}
+              className="text-[10px] tracking-[0.2em] font-light text-neutral-400 hover:text-neutral-600 border-b border-transparent hover:border-current transition-all disabled:cursor-not-allowed disabled:opacity-60"
               style={{ fontFamily: 'DM Sans, sans-serif' }}
             >
               CONTINUE AS GUEST
