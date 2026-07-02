@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Sun, CloudRain, Cloud, Snowflake, Calendar, Sparkles } from 'lucide-react';
 import { colors } from '../constants';
+import { useWeather } from '../hooks/useWeather';
 
 const heroImages = [
   '/images/hero-1.jpg',
@@ -31,68 +32,14 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
   const [randomItems, setRandomItems] = useState([]);
   const heroRef = useRef(null);
 
-  const [weather, setWeather] = useState({
-    condition: 'Sunny',
-    temp: 28,
-    day: 'Today',
-    time: 'Now'
-  });
+  const { weather } = useWeather();
 
-  const weatherInfo = weatherConfig[weather.condition] || weatherConfig.Sunny;
+  const weatherInfo = weatherConfig[weather.generalCondition] || weatherConfig.Sunny;
   const WeatherIcon = weatherInfo.icon;
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const todayName = daysOfWeek[new Date().getDay()];
   const todayOutfit = weeklyPlan[todayName.toLowerCase()] || null;
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch(
-          'https://api.open-meteo.com/v1/forecast?latitude=-6.2146&longitude=106.8451&current=temperature_2m,weather_code&timezone=Asia%2FJakarta'
-        );
-        const data = await response.json();
-        if (data && data.current) {
-          const code = data.current.weather_code;
-          let cond = 'Sunny';
-          let iconName = 'clear';
-
-          if (code >= 1 && code <= 3) {
-            cond = 'Cloudy';
-            iconName = 'cloudy';
-          } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99)) {
-            cond = 'Rainy';
-            iconName = 'rain';
-          } else if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
-            cond = 'Snowy';
-            iconName = 'snow';
-          } else if (code === 0) {
-            cond = 'Sunny';
-            iconName = 'clear';
-          }
-
-          const now = new Date();
-          const currentHour = now.getHours();
-          const period = currentHour >= 12 ? 'pm' : 'am';
-          const displayHour = currentHour % 12 || 12;
-
-          setWeather({
-            condition: cond,
-            icon: iconName,
-            temp: Math.round(data.current.temperature_2m),
-            day: todayName,
-            time: `${displayHour} ${period}`
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch real-time Jakarta weather data:', error);
-      }
-    };
-
-    fetchWeather();
-    const weatherInterval = setInterval(fetchWeather, 900000);
-    return () => clearInterval(weatherInterval);
-  }, [todayName]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -396,9 +343,9 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
           const nameLower = item.name?.toLowerCase() || '';
           const catLower = item.category?.toLowerCase() || '';
           const styleLower = item.style?.toLowerCase() || '';
-          if (weather.condition === 'Rainy') {
+          if (weather.generalCondition === 'Rainy') {
             return (catLower.includes('outer') || catLower.includes('pants') || catLower.includes('shoes') || nameLower.includes('hoodie') || nameLower.includes('jacket') || nameLower.includes('sweater') || nameLower.includes('boot') || styleLower.includes('comfy'));
-          } else if (weather.condition === 'Sunny') {
+          } else if (weather.generalCondition === 'Sunny') {
             return (catLower.includes('top') || catLower.includes('bottom') || catLower.includes('shoes') || nameLower.includes('t-shirt') || nameLower.includes('shirt') || nameLower.includes('short') || nameLower.includes('sandal') || nameLower.includes('sneaker') || styleLower.includes('casual'));
           } else {
             return (nameLower.includes('shirt') || catLower.includes('pants') || catLower.includes('shoes') || styleLower.includes('formal') || nameLower.includes('loafers') || nameLower.includes('flat'));
@@ -409,10 +356,10 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
                             wardrobe.find(item => item.category?.toLowerCase() === 'bottoms');
 
         let outerwearPiece = null;
-        if (weather.condition === 'Rainy') {
+        if (weather.generalCondition === 'Rainy') {
           outerwearPiece = filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || 
                            wardrobe.find(item => item.category?.toLowerCase() === 'outerwear');
-        } else if (weather.temp >= 28 || weather.condition === 'Sunny') {
+        } else if (weather.temp >= 28 || weather.generalCondition === 'Sunny') {
           outerwearPiece = null;
         } else {
           outerwearPiece = filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || 
@@ -450,7 +397,7 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
                 if (onSelectWeatherStyle) {
                   onSelectWeatherStyle({
                     tempC: weather.temp || 28,
-                    condition: weather.condition || 'Clear sky',
+                    condition: weather.generalCondition || 'Clear sky',
                     conditionIcon: weather.icon || 'sun',
                     recommendedOutfit: [topPiece, bottomPiece, outerwearPiece, shoesPiece].filter(Boolean)
                   });
