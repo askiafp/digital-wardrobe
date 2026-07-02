@@ -408,9 +408,16 @@ export default function HomePage({ wardrobe = [], savedOutfits = [], weeklyPlan 
         const bottomPiece = filteredItems.find(item => item.category?.toLowerCase() === 'bottoms') || 
                             wardrobe.find(item => item.category?.toLowerCase() === 'bottoms');
 
-        const outerwearPiece = weather.condition === 'Rainy' 
-          ? (filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || wardrobe.find(item => item.category?.toLowerCase() === 'outerwear'))
-          : null;
+        let outerwearPiece = null;
+        if (weather.condition === 'Rainy') {
+          outerwearPiece = filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || 
+                           wardrobe.find(item => item.category?.toLowerCase() === 'outerwear');
+        } else if (weather.temp >= 28 || weather.condition === 'Sunny') {
+          outerwearPiece = null;
+        } else {
+          outerwearPiece = filteredItems.find(item => item.category?.toLowerCase() === 'outerwear') || 
+                           wardrobe.find(item => item.category?.toLowerCase() === 'outerwear');
+        }
 
         const topPiece = filteredItems.find(item => item.category?.toLowerCase() === 'tops' && item.id !== outerwearPiece?.id) || 
                          wardrobe.find(item => item.category?.toLowerCase() === 'tops' && item.id !== outerwearPiece?.id);

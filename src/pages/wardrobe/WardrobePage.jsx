@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, Plus, Trash2, X, Edit2 } from 'lucide-react';
-import { colors, categories } from '../constants';
+import { colors, categories } from '../../constants';
 import {
   Select,
   SelectContent,
@@ -8,10 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import AddWardrobeItemModal from './AddWardrobeItemModal';
+import DeleteItemModal from './DeleteItemModal';
 
-export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutfit, activeFilter, setActiveFilter, onAddPhoto, onDeleteItem, onEditItem, isGuest }) {
-  const [deleteTargetId, setDeleteTargetId] = useState(null);
+export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutfit, activeFilter, setActiveFilter, onAddItem, onDeleteItem, onEditItem, isGuest }) {
   const [editItem, setEditItem] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newItemData, setNewItemData] = useState({ name: '', category: '', style: '', image: '', preview: '' });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, itemId: null });
 
   const filteredWardrobe = activeFilter === 'All' 
     ? wardrobe 
@@ -31,22 +35,96 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
     e.target.src = 'https://placehold.co/300x400/EDE9E3/9E9890?text=No+Image';
   };
 
+  const handleImagePick = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_WIDTH = 1080, MAX_HEIGHT = 1350;
+        let { width, height } = img;
+        if (width > height) { if (width > MAX_WIDTH)  { height *= MAX_WIDTH / width;   width  = MAX_WIDTH;  } }
+        else                { if (height > MAX_HEIGHT) { width  *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/webp', 0.6);
+        setNewItemData(prev => ({ ...prev, image: compressed, preview: compressed }));
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveNewItem = (e) => {
+    e.preventDefault();
+    if (!newItemData.name || !newItemData.image) { alert('Harap isi semua field!'); return; }
+    
+    const nameLower = newItemData.name.toLowerCase();
+    let autoStyle = 'casual';
+
+    if (
+      nameLower.includes('lounger') || 
+      nameLower.includes('corduroy') || 
+      nameLower.includes('knit') || 
+      nameLower.includes('sweater') || 
+      nameLower.includes('hoodie') || 
+      nameLower.includes('comfy') || 
+      nameLower.includes('cardigan') || 
+      nameLower.includes('lounge')
+    ) {
+      autoStyle = 'comfy';
+    } else if (
+      nameLower.includes('puma') || 
+      nameLower.includes('speedcat') || 
+      nameLower.includes('sport') || 
+      nameLower.includes('run') || 
+      nameLower.includes('active') || 
+      nameLower.includes('sneaker') || 
+      nameLower.includes('gym')
+    ) {
+      autoStyle = 'sporty';
+    } else if (
+      nameLower.includes('vest') || 
+      nameLower.includes('gothic') || 
+      nameLower.includes('collared') || 
+      nameLower.includes('blazer') || 
+      nameLower.includes('suit') || 
+      nameLower.includes('formal') || 
+      nameLower.includes('office') || 
+      nameLower.includes('esq') ||
+      nameLower.includes('trousers')
+    ) {
+      autoStyle = 'formal';
+    }
+
+    const newItem = {
+      id: Date.now(), 
+      name: newItemData.name, 
+      category: newItemData.category || 'Tops',
+      color: '#1A1A1A', 
+      image: newItemData.image, 
+      lastWorn: 'Just now', 
+      style: newItemData.style?.toLowerCase() || autoStyle,
+    };
+    if (onAddItem) {
+      onAddItem(newItem);
+    }
+    setIsAddModalOpen(false);
+    setNewItemData({ name: '', category: '', style: '', image: '', preview: '' });
+  };
+
   const openDeleteConfirmation = (id, e) => {
     e.stopPropagation();
-    onDeleteItem(id, e);
+    setDeleteModal({ isOpen: true, itemId: id });
   };
 
-  const confirmDelete = (e) => {
-    e.stopPropagation();
-    if (onDeleteItem && deleteTargetId) {
-      onDeleteItem(deleteTargetId, e);
+  const confirmDelete = () => {
+    if (onDeleteItem && deleteModal.itemId) {
+      onDeleteItem(deleteModal.itemId);
     }
-    setDeleteTargetId(null);
-  };
-
-  const cancelDelete = (e) => {
-    e.stopPropagation();
-    setDeleteTargetId(null);
+    setDeleteModal({ isOpen: false, itemId: null });
   };
 
   const openEditModal = (item, e) => {
@@ -144,7 +222,10 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
           >
             {activeFilter === 'All' && (
               <div
-                onClick={onAddPhoto}
+                onClick={() => {
+                  if (isGuest) { alert('Sign in to add items to your wardrobe!'); return; }
+                  setIsAddModalOpen(true);
+                }}
                 className="group cursor-pointer flex flex-col transition-all duration-200 active:scale-[0.98]"
               >
                 <div
@@ -330,50 +411,21 @@ export default function WardrobePage({ wardrobe, selectedOutfit, setSelectedOutf
         </div>
       )}
 
-      {deleteTargetId && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[9999] bg-black/40 backdrop-blur-sm p-4"
-          onClick={cancelDelete}
-        >
-          <div 
-            className="bg-white rounded-3xl w-full max-w-sm border border-gray-100 p-6 relative shadow-2xl text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={cancelDelete}
-              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-50 transition-colors"
-            >
-              <X size={16} />
-            </button>
-            
-            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-              <Trash2 size={20} />
-            </div>
+      {isAddModalOpen && (
+        <AddWardrobeItemModal
+          itemData={newItemData}
+          setItemData={setNewItemData}
+          onClose={() => setIsAddModalOpen(false)}
+          onImagePick={handleImagePick}
+          onSave={handleSaveNewItem}
+        />
+      )}
 
-            <h2 className="text-xl font-light mb-1" style={{ fontFamily: 'Cormorant Garamond, serif', color: colors.heading }}>
-              Delete Item?
-            </h2>
-            <p className="text-xs text-gray-400 mb-6 tracking-wide leading-relaxed">
-              Are you sure you want to remove this piece from your wardrobe? This action cannot be undone.
-            </p>
-
-            <div className="flex gap-3">
-              <button 
-                onClick={cancelDelete}
-                className="flex-1 py-2.5 text-xs tracking-wider border rounded-xl font-light hover:bg-gray-50 transition-all text-gray-500"
-                style={{ borderColor: colors.border }}
-              >
-                CANCEL
-              </button>
-              <button 
-                onClick={confirmDelete}
-                className="flex-1 py-2.5 text-xs tracking-wider text-white rounded-xl font-medium transition-all duration-300 shadow-sm bg-red-500 hover:bg-red-600 active:scale-[0.98]"
-              >
-                DELETE
-              </button>
-            </div>
-          </div>
-        </div>
+      {deleteModal.isOpen && (
+        <DeleteItemModal
+          onCancel={() => setDeleteModal({ isOpen: false, itemId: null })}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );
