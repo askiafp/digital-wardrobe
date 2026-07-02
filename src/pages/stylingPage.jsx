@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight, ArrowRight, RotateCcw, Check, EyeOff, X, Palette, Info, Cloud, Sun, CloudRain, Wind, Droplets, Briefcase, Activity, AlertTriangle, Eye } from 'lucide-react';
 import { colors } from '../constants';
+import { useWeather } from '../hooks/useWeather';
 
 import {
   Select,
@@ -9,40 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const WMO_CODES = {
-  0:  { label: 'Clear sky',        icon: 'sun' },
-  1:  { label: 'Mainly clear',     icon: 'sun' },
-  2:  { label: 'Partly cloudy',    icon: 'cloud-sun' },
-  3:  { label: 'Overcast',         icon: 'cloud' },
-  45: { label: 'Foggy',            icon: 'cloud' },
-  48: { label: 'Icy fog',          icon: 'cloud' },
-  51: { label: 'Light drizzle',    icon: 'rain' },
-  53: { label: 'Drizzle',          icon: 'rain' },
-  55: { label: 'Heavy drizzle',    icon: 'rain' },
-  61: { label: 'Light rain',       icon: 'rain' },
-  63: { label: 'Rain',             icon: 'rain' },
-  65: { label: 'Heavy rain',       icon: 'rain' },
-  71: { label: 'Light snow',       icon: 'cloud' },
-  80: { label: 'Light showers',    icon: 'rain' },
-  81: { label: 'Showers',          icon: 'rain' },
-  82: { label: 'Heavy showers',    icon: 'rain' },
-  95: { label: 'Thunderstorm',     icon: 'rain' },
-  96: { label: 'Thunderstorm + hail', icon: 'rain' },
-  99: { label: 'Thunderstorm + hail', icon: 'rain' },
-};
-
-function getWeatherMeta(code) {
-  return WMO_CODES[code] || { label: 'Unknown', icon: 'cloud' };
-}
-
-function getTimeOfDay() {
-  const h = new Date().getHours();
-  if (h >= 5  && h < 11) return 'morning';
-  if (h >= 11 && h < 15) return 'afternoon';
-  if (h >= 15 && h < 19) return 'evening';
-  return 'night';
-}
 
 function getTimeLabel(tod) {
   return { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' }[tod] || 'Now';
@@ -532,39 +499,7 @@ export default function StylingPage({
   const [undertone, setUndertone] = useState(() => localStorage.getItem('closetry_user_undertone') || null);
   const [showUndertoneModal, setShowUndertoneModal] = useState(false);
 
-  const [weather, setWeather]               = useState(null);
-  const [weatherLoading, setWeatherLoading] = useState(true);
-  const [weatherError, setWeatherError]     = useState(false);
-  const [timeOfDay, setTimeOfDay]           = useState(getTimeOfDay());
-
-  const fetchWeather = useCallback(async () => {
-    setWeatherLoading(true);
-    setWeatherError(false);
-    const tod = getTimeOfDay();
-    setTimeOfDay(tod);
-
-    try {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&hourly=temperature_2m,apparent_temperature,weathercode,relative_humidity_2m,wind_speed_10m&current=temperature_2m,apparent_temperature,weathercode,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&temperature_unit=celsius&timezone=Asia%2FJakarta';
-      const res  = await fetch(url);
-      if (!res.ok) throw new Error('fetch failed');
-      const data = await res.json();
-
-      const now      = new Date();
-      const hour     = now.getHours();
-      const hourly   = data.hourly;
-      const idx      = hourly.time.findIndex(t => new Date(t).getHours() === hour && new Date(t).toDateString() === now.toDateString());
-      const source   = idx >= 0
-        ? { temp: hourly.temperature_2m[idx], feels: hourly.apparent_temperature[idx], hum: hourly.relative_humidity_2m[idx], wind: hourly.wind_speed_10m[idx], code: hourly.weathercode[idx] }
-        : { temp: data.current.temperature_2m, feels: data.current.apparent_temperature, hum: data.current.relative_humidity_2m, wind: data.current.wind_speed_10m, code: data.current.weathercode };
-
-      const meta = getWeatherMeta(source.code);
-      setWeather({ tempC: source.temp, feelsLike: source.feels, humidity: source.hum, wind: source.wind, condition: meta.label, conditionIcon: meta.icon, code: source.code });
-    } catch {
-      setWeatherError(true);
-    } finally {
-      setWeatherLoading(false);
-    }
-  }, []);
+  const { weather, setWeather, loading: weatherLoading, error: weatherError, timeOfDay, fetchWeather } = useWeather();
 
   useEffect(() => {
     if (localStorage.getItem('plannerTargetDay')) {
@@ -573,13 +508,6 @@ export default function StylingPage({
     if (localStorage.getItem('plannerTargetSlot')) {
       localStorage.removeItem('plannerTargetSlot');
     }
-  }, []);
-
-  useEffect(() => { fetchWeather(); }, [fetchWeather]);
-
-  useEffect(() => {
-    const interval = setInterval(() => setTimeOfDay(getTimeOfDay()), 60000);
-    return () => clearInterval(interval);
   }, []);
 
 
